@@ -1,0 +1,9 @@
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\App.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\components\dashboard\DashboardCards.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\components\Dashboard.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\components\Lancamento.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\components\Management.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\components\SobControleLogo.tsx
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\index.html
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\public\logo.jpg
+C:\Users\Lucas Portugal\AndroidStudioProjects\sobcontrole - Copia - Copia\utils\helpers.ts

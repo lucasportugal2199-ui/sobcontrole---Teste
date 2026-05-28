@@ -1,0 +1,7 @@
+{
+  "name": "Android of SobControle ",
+  "description": "App de finanças imersivo para Android com IA integrada e suporte total a tela cheia.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

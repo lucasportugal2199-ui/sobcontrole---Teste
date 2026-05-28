@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SobControle</string>
+    <string name="title_activity_main">SobControle</string>
+    <string name="package_name">com.sobcontrole.app</string>
+    <string name="custom_url_scheme">com.sobcontrole.app</string>
+</resources>

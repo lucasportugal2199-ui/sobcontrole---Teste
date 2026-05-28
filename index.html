@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- 🔥 META OBRIGATÓRIO PARA LOGIN GOOGLE NO CAPACITOR -->
+  <meta name="google-signin-client_id"
+    content="634092840111-5t9e5nta646q822hadboq4k9daoigk5o.apps.googleusercontent.com" />
+
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Configurações de cores de tema para preencher áreas de sistema se aparecerem -->
+  <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+
+  <title>SobControle Finanças</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'light-bg': '#F8F9FA',
+            'light-accent': '#14B8A6',
+            'dark-bg': '#0F172A',
+            'dark-accent': '#0D9488',
+            'dark-surface': '#1E293B',
+          }
+        }
+      }
+    }
+  </script>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
+    "@google/genai": "https://esm.sh/@google/genai@0.15.0",
+    "@capacitor/core": "https://esm.sh/@capacitor/core@7.0.0",
+    "@capacitor/app": "https://esm.sh/@capacitor/app@7.0.0",
+    "@capgo/capacitor-social-login": "https://esm.sh/@capgo/capacitor-social-login@7.20.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.0",
+    "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@capacitor/cli": "https://esm.sh/@capacitor/cli@^8.0.0",
+    "@capacitor/status-bar": "https://esm.sh/@capacitor/status-bar@^8.0.0",
+    "@capacitor/haptics": "https://esm.sh/@capacitor/haptics@^8.0.0",
+    "@capacitor/local-notifications": "https://esm.sh/@capacitor/local-notifications@^8.0.0"
+  }
+}
+</script>
+
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top);
+      --sar: env(safe-area-inset-right);
+      --sab: env(safe-area-inset-bottom);
+      --sal: env(safe-area-inset-left);
+    }
+
+    html,
+    body,
+    #root {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      user-select: none;
+      background-color: #F8F9FA;
+    }
+
+    .dark html,
+    .dark body,
+    .dark #root {
+      background-color: #0F172A;
+    }
+
+    body {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    /* Glassmorphism & Effects */
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dark .glass {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .glass-header {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .dark .glass-header {
+      background: rgba(17, 24, 40, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Estilos para inputs focados não puxarem barras de sistema */
+    input,
+    textarea {
+      scroll-margin-bottom: 25vh;
+    }
+
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    /* Removido o padding sat/sab automático do container root para permitir modo imersivo total */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0.5;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        opacity: 0.5;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .month-slide-enter-left {
+      animation: slideInFromLeft 0.4s ease-out forwards;
+    }
+
+    .month-slide-enter-right {
+      animation: slideInFromRight 0.4s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes subtleFadeIn {
+      from {
+        opacity: 0.3;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .subtle-fade-in {
+      animation: subtleFadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .5;
+      }
+    }
+
+    .skeleton-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    .swiping,
+    .swiping body {
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: none;
+    }
+
+    /* Remover outline/borda dos gráficos Recharts ao clicar/tocar */
+    .recharts-wrapper,
+    .recharts-wrapper *,
+    .recharts-surface,
+    .recharts-sector,
+    .recharts-layer,
+    .recharts-tooltip-wrapper,
+    .recharts-active-shape,
+    .recharts-pie,
+    .recharts-pie-sector {
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .recharts-wrapper:focus,
+    .recharts-wrapper:focus-visible,
+    .recharts-surface:focus,
+    .recharts-surface:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    @keyframes cardSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger-card {
+      animation: cardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Goal Calculator Slider */
+    .goal-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+    }
+
+    .goal-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+      border: 3px solid white;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .goal-slider::-webkit-slider-thumb:active {
+      transform: scale(1.15);
+      box-shadow: 0 2px 12px rgba(99, 102, 241, 0.6);
+    }
+
+    .goal-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+      border: 3px solid white;
+    }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-light-bg dark:bg-dark-bg text-slate-900 dark:text-white">
+  <div id="root" class="h-full"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
