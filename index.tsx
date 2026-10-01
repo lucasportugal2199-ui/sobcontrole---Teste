@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Capacitor } from '@capacitor/core';
 import App from './App';
+// Fonte embutida no app (antes vinha do Google Fonts: sem internet, caía na fonte do sistema)
+import '@fontsource-variable/inter/wght.css';
 import './index.css';
 
 const rootElement = document.getElementById('root');

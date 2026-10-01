@@ -17,7 +17,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Inter"', '"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: ['"Inter Variable"', '"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       colors: {
         // Light Mode
