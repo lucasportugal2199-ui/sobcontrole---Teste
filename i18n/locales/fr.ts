@@ -595,11 +595,11 @@ const fr: TranslationDictionary = {
   'tutorial.start': 'Commencer',
   'tutorial.gotIt': 'Compris',
   'tutorial.step1.title': 'Créez des Transactions',
-  'tutorial.step1.description': "Pour créer une nouvelle transaction (revenu ou dépense), touchez le bouton orange '+' au-dessus de la barre. Il fonctionne sur tous les écrans !",
+  'tutorial.step1.description': "Pour créer une nouvelle transaction (revenu ou dépense), touchez le bouton orange '+' au centre de la barre. Il fonctionne sur tous les écrans !",
   'tutorial.step2.title': 'Futur Mensuel',
   'tutorial.step2.description': 'Cliquez sur l\'icône de calendrier \'Futur\' dans le menu inférieur pour voir le Futur Mensuel. Vous pourrez y projeter votre solde au jour le jour pour les mois à venir !',
   'tutorial.step3.title': 'Planifiez vos Rêves',
-  'tutorial.step3.description': 'Ici, dans Objectifs, vous pouvez créer des tirelires pour vos buts et suivre ce qu\'il reste pour les réaliser.',
+  'tutorial.step3.description': "Touchez votre photo pour ouvrir le Menu. Vos Objectifs s'y trouvent : créez des tirelires pour vos rêves et suivez ce qu'il reste.",
   'tutorial.step4.title': 'Tout est Prêt !',
   'tutorial.step4.description': 'Vous connaissez maintenant les bases pour maîtriser vos finances. Explorez à votre guise !',
 

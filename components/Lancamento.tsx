@@ -142,6 +142,7 @@ const Lancamento: React.FC = () => {
                 <div className="flex items-center justify-between">
                     {/* Avatar */}
                     <div 
+                        id="tour-metas"
                         onClick={() => setCurrentView('menu')}
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile?.avatar
