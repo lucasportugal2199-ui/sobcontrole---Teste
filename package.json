@@ -29,7 +29,6 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^0.15.0",
     "@supabase/supabase-js": "^2.86.0",
     "canvas-confetti": "^1.9.2",
     "capacitor-plugin-cdv-purchase": "^13.17.2",

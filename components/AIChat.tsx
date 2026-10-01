@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useTranslation } from '../i18n';
 import { ArrowLeftIcon, SparklesIcon, LoaderIcon, LockIcon, CrownIcon, CalopsitaIcon } from './icons';
-import { GoogleGenAI } from "@google/genai";
+import { generateWithGemini, GeminiContent } from "../utils/aiClient";
 import { formatCurrency } from '../utils/helpers';
 
 interface Message {
@@ -99,8 +99,6 @@ const AIChat: React.FC = () => {
         setIsTyping(true);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '' });
-
             const dataContext = JSON.stringify(allTransactions.map(tx => ({
                 data: tx.data,
                 desc: tx.descricao,
@@ -111,19 +109,17 @@ const AIChat: React.FC = () => {
 
             // IMPORTANTE: O histórico para o Gemini DEVE começar com um turno 'user'.
             // Removemos a mensagem de boas-vindas do histórico enviado se ela for a primeira.
-            const apiHistory = currentMessages
-                .filter(m => m.id !== 'welcome') // Remove mensagem estática de boas-vindas
-                .slice(0, -1) // Remove a última mensagem (que é a atual do user)
+            // A última mensagem do histórico é a pergunta atual do usuário.
+            const apiHistory: GeminiContent[] = currentMessages
+                .filter(m => m.id !== 'welcome' && m.id !== 'error')
                 .map(m => ({
                     role: m.role,
                     parts: [{ text: m.text }]
                 }));
 
-            const chat = ai.chats.create({
-                model: 'gemini-2.5-flash',
-                history: apiHistory,
-                config: {
-                    systemInstruction: `Você é a "Calopsita CFO", uma consultora financeira pessoal de elite com o carisma e a perspicácia de uma calopsita inteligente e atenta aos centavos.
+            const responseText = await generateWithGemini({
+                contents: apiHistory,
+                systemInstruction: { parts: [{ text: `Você é a "Calopsita CFO", uma consultora financeira pessoal de elite com o carisma e a perspicácia de uma calopsita inteligente e atenta aos centavos.
                     Seu objetivo é ajudar o usuário (${userProfile.name}) a entender suas finanças, poupar dinheiro e alcançar seus objetivos.
                     
                     PERSONALIDADE:
@@ -155,13 +151,10 @@ const AIChat: React.FC = () => {
                     [TRANSACTION_DATA]
                     { "valor": 50.0, "descricao": "Bar", "categoria": "Lazer", "tipo": "saida", "data": "2024-03-08" }
                     [/TRANSACTION_DATA]
-                    - Use apenas as categorias fornecidas. Se não souber, use "Outros".`,
-                },
+                    - Use apenas as categorias fornecidas. Se não souber, use "Outros".` }] },
             });
 
-            const response = await chat.sendMessage({ message: text });
-
-            let aiText = response.text || t('aichat.errorProcessing');
+            let aiText = responseText || t('aichat.errorProcessing');
             let pendingTransaction = undefined;
 
             // Intercepta JSON de transação

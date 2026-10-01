@@ -16,9 +16,8 @@ export default defineConfig(({ mode }) => {
     base: './',
 
     define: {
-      // Mapeia as variáveis para process.env (exigido pelo SDK do Gemini e usado pelo Supabase)
-      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY),
+      // Mapeia as variáveis para process.env (usado pelo Supabase e login Google).
+      // A chave do Gemini NÃO entra aqui: ela fica só na Edge Function `gemini` do Supabase.
       'process.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
       'process.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
       'process.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(env.VITE_GOOGLE_CLIENT_ID),

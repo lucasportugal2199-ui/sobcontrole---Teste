@@ -1,6 +1,4 @@
-
-// Fix: Ensure proper types are imported for Gemini API
-import { GoogleGenAI, Type } from "@google/genai";
+import { generateWithGemini, userContent, GeminiPart } from './aiClient';
 import { MESES_NOMES } from '../constants';
 import { Transaction, Categorias, TransactionType, ReceiptAnalysisResult, DailyBalance, ImportedTransaction, PaymentMethod, AllData, CreditCard } from '../types';
 import { parseOFXOffline } from './ofxParser';
@@ -273,10 +271,6 @@ export const calculatePercentageChange = (current: number, previous: number): { 
     return { value: `${isPositive ? '+' : ''}${change.toFixed(1)}%`, isPositive, isInfinite: false };
 };
 
-const getAIClient = () => {
-    return new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || '' });
-};
-
 const sanitizeJsonResponse = (text: string): string => {
     if (!text) return "";
     let cleaned = text.trim();
@@ -337,7 +331,6 @@ export const suggestCategoryWithAgent = async (
   categories: Categorias
 ): Promise<CategoryAgentResult> => {
   if (!description.trim()) throw new Error("A descrição não pode estar vazia.");
-  const ai = getAIClient();
   const currentCategories = categories[type]?.map(c => c.name) || [];
 
   const availableIcons = [
@@ -353,9 +346,8 @@ export const suggestCategoryWithAgent = async (
   ];
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: `Você é o Agente Inteligente de Categorização Financeira do app SobControle.
+    const responseText = await generateWithGemini({
+      contents: userContent({ text: `Você é o Agente Inteligente de Categorização Financeira do app SobControle.
 Analise a transação com descrição: "${description}" e tipo: "${type}".
 Categorias já existentes no app do usuário: [${currentCategories.join(', ')}].
 
@@ -372,32 +364,32 @@ DIRETRIZES:
      - icon: selecione o iconId mais adequado da lista: [${availableIcons.join(', ')}].
      - bucket: se for saída, escolha entre "necessidades", "desejos" ou "futuro".
      - group: se for saída, escolha entre "Gastos Fixos", "Gastos Variáveis" ou "Reserva Financeira".
-     - reason: justificativa breve.`,
-      config: {
+     - reason: justificativa breve.` }),
+      generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.OBJECT,
+          type: 'OBJECT',
           properties: {
-            action: { type: Type.STRING, enum: ['match', 'create'] },
-            categoryName: { type: Type.STRING },
+            action: { type: 'STRING', enum: ['match', 'create'] },
+            categoryName: { type: 'STRING' },
             newCategory: {
-              type: Type.OBJECT,
+              type: 'OBJECT',
               properties: {
-                name: { type: Type.STRING },
-                icon: { type: Type.STRING },
-                bucket: { type: Type.STRING, enum: ['necessidades', 'desejos', 'futuro'] },
-                group: { type: Type.STRING, enum: ['Gastos Fixos', 'Gastos Variáveis', 'Reserva Financeira'] },
-                reason: { type: Type.STRING }
+                name: { type: 'STRING' },
+                icon: { type: 'STRING' },
+                bucket: { type: 'STRING', enum: ['necessidades', 'desejos', 'futuro'] },
+                group: { type: 'STRING', enum: ['Gastos Fixos', 'Gastos Variáveis', 'Reserva Financeira'] },
+                reason: { type: 'STRING' }
               }
             },
-            reason: { type: Type.STRING }
+            reason: { type: 'STRING' }
           },
           required: ['action', 'categoryName']
         }
       }
     });
 
-    const sanitized = sanitizeJsonResponse(response.text || "");
+    const sanitized = sanitizeJsonResponse(responseText);
     const parsed = JSON.parse(sanitized) as CategoryAgentResult;
 
     // Se o modelo sugeriu criar uma categoria cujo nome já existe (case-insensitive), faça match nela
@@ -436,34 +428,30 @@ export const suggestCategory = async (description: string, type: TransactionType
 };
 
 export const analyzeReceipt = async (base64Image: string, mimeType: string, categories: Categorias): Promise<ReceiptAnalysisResult> => {
-    const ai = getAIClient();
     const availableExpenseCategories = categories.saida.map(c => c.name).join(', ');
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: {
-            parts: [
-                { inlineData: { mimeType, data: base64Image } }, 
-                { text: `Extraia os dados deste recibo. Categorias permitidas: [${availableExpenseCategories}]. Escolha a mais aproximada, NUNCA crie uma nova.` }
-            ]
-        },
-        config: {
+    const responseText = await generateWithGemini({
+        contents: userContent(
+            { inlineData: { mimeType, data: base64Image } },
+            { text: `Extraia os dados deste recibo. Categorias permitidas: [${availableExpenseCategories}]. Escolha a mais aproximada, NUNCA crie uma nova.` }
+        ),
+        generationConfig: {
             responseMimeType: "application/json",
             responseSchema: {
-                type: Type.OBJECT,
+                type: 'OBJECT',
                 properties: {
-                    valor: { type: Type.NUMBER },
-                    descricao: { type: Type.STRING },
-                    data: { type: Type.STRING },
-                    categoria: { type: Type.STRING }
+                    valor: { type: 'NUMBER' },
+                    descricao: { type: 'STRING' },
+                    data: { type: 'STRING' },
+                    categoria: { type: 'STRING' }
                 },
                 required: ['valor', 'descricao', 'data', 'categoria']
             }
         }
     });
-    
+
     try {
-        const sanitized = sanitizeJsonResponse(response.text || "");
+        const sanitized = sanitizeJsonResponse(responseText);
         const json = JSON.parse(sanitized);
         if (!/^\d{4}-\d{2}-\d{2}$/.test(json.data)) json.data = formatDateToInput(new Date());
         
@@ -494,11 +482,10 @@ export const analyzeStatement = async (file: File, categories: Categorias): Prom
         }
     }
 
-    const ai = getAIClient();
     const catEntrada = categories.entrada.map(c => c.name).join(', ');
     const catSaida = categories.saida.map(c => c.name).join(', ');
 
-    let contentPart;
+    let contentPart: GeminiPart;
     if (isOFX) {
         const text = await fileToText(file);
         contentPart = { text: `Analise este conteúdo de arquivo OFX e extraia as transações financeiras. Categorias de entrada permitidas: [${catEntrada}]. Categorias de saída permitidas: [${catSaida}].\n\n${text}` };
@@ -507,26 +494,23 @@ export const analyzeStatement = async (file: File, categories: Categorias): Prom
         contentPart = { inlineData: { mimeType: file.type || 'application/pdf', data: base64 } };
     }
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: {
-            parts: [
-                contentPart as any,
-                { text: `Analise este documento e extraia as transações. REGRAS: 1. Ignore saldos. 2. Data AAAA-MM-DD. 3. Valor positivo. 4. tipo='saida' ou 'entrada'. 5. CATEGORIA OBRIGATÓRIA: Use APENAS uma das listas enviadas no contexto. Não invente categorias novas sob nenhuma circunstância. Se não souber, use a mais próxima.` }
-            ]
-        },
-        config: {
+    const responseText = await generateWithGemini({
+        contents: userContent(
+            contentPart,
+            { text: `Analise este documento e extraia as transações. REGRAS: 1. Ignore saldos. 2. Data AAAA-MM-DD. 3. Valor positivo. 4. tipo='saida' ou 'entrada'. 5. CATEGORIA OBRIGATÓRIA: Use APENAS uma das listas enviadas no contexto. Não invente categorias novas sob nenhuma circunstância. Se não souber, use a mais próxima.` }
+        ),
+        generationConfig: {
             responseMimeType: "application/json",
             responseSchema: {
-                type: Type.ARRAY,
+                type: 'ARRAY',
                 items: {
-                    type: Type.OBJECT,
+                    type: 'OBJECT',
                     properties: {
-                        data: { type: Type.STRING },
-                        descricao: { type: Type.STRING },
-                        valor: { type: Type.NUMBER },
-                        tipo: { type: Type.STRING, enum: ['entrada', 'saida'] },
-                        categoria: { type: Type.STRING }
+                        data: { type: 'STRING' },
+                        descricao: { type: 'STRING' },
+                        valor: { type: 'NUMBER' },
+                        tipo: { type: 'STRING', enum: ['entrada', 'saida'] },
+                        categoria: { type: 'STRING' }
                     },
                     required: ['data', 'descricao', 'valor', 'tipo', 'categoria']
                 }
@@ -535,7 +519,7 @@ export const analyzeStatement = async (file: File, categories: Categorias): Prom
     });
 
     try {
-        const sanitized = sanitizeJsonResponse(response.text || "[]");
+        const sanitized = sanitizeJsonResponse(responseText || "[]");
         const results = JSON.parse(sanitized) as ImportedTransaction[];
         
         const validIn = categories.entrada.map(c => c.name);
