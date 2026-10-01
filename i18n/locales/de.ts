@@ -920,7 +920,7 @@ const de: TranslationDictionary = {
   'tutorial.start': 'Starten',
   'tutorial.gotIt': 'Verstanden',
   'tutorial.step1.title': 'Transaktionen erstellen',
-  'tutorial.step1.description': 'Um eine neue Transaktion (Einnahme oder Ausgabe) zu erstellen, klicken Sie einfach auf dieses \'+\' Symbol in der Mitte!',
+  'tutorial.step1.description': "Um eine neue Buchung (Einnahme oder Ausgabe) zu erstellen, tippe auf den orangefarbenen '+'-Button über der Leiste. Er funktioniert auf jedem Bildschirm!",
   'tutorial.step2.title': 'Monatsvorschau',
   'tutorial.step2.description': 'Klicken Sie auf das Kalendersymbol \'Zukunft\' im unteren Menü, um die Monatsvorschau anzuzeigen. Dort prognostizieren Sie Ihr Tagesguthaben für die kommenden Monate!',
   'tutorial.step3.title': 'Planen Sie Ihre Ziele',
@@ -1050,6 +1050,8 @@ const de: TranslationDictionary = {
   'payMethod.transfer': "Überweisung",
   'newTx.noAccountLinked': "Kein Konto verknüpft",
   'tx.recurring': "Wiederkehrend",
+  'nav.home': "Start",
+  'nav.menu': "Hauptnavigation",
 };
 
 export default de;

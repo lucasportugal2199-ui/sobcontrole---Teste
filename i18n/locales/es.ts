@@ -922,7 +922,7 @@ const es: TranslationDictionary = {
   'tutorial.start': 'Empezar',
   'tutorial.gotIt': 'Entendido',
   'tutorial.step1.title': 'Cree Transacciones',
-  'tutorial.step1.description': 'Para crear una nueva transacción (ingreso o gasto), ¡simplemente haga clic en este icono de \'+\' en el centro!',
+  'tutorial.step1.description': "Para crear una nueva transacción (ingreso o gasto), toca el botón naranja '+' sobre la barra. ¡Funciona en cualquier pantalla!",
   'tutorial.step2.title': 'Futuro Mensual',
   'tutorial.step2.description': 'Haga clic en el icono de calendario \'Futuro\' en el menú inferior para ver el Futuro Mensual. ¡Allí proyectará su saldo día a día para los próximos meses!',
   'tutorial.step3.title': 'Planifique sus Sueños',
@@ -1052,6 +1052,8 @@ const es: TranslationDictionary = {
   'payMethod.transfer': "Transferencia",
   'newTx.noAccountLinked': "Ninguna cuenta vinculada",
   'tx.recurring': "Recurrente",
+  'nav.home': "Inicio",
+  'nav.menu': "Navegación principal",
 };
 
 export default es;

@@ -928,7 +928,7 @@ const en: TranslationDictionary = {
   'tutorial.start': 'Start',
   'tutorial.gotIt': 'Got It',
   'tutorial.step1.title': 'Create Transactions',
-  'tutorial.step1.description': 'To create a new transaction (income or expense), just tap the \'+\' icon in the center!',
+  'tutorial.step1.description': "To create a new transaction (income or expense), tap the orange '+' button above the bar. It works on any screen!",
   'tutorial.step2.title': 'Monthly Outlook',
   'tutorial.step2.description': 'Tap the \'Future\' calendar icon in the bottom menu to view your Monthly Outlook. There you can project your daily balance for the coming months!',
   'tutorial.step3.title': 'Plan Your Dreams',
@@ -1058,6 +1058,8 @@ const en: TranslationDictionary = {
   'payMethod.transfer': "Transfer",
   'newTx.noAccountLinked': "No account linked",
   'tx.recurring': "Recurring",
+  'nav.home': "Home",
+  'nav.menu': "Main navigation",
 };
 
 export default en;

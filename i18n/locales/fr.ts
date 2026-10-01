@@ -595,7 +595,7 @@ const fr: TranslationDictionary = {
   'tutorial.start': 'Commencer',
   'tutorial.gotIt': 'Compris',
   'tutorial.step1.title': 'Créez des Transactions',
-  'tutorial.step1.description': 'Pour créer une nouvelle transaction (revenu ou dépense), cliquez simplement sur l\'icône \'+\' au centre !',
+  'tutorial.step1.description': "Pour créer une nouvelle transaction (revenu ou dépense), touchez le bouton orange '+' au-dessus de la barre. Il fonctionne sur tous les écrans !",
   'tutorial.step2.title': 'Futur Mensuel',
   'tutorial.step2.description': 'Cliquez sur l\'icône de calendrier \'Futur\' dans le menu inférieur pour voir le Futur Mensuel. Vous pourrez y projeter votre solde au jour le jour pour les mois à venir !',
   'tutorial.step3.title': 'Planifiez vos Rêves',
@@ -734,6 +734,8 @@ const fr: TranslationDictionary = {
   'payMethod.transfer': "Virement",
   'newTx.noAccountLinked': "Aucun compte lié",
   'tx.recurring': "Récurrent",
+  'nav.home': "Accueil",
+  'nav.menu': "Navigation principale",
 };
 
 export default fr;
