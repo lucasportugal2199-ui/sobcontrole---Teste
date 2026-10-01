@@ -10,22 +10,23 @@ const log = createSyncLogger('SupabaseSync');
 // Nunca apagar a linha do usuário para "tentar de novo": se a inserção
 // falhasse depois do DELETE, os dados sumiam da nuvem. Em caso de erro,
 // a próxima sincronização automática tenta outra vez com os dados locais.
+// Devolve o updated_at gravado no servidor, ou null se não salvou.
 export async function saveAllDataToSupabase(
   userData: UserData
-): Promise<boolean> {
+): Promise<string | null> {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData.session?.user;
 
     if (!user) {
       log.warn('Sessão inválida — abortando save');
-      return false;
+      return null;
     }
 
     // 🛑 BARREIRA: Payload inválido (null, undefined, {}, array, sem allData)
     if (!isValidPayload(userData)) {
       log.warn('🛑 BLOQUEADO: Payload inválido');
-      return false;
+      return null;
     }
 
     const allDataPayload = {
@@ -35,7 +36,7 @@ export async function saveAllDataToSupabase(
 
     log.info(`📤 SAVE INICIADO para user ${user.id.slice(0, 8)}`, dataSummary(userData));
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('finance_all_data')
       .upsert(
         [{
@@ -44,7 +45,9 @@ export async function saveAllDataToSupabase(
           updated_at: new Date().toISOString(),
         }],
         { onConflict: 'user_id' }
-      );
+      )
+      .select('updated_at')
+      .maybeSingle();
 
     if (error) {
       log.error('❌ Erro no upsert:', {
@@ -53,28 +56,53 @@ export async function saveAllDataToSupabase(
         details: error.details,
         hint: (error as any).hint
       });
-      return false;
+      return null;
     }
 
     log.info('✅ Dados salvos no Supabase');
-    return true;
+    return data?.updated_at ?? new Date().toISOString();
   } catch (err) {
     log.error('❌ Erro crítico ao salvar:', err);
-    return false;
+    return null;
   }
+}
+
+/* ============================= */
+/* VERSÃO REMOTA — só o updated_at (consulta leve) */
+/* ============================= */
+// Usado para saber se a nuvem mudou desde a última sincronização sem
+// baixar todos os dados. Devolve null se o usuário ainda não tem dados lá.
+export async function fetchRemoteUpdatedAt(): Promise<string | null> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+  if (!user) throw new Error('Sessão inválida');
+
+  const { data, error } = await supabase
+    .from('finance_all_data')
+    .select('updated_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.updated_at ?? null;
 }
 
 /* ============================= */
 /* FETCH */
 /* ============================= */
 export async function fetchAllDataFromSupabase(): Promise<UserData | null> {
+  return (await fetchAllDataWithVersion()).data;
+}
+
+/** Dados remotos + updated_at do servidor (versão usada pela sincronização automática). */
+export async function fetchAllDataWithVersion(): Promise<{ data: UserData | null; updatedAt: string | null }> {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData.session?.user;
 
     if (!user) {
       log.warn('Sessão inválida — abortando fetch');
-      return null;
+      return { data: null, updatedAt: null };
     }
 
     log.info(`Buscando dados do user ${user.id.slice(0, 8)}...`);
@@ -92,7 +120,7 @@ export async function fetchAllDataFromSupabase(): Promise<UserData | null> {
 
     if (!data) {
       log.info('Nenhum dado encontrado no Supabase (usuário novo)');
-      return null;
+      return { data: null, updatedAt: null };
     }
 
     // Log de diagnóstico
@@ -105,7 +133,7 @@ export async function fetchAllDataFromSupabase(): Promise<UserData | null> {
 
     if (data.all_data?.__userId && data.all_data.__userId !== user.id) {
       log.warn('⚠️ Dados remotos pertencem a outro usuário — ignorando');
-      return null;
+      return { data: null, updatedAt: data.updated_at ?? null };
     }
 
     const remoteData = data.all_data ?? null;
@@ -115,7 +143,7 @@ export async function fetchAllDataFromSupabase(): Promise<UserData | null> {
 
     log.info('✅ Dados remotos carregados:', dataSummary(remoteData));
 
-    return remoteData;
+    return { data: remoteData, updatedAt: data.updated_at ?? null };
   } catch (err) {
     log.error('Erro ao buscar:', err);
     throw err;

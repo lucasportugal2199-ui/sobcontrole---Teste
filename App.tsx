@@ -64,8 +64,9 @@ import {
   recalculateBalancesFrom,
   generateMockTransactions
 } from './utils/helpers';
-import { fetchAllDataFromSupabase, saveAllDataToSupabase } from './utils/supabaseSync';
-import { isEmptyState, isValidPayload, smartMerge, dataSummary, createSyncLogger, collectIds, updateDeletedIds, hasDeletedIds, sameSyncedContent } from './utils/syncEngine';
+import { fetchAllDataFromSupabase, fetchAllDataWithVersion, fetchRemoteUpdatedAt, saveAllDataToSupabase } from './utils/supabaseSync';
+import { runCloudSync, initialCloudSyncState, CloudApi } from './utils/cloudSync';
+import { isEmptyState, smartMerge, dataSummary, createSyncLogger, collectIds, updateDeletedIds, hasDeletedIds, sameSyncedContent } from './utils/syncEngine';
 import { NotificationService } from './utils/notificationService';
 import { supabase } from './utils/supabaseClient'; // Importação do cliente
 import { BillingService } from './utils/billingService';
@@ -262,6 +263,10 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   // Ids de todos os itens na última persistência local. Comparando com o estado atual
   // descobrimos o que foi excluído (ver updateDeletedIds). null = ainda não inicializado.
   const knownIdsRef = React.useRef<Set<string> | null>(null);
+
+  // O que sabemos da nuvem desde a última sincronização (versão + conteúdo).
+  // Se a versão não mudou, a sincronização automática não precisa baixar tudo de novo.
+  const cloudSyncStateRef = React.useRef(initialCloudSyncState());
 
   const [hasLocalSession, setHasLocalSession] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -475,6 +480,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     setSubscriptions([]);
     setDeletedIds({});
     knownIdsRef.current = null;
+    cloudSyncStateRef.current = initialCloudSyncState();
 
     // UI / Preferências
     setTheme('dark');
@@ -618,6 +624,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       isRemoteLoadedRef.current = false;
       isHydratedRef.current = false;
       knownIdsRef.current = null;
+      cloudSyncStateRef.current = initialCloudSyncState();
       setIsLoadingData(true);
 
       hydrationLog.group('Iniciando hidratação');
@@ -918,6 +925,12 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   ]);
 
 
+  const cloudApi: CloudApi = {
+    fetchVersion: fetchRemoteUpdatedAt,
+    fetchFull: fetchAllDataWithVersion,
+    save: saveAllDataToSupabase,
+  };
+
   // --- SINCRONIZAÇÃO AUTOMÁTICA SEGURA ---
   // Sempre junta (smartMerge) o estado local com o da nuvem antes de enviar:
   // assim mudanças feitas em outro aparelho não são sobrescritas, e as
@@ -965,28 +978,10 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           lastUpdatedAt: new Date().toISOString(),
         };
 
-        let remote: UserData | null = null;
-        try {
-          remote = await fetchAllDataFromSupabase();
-        } catch (fetchErr) {
-          syncLog.warn('Erro ao buscar remoto no auto-sync — abortando upload', fetchErr);
-          return;
-        }
-        if (cancelled) return;
-
-        // Junta com a nuvem. Nada que só exista lá se perde: só some o que foi excluído.
-        const merged = remote && isValidPayload(remote) ? smartMerge(currentData, remote) : currentData;
-
-        if (remote && sameSyncedContent(merged, remote)) {
-          syncLog.info('☁️ Nuvem já está atualizada — nenhum upload necessário');
-        } else {
-          syncLog.info('📤 Enviando dados para a nuvem', {
-            userId: effectiveUserId.slice(0, 8),
-            summary: dataSummary(merged)
-          });
-          const saved = await saveAllDataToSupabase({ ...merged, lastUpdatedAt: new Date().toISOString() });
-          if (!saved || cancelled) return;
-        }
+        syncLog.info('🔄 Sincronizando com a nuvem', { userId: effectiveUserId.slice(0, 8) });
+        const result = await runCloudSync(currentData, cloudSyncStateRef.current, cloudApi, () => cancelled);
+        if (!result) return;
+        const { merged } = result;
 
         // Traz para a tela o que veio da nuvem (ex.: lançamentos de outro aparelho)
         if (!sameSyncedContent(merged, currentData)) {
