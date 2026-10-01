@@ -143,7 +143,7 @@ const Lancamento: React.FC = () => {
                     {/* Avatar */}
                     <div 
                         id="tour-metas"
-                        onClick={() => setCurrentView('menu')}
+                        onClick={() => setCurrentView('menu')} role="button" aria-label={t('a11y.openMenu')}
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile?.avatar
                                 ? 'shadow-md'
@@ -161,7 +161,7 @@ const Lancamento: React.FC = () => {
                     {/* Seletor de Mês */}
                     <div className="flex items-center gap-1">
                         <button 
-                            onClick={() => changeMonth(-1)} 
+                            onClick={() => changeMonth(-1)} aria-label={t('a11y.previousMonth')} 
                             className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform"
                         >
                             <ArrowLeftIcon className="h-4 w-4" />
@@ -173,7 +173,7 @@ const Lancamento: React.FC = () => {
                             {formatarMesAno(currentDate, appLocale, monthNames)}
                         </button>
                         <button 
-                            onClick={() => changeMonth(1)} 
+                            onClick={() => changeMonth(1)} aria-label={t('a11y.nextMonth')} 
                             className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform"
                         >
                             <ArrowRightIcon className="h-4 w-4" />
@@ -182,7 +182,7 @@ const Lancamento: React.FC = () => {
 
                     {/* Botão Hoje */}
                     <button 
-                        onClick={handleGoToToday} 
+                        onClick={handleGoToToday} aria-label={t('a11y.goToToday')} 
                         className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.08] text-blue-500 dark:text-blue-400 active:scale-95 transition-transform shadow-sm hover:bg-slate-200 dark:hover:bg-slate-800"
                         title={`${monthNames[today.getMonth()].substring(0, 3)} ${today.getDate()}`}
                     >
@@ -326,7 +326,7 @@ const Lancamento: React.FC = () => {
             </div>
 
             {/* Cabeçalho da tabela — fora do scroll para não haver sobreposição */}
-            <div className="flex-shrink-0 bg-slate-200 dark:bg-[#151e30] border-b border-light-border dark:border-dark-elevated/50 shadow-sm px-4">
+            <div className="flex-shrink-0 bg-slate-200 dark:bg-dark-elevated border-b border-light-border dark:border-dark-elevated/50 shadow-sm px-4">
                 <div className="flex items-center gap-3 px-3 text-[11px] font-medium text-slate-500 dark:text-slate-400 py-1.5">
                     <div className="w-[58px] flex-shrink-0 text-left pl-1">{t('lancamento.day')}</div>
                     <div className="flex-grow grid grid-cols-3 gap-2 text-right">
@@ -351,7 +351,8 @@ const Lancamento: React.FC = () => {
 
                                 let dayCircleClass = 'h-7 w-7 flex-shrink-0 flex items-center justify-center rounded-full font-black text-[11px] relative transition-all ';
                                 if (isToday) dayCircleClass += 'bg-light-accent text-white shadow-lg shadow-light-accent/40 ring-2 ring-light-accent/20';
-                                else if (isWeekend) dayCircleClass += 'bg-rose-500/[0.05] dark:bg-rose-500/10 text-rose-400/90 dark:text-rose-400/80 border border-rose-500/10 dark:border-rose-500/20';
+                                // Fim de semana: cinza sutil (o vermelho parecia alerta de gasto)
+                                else if (isWeekend) dayCircleClass += 'bg-transparent text-light-text-muted dark:text-dark-text-muted border border-light-border dark:border-dark-elevated';
                                 else dayCircleClass += 'bg-slate-200/70 dark:bg-slate-700 text-light-text-secondary dark:text-dark-text-secondary border border-light-border dark:border-dark-elevated';
 
                                 // #4: Saldo zero em cor neutra
@@ -367,7 +368,7 @@ const Lancamento: React.FC = () => {
                                             ? 'py-2.5 px-3 flex items-center gap-3 transition-all active:scale-[0.99] cursor-pointer rounded-2xl mx-2 my-1.5 border border-light-accent/40 dark:border-dark-accent/40 bg-light-accent/[0.06] dark:bg-[#3B82F6]/[0.06] shadow-lg shadow-light-accent/10 dark:shadow-dark-accent/10 ring-2 ring-light-accent/10 dark:ring-dark-accent/10 z-10 scale-[1.01]'
                                             : `py-2 px-3 flex items-center gap-3 transition-all active:bg-slate-50 dark:active:bg-dark-surface cursor-pointer border-b border-slate-100 dark:border-dark-elevated/40 last:border-b-0 ${
                                                 isWeekend
-                                                    ? 'bg-rose-50/50 dark:bg-rose-950/10'
+                                                    ? 'bg-slate-50 dark:bg-white/[0.02]'
                                                     : 'bg-white dark:bg-dark-card'
                                             }`
                                         }
@@ -376,7 +377,7 @@ const Lancamento: React.FC = () => {
                                             <div className={dayCircleClass}>
                                                 {String(dia.dia).padStart(2, '0')}
                                             </div>
-                                            <span className={`text-[9px] font-extrabold uppercase tracking-tight ${isWeekend ? 'text-rose-400/70 dark:text-rose-400/70' : 'text-light-text-muted dark:text-dark-text-muted'}`}>
+                                            <span className={`text-[10px] font-extrabold uppercase tracking-tight text-light-text-muted dark:text-dark-text-muted`}>
                                                 {dayOfWeekStr}
                                             </span>
                                         </div>

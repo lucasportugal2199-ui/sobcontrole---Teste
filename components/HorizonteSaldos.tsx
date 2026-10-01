@@ -51,7 +51,8 @@ const SaldoCell = React.memo(({
 
     let dayBgClass = "bg-slate-100 dark:bg-slate-800 text-light-text-muted dark:text-dark-text-muted border border-slate-200/50 dark:border-slate-700/50";
     if (isWeekend) {
-        dayBgClass = "bg-rose-500/[0.05] dark:bg-rose-500/10 text-rose-400/90 dark:text-rose-400/80 border border-rose-500/10 dark:border-rose-500/20";
+        // Neutro: aqui o vermelho indica dia com gasto, não pode significar "fim de semana"
+        dayBgClass = "bg-transparent text-light-text-muted dark:text-dark-text-muted border border-light-border dark:border-dark-elevated";
     }
     if (isToday) {
         dayBgClass = "bg-light-accent dark:bg-[#3B82F6] text-white border-transparent shadow-sm shadow-light-accent/30";
@@ -72,7 +73,7 @@ const SaldoCell = React.memo(({
         >
             <div className={`flex-grow flex flex-row items-center justify-between px-1.5 ${isToday ? 'bg-light-accent/20 dark:bg-[#3B82F6]/20' : ''} ${isCenter ? '' : 'opacity-40'}`}>
                 {/* Dia — esquerda */}
-                <div className={`h-5 w-5 flex-shrink-0 rounded-full flex items-center justify-center text-[9px] font-black tracking-tighter ${dayBgClass}`}>
+                <div className={`h-5 w-5 flex-shrink-0 rounded-full flex items-center justify-center text-[10px] font-black tracking-tighter ${dayBgClass}`}>
                     {item.dia}
                 </div>
                 {/* Valor + bolinhas — direita */}
@@ -277,7 +278,7 @@ const HorizonteSaldos: React.FC = () => {
                 <div className="flex items-center justify-between">
                     {/* Avatar */}
                     <div 
-                        onClick={() => setCurrentView('menu')}
+                        onClick={() => setCurrentView('menu')} role="button" aria-label={t('a11y.openMenu')}
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile?.avatar
                                 ? 'shadow-md'
@@ -313,7 +314,7 @@ const HorizonteSaldos: React.FC = () => {
 
                     {/* Botão Hoje */}
                     <button 
-                        onClick={handleGoToToday} 
+                        onClick={handleGoToToday} aria-label={t('a11y.goToToday')} 
                         className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.08] text-blue-500 dark:text-blue-400 active:scale-95 transition-transform shadow-sm hover:bg-slate-200 dark:hover:bg-slate-800"
                         title={`${monthNames[today.getMonth()].substring(0, 3)} ${today.getDate()}`}
                     >
@@ -370,7 +371,7 @@ const HorizonteSaldos: React.FC = () => {
             </div>
 
             {/* Header fixo de colunas — fora do scroll */}
-            <div className="flex-shrink-0 grid grid-cols-3 bg-slate-200/80 dark:bg-[#151e30] border-b border-slate-200 dark:border-dark-elevated/40">
+            <div className="flex-shrink-0 grid grid-cols-3 bg-slate-200/80 dark:bg-dark-elevated border-b border-slate-200 dark:border-dark-elevated/40">
                 {threeMonthsData.map((monthData, index) => {
                     const isCenter = index === 1;
                     return (
