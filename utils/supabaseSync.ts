@@ -5,47 +5,37 @@ import { isEmptyState, isValidPayload, dataSummary, createSyncLogger } from './s
 const log = createSyncLogger('SupabaseSync');
 
 /* ============================= */
-/* SAVE — com verificação pós-save e fallback */
+/* SAVE — uma única gravação (upsert) */
 /* ============================= */
+// Nunca apagar a linha do usuário para "tentar de novo": se a inserção
+// falhasse depois do DELETE, os dados sumiam da nuvem. Em caso de erro,
+// a próxima sincronização automática tenta outra vez com os dados locais.
 export async function saveAllDataToSupabase(
   userData: UserData
-): Promise<void> {
+): Promise<boolean> {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const user = sessionData.session?.user;
 
     if (!user) {
       log.warn('Sessão inválida — abortando save');
-      return;
+      return false;
     }
 
     // 🛑 BARREIRA: Payload inválido (null, undefined, {}, array, sem allData)
     if (!isValidPayload(userData)) {
-      log.warn('🛑 BLOQUEADO: Payload inválido', {
-        userId: user.id.slice(0, 8),
-        type: typeof userData,
-        keys: userData ? Object.keys(userData) : 'N/A'
-      });
-      return;
+      log.warn('🛑 BLOQUEADO: Payload inválido');
+      return false;
     }
 
-    // Prepara o payload para o JSONB
     const allDataPayload = {
       ...userData,
       __userId: user.id
     };
 
-    const payloadStr = JSON.stringify(allDataPayload);
-    const payloadKeys = Object.keys(allDataPayload);
-    
-    log.info(`📤 SAVE INICIADO para user ${user.id.slice(0, 8)}`, {
-      summary: dataSummary(userData),
-      payloadSizeKB: (payloadStr.length / 1024).toFixed(1),
-      payloadKeysCount: payloadKeys.length,
-    });
+    log.info(`📤 SAVE INICIADO para user ${user.id.slice(0, 8)}`, dataSummary(userData));
 
-    // ===== TENTATIVA 1: UPSERT com .select() para ver o retorno =====
-    const { data: upsertResult, error: upsertError } = await supabase
+    const { error } = await supabase
       .from('finance_all_data')
       .upsert(
         [{
@@ -54,139 +44,23 @@ export async function saveAllDataToSupabase(
           updated_at: new Date().toISOString(),
         }],
         { onConflict: 'user_id' }
-      )
-      .select('all_data');
+      );
 
-    if (upsertError) {
-      log.error('❌ Erro no upsert:', { 
-        code: upsertError.code, 
-        message: upsertError.message, 
-        details: upsertError.details,
-        hint: (upsertError as any).hint 
+    if (error) {
+      log.error('❌ Erro no upsert:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: (error as any).hint
       });
-    } else {
-      const returnedKeys = Object.keys(upsertResult?.[0]?.all_data || {});
-      log.info('✅ Upsert retorno:', {
-        returnedRows: upsertResult?.length || 0,
-        returnedAllDataKeys: returnedKeys.length,
-        firstKeys: returnedKeys.slice(0, 5).join(', '),
-      });
+      return false;
     }
 
-    // ===== VERIFICAÇÃO: Lê de volta para confirmar =====
-    const { data: verifyData, error: verifyError } = await supabase
-      .from('finance_all_data')
-      .select('all_data, updated_at')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (verifyError) {
-      log.error('❌ Erro na verificação pós-save:', verifyError);
-      return;
-    }
-    
-    if (!verifyData) {
-      log.warn('⚠️ Nenhum registro encontrado na verificação');
-      return;
-    }
-
-    const savedKeys = Object.keys(verifyData.all_data || {});
-    const savedSize = JSON.stringify(verifyData.all_data || {}).length;
-    
-    log.info(`🔍 VERIFICAÇÃO PÓS-SAVE:`, {
-      savedKeysCount: savedKeys.length,
-      savedSizeBytes: savedSize,
-      isStillEmpty: savedKeys.length <= 1,
-    });
-
-    // Se os dados FORAM salvos, sucesso!
-    if (savedKeys.length > 1) {
-      log.info('✅ Dados verificados com sucesso no Supabase!');
-      return;
-    }
-
-    // ===== DADOS NÃO FORAM PERSISTIDOS — Tentar UPDATE explícito =====
-    log.warn('⚠️ all_data ainda vazio após upsert! Tentando UPDATE explícito...');
-    
-    const { data: updateResult, error: updateError } = await supabase
-      .from('finance_all_data')
-      .update({ all_data: allDataPayload })
-      .eq('user_id', user.id)
-      .select('all_data');
-
-    if (updateError) {
-      log.error('❌ UPDATE falhou:', {
-        code: updateError.code,
-        message: updateError.message,
-        details: updateError.details,
-        hint: (updateError as any).hint
-      });
-    } else {
-      const updateKeys = Object.keys(updateResult?.[0]?.all_data || {});
-      log.info('🔍 UPDATE retorno:', {
-        returnedRows: updateResult?.length || 0,
-        returnedAllDataKeys: updateKeys.length,
-      });
-      
-      if (updateKeys.length > 1) {
-        log.info('✅ UPDATE explícito salvou os dados com sucesso!');
-        return;
-      }
-    }
-
-    // ===== UPDATE TAMBÉM FALHOU — Tentar DELETE + INSERT =====
-    log.warn('⚠️ UPDATE também não persistiu. Tentando DELETE + INSERT...');
-    
-    const { error: deleteError } = await supabase
-      .from('finance_all_data')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (deleteError) {
-      log.error('❌ DELETE falhou:', deleteError);
-      return;
-    }
-
-    log.info('✅ DELETE OK — inserindo nova row...');
-
-    const { data: insertResult, error: insertError } = await supabase
-      .from('finance_all_data')
-      .insert({
-        user_id: user.id,
-        all_data: allDataPayload,
-      })
-      .select('all_data');
-
-    if (insertError) {
-      log.error('❌ INSERT falhou:', {
-        code: insertError.code,
-        message: insertError.message,
-        details: insertError.details,
-        hint: (insertError as any).hint
-      });
-    } else {
-      const insertKeys = Object.keys(insertResult?.[0]?.all_data || {});
-      log.info('🔍 INSERT retorno:', {
-        returnedRows: insertResult?.length || 0,
-        returnedAllDataKeys: insertKeys.length,
-      });
-      
-      if (insertKeys.length > 1) {
-        log.info('✅ DELETE + INSERT salvou os dados com sucesso!');
-      } else {
-        log.error('❌ TODAS AS TENTATIVAS FALHARAM. Possível problema de RLS/permissão no Supabase.');
-        log.error('💡 SOLUÇÃO: Verifique no Supabase Dashboard → Authentication → Policies:');
-        log.error('   1. A tabela finance_all_data tem RLS habilitado?');
-        log.error('   2. Existe policy de UPDATE para authenticated?');
-        log.error('   3. A policy de UPDATE inclui all_data?');
-      }
-    }
-
+    log.info('✅ Dados salvos no Supabase');
+    return true;
   } catch (err) {
     log.error('❌ Erro crítico ao salvar:', err);
-    try {
-      log.error('Detalhes:', JSON.stringify(err, null, 2));
-    } catch { /* ignore */ }
+    return false;
   }
 }
 
