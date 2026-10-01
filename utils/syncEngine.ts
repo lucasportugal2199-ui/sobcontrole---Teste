@@ -402,29 +402,33 @@ export function smartMerge(local: UserData, remote: UserData): UserData {
 function mergeAllData(local: AllData, remote: AllData): AllData {
   const allMonths = new Set([...Object.keys(local), ...Object.keys(remote)]);
   const merged: AllData = {};
-  
+
+  // Lançamento que existe aqui fica onde está aqui, mesmo que na nuvem esteja
+  // em outro mês (data editada): senão ele apareceria duplicado nos dois meses.
+  const localIds = new Set<string>();
+  for (const month of Object.values(local)) {
+    for (const tx of month?.transactions || []) localIds.add(tx.id);
+  }
+  const remoteOnly = (txs: Transaction[] = []) => txs.filter(tx => !localIds.has(tx.id));
+
   for (const monthKey of allMonths) {
     const localMonth = local[monthKey];
     const remoteMonth = remote[monthKey];
-    
+
     if (!localMonth && remoteMonth) {
-      merged[monthKey] = remoteMonth;
+      merged[monthKey] = { ...remoteMonth, transactions: remoteOnly(remoteMonth.transactions) };
     } else if (localMonth && !remoteMonth) {
       merged[monthKey] = localMonth;
     } else if (localMonth && remoteMonth) {
-      // Ambos existem — merge transações por ID (local vence)
+      // Ambos existem — local primeiro, depois o que só existe na nuvem
       merged[monthKey] = {
         ...localMonth,
-        transactions: unionLocalFirst<Transaction>(
-          localMonth.transactions || [],
-          remoteMonth.transactions || [],
-          tx => tx.id
-        ),
+        transactions: [...(localMonth.transactions || []), ...remoteOnly(remoteMonth.transactions)],
         saldoFinal: 0, // será recalculado
       };
     }
   }
-  
+
   return merged;
 }
 

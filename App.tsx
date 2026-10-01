@@ -59,6 +59,7 @@ import {
   getPreviousBalance,
   calculateStatementDate,
   getStatementDueDate,
+  addMonthsToMonthKey,
   calculateCreditCardDueDate,
   addMonthsSafely,
   recalculateBalancesFrom,
@@ -66,6 +67,7 @@ import {
 } from './utils/helpers';
 import { fetchAllDataFromSupabase, fetchAllDataWithVersion, fetchRemoteUpdatedAt, saveAllDataToSupabase } from './utils/supabaseSync';
 import { runCloudSync, initialCloudSyncState, CloudApi } from './utils/cloudSync';
+import { fixOverflowedCardDueDates } from './utils/migrations';
 import { isEmptyState, smartMerge, dataSummary, createSyncLogger, collectIds, updateDeletedIds, hasDeletedIds, sameSyncedContent } from './utils/syncEngine';
 import { NotificationService } from './utils/notificationService';
 import { supabase } from './utils/supabaseClient'; // Importação do cliente
@@ -842,6 +844,23 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
     loadData();
   }, [isAuthenticated]);
+
+  // --- CORREÇÕES ÚNICAS NOS DADOS (uma vez por usuário neste aparelho) ---
+  useEffect(() => {
+    if (!isAuthenticated || isLoadingData || !isSyncReady()) return;
+    const userId = currentUserIdRef.current || localStorage.getItem("lastUserId");
+    if (!userId) return;
+
+    // Vencimento de cartão dia 29/30/31 gravado no mês seguinte (bug até a 1.9.1)
+    const flag = `migration_card_due_overflow_v1_${userId}`;
+    if (localStorage.getItem(flag)) return;
+    const { allData: fixedData, fixed, firstMonth } = fixOverflowedCardDueDates(allData, creditCards);
+    if (fixed > 0 && firstMonth) {
+      createSyncLogger('Migration').info(`Corrigidas ${fixed} compras no cartão com vencimento no mês errado`);
+      setAllData(recalculateBalancesFrom(firstMonth, fixedData));
+    }
+    localStorage.setItem(flag, '1');
+  }, [isAuthenticated, isLoadingData]);
 
   // --- PERSISTÊNCIA LOCAL COM DEBOUNCE (500ms) ---
   useEffect(() => {
@@ -1775,7 +1794,11 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
       for (let i = 0; i < qty; i++) {
         const txPurchaseStr = form.isInstallment ? purchaseDate : addMonthsSafely(purchaseDate, i);
-        const txEffectiveStr = addMonthsSafely(effectiveDate, i);
+        // Cartão: cada parcela vence no dia de vencimento da fatura do seu mês
+        // (somar meses à 1ª data perderia o dia 31 a partir de um mês de 30 dias)
+        const txEffectiveStr = card && baseStatement
+          ? getStatementDueDate(addMonthsToMonthKey(baseStatement, i), card.dueDay)
+          : addMonthsSafely(effectiveDate, i);
 
         const storageMonthKey = getMonthKey(new Date(txEffectiveStr + 'T00:00:00'));
 

@@ -150,6 +150,12 @@ export const calculateCreditCardDueDate = (purchaseDateStr: string, card: Credit
   return formatDateToInput(dueDate);
 };
 
+// Soma meses a uma chave de mês: ("2026-11", 3) → "2027-02"
+export const addMonthsToMonthKey = (monthKey: string, months: number): string => {
+  const [year, month] = monthKey.split('-').map(Number);
+  return getMonthKey(new Date(year, month - 1 + months, 1));
+};
+
 // Data de vencimento (YYYY-MM-DD) da fatura de um mês ("YYYY-MM")
 export const getStatementDueDate = (statementKey: string, dueDay: number): string => {
   const [year, month] = statementKey.split('-').map(Number);
