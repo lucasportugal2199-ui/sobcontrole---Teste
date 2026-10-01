@@ -32,6 +32,12 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       emptyOutDir: true,
-    }
+    },
+
+    // No app publicado, remove console.log/info/debug: eles mostravam dados do usuário
+    // (e-mail, resumo das finanças) no logcat do Android. warn/error continuam.
+    esbuild: mode === 'production'
+      ? { pure: ['console.log', 'console.info', 'console.debug', 'console.group', 'console.groupEnd'] }
+      : undefined,
   };
 });

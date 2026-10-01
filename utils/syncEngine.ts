@@ -28,6 +28,8 @@ export function createSyncLogger(prefix: string): SyncLogger {
   
   return {
     info: (msg: string, data?: any) => {
+      // Só no `npm run dev`: no app publicado não registramos dados do usuário
+      if (!import.meta.env.DEV) return;
       console.log(`[${timestamp()}] 🔄 [${prefix}] ${msg}`, data !== undefined ? data : '');
     },
     warn: (msg: string, data?: any) => {

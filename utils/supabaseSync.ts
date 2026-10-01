@@ -38,7 +38,7 @@ export async function saveAllDataToSupabase(
     const payloadStr = JSON.stringify(allDataPayload);
     const payloadKeys = Object.keys(allDataPayload);
     
-    log.info(`📤 SAVE INICIADO para user ${user.id.slice(0, 8)} (${user.email})`, {
+    log.info(`📤 SAVE INICIADO para user ${user.id.slice(0, 8)}`, {
       summary: dataSummary(userData),
       payloadSizeKB: (payloadStr.length / 1024).toFixed(1),
       payloadKeysCount: payloadKeys.length,
