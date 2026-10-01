@@ -630,8 +630,8 @@ const pt: TranslationDictionary = {
   'premium.subtitle': 'Desbloqueie o máximo potencial das suas finanças',
   'premium.alreadyPro': 'Você já é PRO! 🎉',
   'premium.alreadyProSubtitle': 'Todas as funcionalidades premium estão ativas.',
-  'premium.benefit.ai': 'IA Ilimitada',
-  'premium.benefit.aiDesc': 'Consultoria financeira 24h sem restrições.',
+  'premium.benefit.ai': "IA: 100 consultas/dia",
+  'premium.benefit.aiDesc': "Consultoria financeira com a Calopsita CFO, até 100 consultas por dia.",
   'premium.benefit.export': 'Exportação Excel e PDF',
   'premium.benefit.exportDesc': 'Relatórios profissionais e planilhas reais.',
   'premium.benefit.import': 'Importação Inteligente',
@@ -692,7 +692,7 @@ const pt: TranslationDictionary = {
   'ai.thinking': 'Pensando...',
   'ai.error': 'Erro ao gerar resposta. Tente novamente.',
   'ai.welcomeMessage': 'Olá! Sou seu consultor financeiro virtual. Como posso te ajudar hoje?',
-  'ai.limitReached': 'Limite de consultas atingido. Seja PRO para consultas ilimitadas!',
+  'ai.limitReached': "Limite de consultas de hoje atingido. Seja PRO para fazer até 100 por dia!",
 
   // ============================================================
   // ANNUAL REPORT
@@ -890,8 +890,8 @@ const pt: TranslationDictionary = {
   'premium.status.completePaymentDesc': 'Conclua o pagamento na janela que o Android abriu.',
   'premium.status.processingAccessDesc': 'Estamos processando seu acesso premium agora.',
   'premium.status.allFunctionsReleasedDesc': 'Todas as funções premium foram liberadas.',
-  'premium.benefit1.title': 'IA Ilimitada',
-  'premium.benefit1.desc': 'Consultoria financeira 24h sem restrições.',
+  'premium.benefit1.title': "IA: 100 consultas/dia",
+  'premium.benefit1.desc': "Consultoria financeira com a Calopsita CFO, até 100 consultas por dia.",
   'premium.benefit2.title': 'Exportação Excel e PDF',
   'premium.benefit2.desc': 'Relatórios profissionais e planilhas reais.',
   'premium.benefit3.title': 'Importação Inteligente',

@@ -105,7 +105,7 @@ const PremiumScreen: React.FC = () => {
 
     const featureList = [
         "CFO de Bolso com Inteligência Artificial",
-        "Scanner ilimitado de comprovantes com IA",
+        "Scanner de comprovantes com IA",
         "Relatórios anuais e exportação em PDF/Excel",
         "Criação de categorias ilimitadas"
     ];

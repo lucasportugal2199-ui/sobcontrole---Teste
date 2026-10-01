@@ -262,7 +262,7 @@ const fr: TranslationDictionary = {
 
   'premium.title': 'PRO', 'premium.header': 'SobControle PRO', 'premium.subtitle': 'Débloquez le plein potentiel de vos finances',
   'premium.alreadyPro': 'Vous êtes déjà PRO ! 🎉', 'premium.alreadyProSubtitle': 'Toutes les fonctionnalités premium sont actives.',
-  'premium.benefit.ai': 'IA Illimitée', 'premium.benefit.aiDesc': 'Conseil financier 24h sans restrictions.',
+  'premium.benefit.ai': "IA : 100 questions/jour", 'premium.benefit.aiDesc': "Conseils financiers de la Calopsitte CFO, jusqu'à 100 questions par jour.",
   'premium.benefit.export': 'Export Excel et PDF', 'premium.benefit.exportDesc': 'Rapports professionnels et vrais tableurs.',
   'premium.benefit.import': 'Import Intelligent', 'premium.benefit.importDesc': 'Traitez les relevés PDF et OFX automatiquement.',
   'premium.benefit.calculator': 'Calculateur d\'Objectifs', 'premium.benefit.calculatorDesc': 'Simulez des scénarios et planifiez votre avenir financier.',
@@ -288,7 +288,7 @@ const fr: TranslationDictionary = {
   'ai.title': 'CFO Virtuel', 'ai.subtitle': 'Votre conseiller financier personnel', 'ai.placeholder': 'Posez une question sur vos finances...',
   'ai.send': 'Envoyer', 'ai.thinking': 'Réflexion...', 'ai.error': 'Erreur lors de la génération de la réponse. Réessayez.',
   'ai.welcomeMessage': 'Bonjour ! Je suis votre conseiller financier virtuel. Comment puis-je vous aider ?',
-  'ai.limitReached': 'Limite de consultations atteinte. Passez PRO pour des consultations illimitées !',
+  'ai.limitReached': "Limite de questions du jour atteinte. Passez PRO pour en poser jusqu'à 100 par jour !",
 
   'report.title': 'Rapport Annuel', 'report.totalIncome': 'Total des Revenus', 'report.totalExpenses': 'Total des Dépenses',
   'report.netResult': 'Résultat Net', 'report.monthlyAvg': 'Moyenne Mensuelle', 'report.bestMonth': 'Meilleur Mois',
@@ -381,8 +381,8 @@ const fr: TranslationDictionary = {
   'premium.status.completePaymentDesc': 'Finalisez le paiement dans la fenêtre ouverte par Android.',
   'premium.status.processingAccessDesc': 'We are processing your premium access now.',
   'premium.status.allFunctionsReleasedDesc': 'Toutes les fonctionnalités premium ont été débloquées.',
-  'premium.benefit1.title': 'IA Illimitée',
-  'premium.benefit1.desc': 'Conseil financier 24h/24 sans restriction.',
+  'premium.benefit1.title': "IA : 100 questions/jour",
+  'premium.benefit1.desc': "Conseils financiers de la Calopsitte CFO, jusqu'à 100 questions par jour.",
   'premium.benefit2.title': 'Export Excel & PDF',
   'premium.benefit2.desc': 'Rapports professionnels et vraies feuilles de calcul.',
   'premium.benefit3.title': 'Importation Intelligente',

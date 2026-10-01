@@ -45,7 +45,7 @@ const AIChat: React.FC = () => {
     useEffect(() => {
         if (messages.length === 0) {
             const welcomeText = isPremium
-                ? `Piu! Olá, ${userProfile.name}! 🦜 Eu sou a sua Calopsita CFO. Como você é assinante PRO, você tem consultas ilimitadas! Como posso te ajudar a voar alto nas suas finanças hoje?`
+                ? `Piu! Olá, ${userProfile.name}! 🦜 Eu sou a sua Calopsita CFO. Como você é assinante PRO, você tem até 100 consultas por dia! Como posso te ajudar a voar alto nas suas finanças hoje?`
                 : `Piu! Olá, ${userProfile.name}! 🦜 Eu sou a sua Calopsita CFO. Você tem 3 consultas gratuitas por dia para analisar seus gastos, guardar sementinhas e organizar seu orçamento. Como posso te ajudar hoje?`;
 
             setMessages([{
@@ -218,13 +218,13 @@ const AIChat: React.FC = () => {
                 {isPremium ? (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/15 via-yellow-500/15 to-amber-500/20 border border-amber-500/30 rounded-full shadow-sm">
                         <CrownIcon className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                        <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">PRO • Ilimitado</span>
+                        <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">PRO • 100/dia</span>
                     </div>
                 ) : (
                     <button
                         onClick={() => setCurrentView('premium')}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200/80 dark:bg-dark-surface border border-slate-300 dark:border-dark-elevated rounded-full hover:border-amber-400/50 transition group"
-                        title="Toque para virar PRO e ter consultas ilimitadas"
+                        title="Toque para virar PRO e ter até 100 consultas por dia"
                     >
                         <span className={`w-2 h-2 rounded-full ${remainingQueries > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
                         <span className="text-[10px] font-black text-light-text dark:text-dark-text tracking-tight">
@@ -331,7 +331,7 @@ const AIChat: React.FC = () => {
                             className="w-full max-w-sm mx-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white py-3.5 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-purple-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 group"
                         >
                             <CrownIcon className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
-                            <span>Desbloquear Consultas Ilimitadas no PRO</span>
+                            <span>Até 100 consultas por dia no PRO</span>
                         </button>
                     </div>
                 ) : (
