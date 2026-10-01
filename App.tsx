@@ -58,6 +58,7 @@ import {
   analyzeStatement,
   getPreviousBalance,
   calculateStatementDate,
+  getStatementDueDate,
   calculateCreditCardDueDate,
   addMonthsSafely,
   recalculateBalancesFrom,
@@ -1738,8 +1739,6 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
       // A data efetiva (para descontar do caixa) será o dia de vencimento do cartão
       // no MÊS da fatura escolhida/calculada.
-      const [statementYear, statementMonth] = baseStatement.split('-').map(Number);
-      const dueDay = card.dueDay;
 
       // CUIDADO: Se o dia de vencimento (dueDay) for *menor* que o dia de fechamento (closingDay),
       // significa que o mês da fatura fecha num mês, e vence no *próximo*.
@@ -1749,7 +1748,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       // Então `baseStatement` já é "2024-03". Logo, o vencimento é `dueDay` do próprio `baseStatement`.
 
       // Monta a data eXata de vencimento baseada no statementMonth
-      effectiveDate = formatDateToInput(new Date(statementYear, statementMonth - 1, dueDay));
+      effectiveDate = getStatementDueDate(baseStatement, card.dueDay);
     }
     const baseValue = form.isInstallment ? form.valor / (parseInt(form.installmentCount, 10) || 1) : form.valor;
 
@@ -2098,9 +2097,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           }
           finalStatementDate = baseStatement;
 
-          const [statementYear, statementMonth] = baseStatement.split('-').map(Number);
-          const dueDay = card.dueDay;
-          effectiveDate = formatDateToInput(new Date(statementYear, statementMonth - 1, dueDay));
+          effectiveDate = getStatementDueDate(baseStatement, card.dueDay);
         }
 
         const newTx: Transaction = {

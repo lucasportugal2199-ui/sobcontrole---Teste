@@ -95,12 +95,17 @@ export const addMonthsSafely = (dateStr: string, monthsToAdd: number): string =>
 };
 
 
+// Data com o dia limitado ao último dia do mês: dia 31 em abril vira 30/04
+// (new Date(2026, 3, 31) "transbordaria" para 01/05).
+const dateWithClampedDay = (year: number, month: number, day: number): Date =>
+  new Date(year, month, Math.min(day, getDiasNoMes(year, month)));
+
 // Calcula o dia de fechamento efetivo do cartão para um determinado mês de referência
 export const getEffectiveClosingDay = (card: CreditCard, referenceDate?: Date): number => {
   if (card.closingType === 'dynamic' && card.closingDaysBefore != null) {
     // Fechamento dinâmico: X dias antes do vencimento
     const ref = referenceDate || new Date();
-    const dueDate = new Date(ref.getFullYear(), ref.getMonth(), card.dueDay);
+    const dueDate = dateWithClampedDay(ref.getFullYear(), ref.getMonth(), card.dueDay);
     const closingDate = new Date(dueDate);
     closingDate.setDate(closingDate.getDate() - card.closingDaysBefore);
     return closingDate.getDate();
@@ -140,9 +145,15 @@ export const calculateCreditCardDueDate = (purchaseDateStr: string, card: Credit
       }
   }
 
-  // Cria a data de vencimento
-  const dueDate = new Date(targetYear, targetMonth, card.dueDay);
+  // Cria a data de vencimento (dia 31 em mês de 30 dias = último dia do mês)
+  const dueDate = dateWithClampedDay(targetYear, targetMonth, card.dueDay);
   return formatDateToInput(dueDate);
+};
+
+// Data de vencimento (YYYY-MM-DD) da fatura de um mês ("YYYY-MM")
+export const getStatementDueDate = (statementKey: string, dueDay: number): string => {
+  const [year, month] = statementKey.split('-').map(Number);
+  return formatDateToInput(dateWithClampedDay(year, month - 1, dueDay));
 };
 
 export const calculateStatementDate = (purchaseDateStr: string, card: CreditCard): string => {
