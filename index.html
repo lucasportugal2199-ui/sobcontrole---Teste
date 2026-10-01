@@ -3,7 +3,6 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
 
   <!-- 🔥 META OBRIGATÓRIO PARA LOGIN GOOGLE NO CAPACITOR -->
   <meta name="google-signin-client_id"
@@ -25,86 +24,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Inter"', '"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-          },
-          colors: {
-            // Light Mode
-            'light-bg': '#F1F5F9',
-            'light-card': '#FFFFFF',
-            'light-card-elevated': '#FFFFFF',
-            'light-border': '#D7E0EB',
-            'light-text': '#172033',
-            'light-text-secondary': '#475569',
-            'light-text-muted': '#64748B',
-            'light-accent': '#EA580C',
-            'light-accent-hover': '#F97316',
-            'light-accent-subtle': '#FFEDD5',
-            'light-selected': '#FFEDD5',
-
-            // Dark Mode — OLED Black
-            'dark-bg': '#050505',
-            'dark-card': '#111111',
-            'dark-elevated': '#1A1A1A',
-            'dark-surface': '#1F1F1F',
-            'dark-border': '#1F1F1F',
-            'dark-text': '#F5F5F5',
-            'dark-text-secondary': '#B0B0B0',
-            'dark-text-muted': '#666666',
-            'dark-accent': '#EA580C',
-            'dark-accent-hover': '#F97316',
-            'dark-accent-subtle': '#431407',
-
-            // Acentos da Marca
-            'brand-accent': '#EA580C',
-            'brand-accent-hover': '#F97316',
-            'brand-accent-dark-subtle': '#431407',
-            'brand-accent-light-subtle': '#FFEDD5',
-
-            // Semantic Finanças
-            'fin-income': '#10B981',
-            'fin-expense': '#EF4444',
-            'fin-info': '#EA580C',
-            'fin-warning': '#F59E0B',
-            'fin-invest': '#8B5CF6',
-            'fin-action': '#EA580C',
-          }
-        }
-      }
-    }
-  </script>
-
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
-    "@capacitor/core": "https://esm.sh/@capacitor/core@7.0.0",
-    "@capacitor/app": "https://esm.sh/@capacitor/app@7.0.0",
-    "@capgo/capacitor-social-login": "https://esm.sh/@capgo/capacitor-social-login@7.20.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.0",
-    "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "path": "https://esm.sh/path@^0.12.7",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "@capacitor/cli": "https://esm.sh/@capacitor/cli@^8.0.0",
-    "@capacitor/status-bar": "https://esm.sh/@capacitor/status-bar@^8.0.0",
-    "@capacitor/haptics": "https://esm.sh/@capacitor/haptics@^8.0.0",
-    "@capacitor/local-notifications": "https://esm.sh/@capacitor/local-notifications@^8.0.0"
-  }
-}
-</script>
 
   <style>
     :root {
@@ -418,7 +337,6 @@
       border: 3px solid white;
     }
   </style>
-  <link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="bg-light-bg dark:bg-dark-bg text-slate-900 dark:text-white">
