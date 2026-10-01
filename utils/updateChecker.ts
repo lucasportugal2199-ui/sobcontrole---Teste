@@ -1,4 +1,5 @@
 import { App as CapApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from './supabaseClient';
 
 export interface AppUpdateInfo {
@@ -34,6 +35,10 @@ export const compareVersions = (v1: string, v2: string): number => {
  * Obtém a versão atual do app e compara com a versão remota no Supabase/Config
  */
 export const checkForAppUpdate = async (): Promise<AppUpdateInfo> => {
+  // Fora do app instalado (npm run dev no navegador) não há versão da loja para comparar
+  if (!Capacitor.isNativePlatform()) {
+    return { hasUpdate: false, latestVersion: '', minVersion: '', isForceUpdate: false, storeUrl: PLAY_STORE_URL };
+  }
   try {
     let currentVersion = '1.7.0'; // Fallback
     try {
