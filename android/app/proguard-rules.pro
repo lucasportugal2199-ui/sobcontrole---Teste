@@ -24,3 +24,17 @@
 -dontwarn com.facebook.**
 -dontwarn com.twitter.**
 -dontwarn com.twitter.sdk.android.**
+
+# --- Regras para o build de release encolhido (minifyEnabled) ---
+
+# Relatórios de crash no Play Console com número de linha (o mapping vai no .aab)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Classes do próprio app: plugin nativo (BankNotificationPlugin), serviço de
+# notificações e widgets são referenciados por nome (manifest/Capacitor)
+-keep class com.sobcontrole.app.** { *; }
+
+# Login com Google: o Credential Manager carrega o provedor do Play Services por reflexão
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** { *; }
