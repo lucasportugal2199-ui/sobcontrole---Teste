@@ -1,4 +1,5 @@
 import React, { useMemo, useContext } from 'react';
+import { computeMonthForecast } from '../../../utils/forecast';
 import { formatCurrency, getMonthKey, getPreviousBalance, calculateDailyBalancesForMonth, getCorPorCategoria, getTranslatedCategoryName } from '../../../utils/helpers';
 import { Transaction, CreditCard, AllData, Budgets } from '../../../types';
 import { AppContext } from '../../../context/AppContext';
@@ -517,29 +518,21 @@ export const TopCategoriesRanking: React.FC<{
 // ==========================================
 
 export const EndOfMonthForecast: React.FC<{
+    filteredData: Transaction[];
     totalReceitas: number;
     totalDespesas: number;
     currentDate: Date;
     saldoPrevisto: number;
-}> = ({ totalReceitas, totalDespesas, currentDate, saldoPrevisto }) => {
+}> = ({ filteredData, totalReceitas, totalDespesas, currentDate, saldoPrevisto }) => {
     const { appLocale, appCurrency } = useAppLocale();
 
-    const forecast = useMemo(() => {
-        const today = new Date();
-        const isCurrentMonth = currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear();
-        const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-        const currentDay = isCurrentMonth ? today.getDate() : daysInMonth;
+    // Regras em utils/forecast.ts
+    const forecast = useMemo(
+        () => computeMonthForecast({ transactions: filteredData, totalReceitas, totalDespesas, saldoPrevisto, currentDate }),
+        [filteredData, totalReceitas, totalDespesas, saldoPrevisto, currentDate]
+    );
 
-        const dailyRate = currentDay > 0 ? totalDespesas / currentDay : 0;
-        const projectedExpenses = dailyRate * daysInMonth;
-        const projectedBalance = totalReceitas - projectedExpenses;
-        const monthProgress = (currentDay / daysInMonth) * 100;
-        const budgetUsed = totalReceitas > 0 ? (totalDespesas / totalReceitas) * 100 : 0;
-
-        return { dailyRate, projectedExpenses, projectedBalance, monthProgress, budgetUsed, currentDay, daysInMonth, isCurrentMonth };
-    }, [totalReceitas, totalDespesas, currentDate]);
-
-    const isOverBudget = forecast.projectedExpenses > totalReceitas;
+    const isOverBudget = totalReceitas > 0 && forecast.projectedExpenses > totalReceitas;
 
     return (
         <div className="space-y-4">
@@ -582,7 +575,9 @@ export const EndOfMonthForecast: React.FC<{
                 <div className="flex items-start gap-2.5 p-3 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-800/50">
                     <AlertTriangleIcon className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
                     <p className="text-[11px] font-semibold text-rose-700 dark:text-rose-300 leading-relaxed">
-                        No ritmo atual, as despesas devem chegar a {formatCurrency(forecast.projectedExpenses, appLocale, appCurrency)}, superando as receitas.
+                        {forecast.estimatedUnregistered > 0
+                            ? <>No ritmo atual, as despesas devem chegar a {formatCurrency(forecast.projectedExpenses, appLocale, appCurrency)}, superando as receitas.</>
+                            : <>As despesas lançadas para este mês ({formatCurrency(forecast.projectedExpenses, appLocale, appCurrency)}) superam as receitas.</>}
                     </p>
                 </div>
             )}

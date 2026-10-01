@@ -351,7 +351,7 @@ const Dashboard: React.FC = () => {
             case 'fixedVsVariable':
                 return totalDespesas > 0 ? <FixedVsVariable filteredData={filteredData} /> : null;
             case 'endOfMonthForecast':
-                return <EndOfMonthForecast totalReceitas={totalReceitas} totalDespesas={totalDespesas} currentDate={currentDate} saldoPrevisto={saldoPrevisto} />;
+                return <EndOfMonthForecast filteredData={filteredData} totalReceitas={totalReceitas} totalDespesas={totalDespesas} currentDate={currentDate} saldoPrevisto={saldoPrevisto} />;
             case 'spendingPace':
                 return allTransactions.length > 0
                     ? <SpendingPace filteredData={filteredData} allData={allData} currentDate={currentDate} theme={theme} />
