@@ -467,13 +467,9 @@ const Management: React.FC = () => {
                         </button>
                     </div>
 
-                    <button 
-                        onClick={() => setIsFilterModalOpen(true)} 
-                        className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.08] text-slate-700 dark:text-white active:scale-95 transition-transform shadow-sm"
-                        title="Filtrar Lançamentos"
-                    >
-                        <FilterIcon className="h-4 w-4" />
-                    </button>
+                    {/* Espaço do mesmo tamanho do avatar: mantém o mês centralizado.
+                        O filtro fica ao lado da busca (que gruda no topo ao rolar). */}
+                    <div className="h-10 w-10" aria-hidden="true" />
                 </div>
             </header>
 
