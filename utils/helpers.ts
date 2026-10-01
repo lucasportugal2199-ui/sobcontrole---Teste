@@ -1,6 +1,6 @@
 import { generateWithGemini, userContent, GeminiPart } from './aiClient';
 import { MESES_NOMES } from '../constants';
-import { Transaction, Categorias, TransactionType, ReceiptAnalysisResult, DailyBalance, ImportedTransaction, PaymentMethod, AllData, CreditCard } from '../types';
+import { Transaction, Categorias, Category, TransactionType, ReceiptAnalysisResult, DailyBalance, ImportedTransaction, PaymentMethod, AllData, CreditCard } from '../types';
 import { parseOFXOffline } from './ofxParser';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -30,6 +30,10 @@ export const formatarMesAno = (date: Date, locale = 'pt-BR', monthNames?: string
   const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
   return formatter.format(date);
 };
+
+/** Categorias do tipo da transação. Transferência não tem categorias: lista vazia. */
+export const getCategoriesForType = (categorias: Categorias, type: TransactionType): Category[] =>
+  type === 'transferencia' ? [] : categorias[type] || [];
 
 export const getMonthKey = (date: Date): string => {
   const ano = date.getFullYear();
@@ -348,7 +352,7 @@ export const suggestCategoryWithAgent = async (
   categories: Categorias
 ): Promise<CategoryAgentResult> => {
   if (!description.trim()) throw new Error("A descrição não pode estar vazia.");
-  const currentCategories = categories[type]?.map(c => c.name) || [];
+  const currentCategories = getCategoriesForType(categories, type).map(c => c.name);
 
   const availableIcons = [
     'shopping-basket', 'utensils', 'coffee', 'pizza', 'burger', 'beer', 'cookie', 'shopping-cart',

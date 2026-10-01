@@ -1,13 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { CheckCircleIcon, LockIcon } from '../icons';
-import { AppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { AVAILABLE_BADGES } from '../../constants';
 import { useTranslation } from '../../i18n';
 
 type BadgeFilter = 'all' | 'unlocked' | 'locked';
 
 const AchievementsViewer: React.FC = () => {
-    const { userProfile } = useContext(AppContext);
+    const { userProfile } = useAppContext();
     const { t, locale } = useTranslation();
     const [filter, setFilter] = useState<BadgeFilter>('all');
 

@@ -16,7 +16,7 @@ const base = (txs: any[], extra: Partial<UserData> = {}): UserData => ({
   ...extra,
 });
 
-const txIds = (d: UserData) => d.allData['2026-09'].transactions.map(t => t.id);
+const txIds = (d: UserData) => d.allData['2026-09']!.transactions.map(t => t.id);
 const now = () => new Date().toISOString();
 
 describe('exclusões (deletedIds)', () => {
@@ -73,9 +73,17 @@ describe('smartMerge', () => {
     expect(txIds(smartMerge(base([tx('B'), tx('A')]), base([tx('A'), tx('C')])))).toEqual(['B', 'A', 'C']);
   });
 
+  it('nome vazio de um lado não apaga o nome do outro', () => {
+    const local = base([tx('A')], { userProfile: { name: '', email: '', badges: [] } as any });
+    const remote = base([tx('A')], { userProfile: { name: 'Lucas', email: 'l@x.com', badges: [] } as any });
+    const merged = smartMerge(local, remote);
+    expect(merged.userProfile.name).toBe('Lucas');
+    expect(merged.userProfile.email).toBe('l@x.com');
+  });
+
   it('edição local do mesmo lançamento vence', () => {
     const merged = smartMerge(base([tx('A', 99)]), base([tx('A', 10)]));
-    expect(merged.allData['2026-09'].transactions[0].valor).toBe(99);
+    expect(merged.allData['2026-09']!.transactions[0]!.valor).toBe(99);
   });
 
   it('é estável: juntar o resultado com ele mesmo não muda nada (sem loop de sync)', () => {

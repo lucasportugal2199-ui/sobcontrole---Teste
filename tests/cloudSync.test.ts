@@ -17,7 +17,7 @@ const base = (txs: any[], extra: Partial<UserData> = {}): UserData => ({
   lastUpdatedAt: new Date().toISOString(),
   ...extra,
 });
-const txIds = (d: UserData) => d.allData['2026-09'].transactions.map(t => t.id);
+const txIds = (d: UserData) => d.allData['2026-09']!.transactions.map(t => t.id);
 
 /** Nuvem simulada: guarda os dados (como JSON, igual ao banco) e conta as chamadas */
 class FakeCloud implements CloudApi {

@@ -112,6 +112,9 @@ export interface Transaction {
   statementDate?: string; // Mês da fatura "YYYY-MM" (se crédito)
 }
 
+/** Tipos que têm lista de categorias (transferência não tem) */
+export type CategoryType = 'entrada' | 'saida';
+
 export interface Categorias {
   entrada: Category[];
   saida: Category[];

@@ -34,6 +34,7 @@ import {
   PatrimonioHistory,
   Subscription,
   UserData,
+  CategoryType,
 } from './types';
 import {
   CloseIcon,
@@ -1525,7 +1526,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
     setAllData((prev: AllData) => {
       let next = { ...prev };
-      let oldestModifiedMonth: string | null = null;
+      let oldestModifiedMonth = null as string | null; // atribuída dentro de callbacks
 
       // 1. Vinculação Retroativa se for a primeira conta
       if (isFirstAccount) {
@@ -1854,7 +1855,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   };
 
   // --- Handlers para Categorias ---
-  const handleAddCategory = (type: TransactionType, name: string, bucket?: 'necessidades' | 'desejos' | 'futuro', group?: 'Gastos Fixos' | 'Gastos Variáveis' | 'Reserva Financeira', icon?: string) => {
+  const handleAddCategory = (type: CategoryType, name: string, bucket?: 'necessidades' | 'desejos' | 'futuro', group?: 'Gastos Fixos' | 'Gastos Variáveis' | 'Reserva Financeira', icon?: string) => {
     setCategorias(prev => ({
       ...prev,
       [type]: [...prev[type], { id: name.toLowerCase().replace(/\s+/g, '-'), name, bucket, group, icon }]
@@ -1862,7 +1863,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     showToast("Categoria adicionada!", "success");
   };
 
-  const handleEditCategory = (type: TransactionType, oldName: string, newName: string, bucket?: 'necessidades' | 'desejos' | 'futuro', group?: 'Gastos Fixos' | 'Gastos Variáveis' | 'Reserva Financeira', icon?: string) => {
+  const handleEditCategory = (type: CategoryType, oldName: string, newName: string, bucket?: 'necessidades' | 'desejos' | 'futuro', group?: 'Gastos Fixos' | 'Gastos Variáveis' | 'Reserva Financeira', icon?: string) => {
     setCategorias(prev => ({
       ...prev,
       [type]: prev[type].map(c => c.name === oldName ? { ...c, name: newName, bucket, group, icon } : c)
@@ -1892,7 +1893,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     showToast("Categoria atualizada!", "success");
   };
 
-  const handleDeleteCategory = (type: TransactionType, name: string) => {
+  const handleDeleteCategory = (type: CategoryType, name: string) => {
     setCategorias(prev => ({
       ...prev,
       [type]: prev[type].filter(c => c.name !== name)
@@ -2043,7 +2044,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
     setAllData((prev: AllData) => {
       const next = { ...prev };
-      let oldestModifiedMonth: string | null = null;
+      let oldestModifiedMonth = null as string | null; // atribuída dentro de callbacks
 
       // Se for update em massa para o futuro
       if (scope === 'future') {
@@ -2094,7 +2095,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
       // Lógica padrão: remove a transação antiga (a específica selecionada) e insere a nova
       // Isso lida com a mudança de data, que move a transação de mês
-      let oldDateKey: string | null = null;
+      let oldDateKey = null as string | null; // atribuída dentro de callbacks
       Object.keys(next).forEach(key => {
         if (next[key]?.transactions.some(t => t.id === editingTxId)) {
           oldDateKey = key;

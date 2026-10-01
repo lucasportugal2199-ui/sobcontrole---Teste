@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useContext, useRef, useEffect } from 'react';
 import { Transaction, PaymentMethod } from '../types';
-import { formatCurrency, getMonthKey, formatarMesAno, formatCurrencyForInput, parseCurrency, calculateStatementDate, getPreviousBalance, getCorPorCategoria, getTranslatedCategoryName } from '../utils/helpers';
+import { formatCurrency, getMonthKey, formatarMesAno, formatCurrencyForInput, parseCurrency, calculateStatementDate, getPreviousBalance, getCorPorCategoria, getTranslatedCategoryName, getCategoriesForType } from '../utils/helpers';
 import {
     ArrowRightIcon, ArrowLeftIcon, EditIcon, TrashIcon, FilterIcon,
     RepeatIcon, ClipboardListIcon, CreditCardIcon, BankIcon,
@@ -766,7 +766,7 @@ const Management: React.FC = () => {
                                 <button type="button" onClick={() => setIsCategoryPickerOpen(true)} className="w-full py-3 px-4 bg-light-card-elevated dark:bg-dark-bg text-light-text dark:text-dark-text border border-light-border dark:border-dark-elevated rounded-xl text-left flex justify-between items-center font-bold text-xs truncate">
                                     <div className="flex items-center gap-2.5 truncate">
                                         {(() => {
-                                            const cat = categorias[currentTxType]?.find(c => c.name === editForm.categoria);
+                                            const cat = getCategoriesForType(categorias, currentTxType).find(c => c.name === editForm.categoria);
                                             return cat?.icon
                                                 ? <div className="text-light-text-secondary dark:text-dark-text-secondary flex items-center justify-center flex-shrink-0"><CategoryIcon name={cat.icon} className="h-5 w-5" /></div>
                                                 : <div className="h-3 w-3 rounded-full flex-shrink-0 border border-slate-200 dark:border-slate-700" style={{ backgroundColor: getCorPorCategoria(editForm.categoria, categoryColors) }} />;
@@ -866,7 +866,7 @@ const Management: React.FC = () => {
                 isOpen={isCategoryPickerOpen}
                 onClose={() => setIsCategoryPickerOpen(false)}
                 title={t('newTx.category')}
-                items={categorias[currentTxType].map(c => ({ id: c.name, name: getTranslatedCategoryName(c.name, t), icon: c.icon, color: getCorPorCategoria(c.name, categoryColors) }))}
+                items={getCategoriesForType(categorias, currentTxType).map(c => ({ id: c.name, name: getTranslatedCategoryName(c.name, t), icon: c.icon, color: getCorPorCategoria(c.name, categoryColors) }))}
                 selectedId={editForm.categoria}
                 onSelect={i => setEditForm({ ...editForm, categoria: i.id })}
             />

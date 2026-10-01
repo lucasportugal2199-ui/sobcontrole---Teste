@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
     MoonIcon, MailIcon, SparklesIcon, ViewGridIcon, CalendarIcon,
     CreditCardIcon, ChartBarIcon, ClipboardListIcon, CategoryIcon, RepeatIcon,
@@ -22,7 +22,7 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { useTranslation } from '../../i18n';
 
 const DASHBOARD_LABELS: Record<string, string> = {
@@ -122,7 +122,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({ handleHapticToggle }) =
         updateUserProfile,
         locale,
         setLocale
-    } = useContext(AppContext);
+    } = useAppContext();
 
     const { t } = useTranslation();
 

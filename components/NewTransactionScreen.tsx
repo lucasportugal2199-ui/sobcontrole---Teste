@@ -11,7 +11,8 @@ import {
     formatCurrencyForInput, parseCurrency, formatDateToInput,
     suggestCategory, suggestCategoryWithAgent, formatCurrency, fileToBase64, analyzeReceipt,
     calculateStatementDate, getMonthKey, formatarMesAno, getCorPorCategoria,
-    getTranslatedCategoryName
+    getTranslatedCategoryName,
+    getCategoriesForType,
 } from '../utils/helpers';
 import { TransactionType, PaymentMethod } from '../types';
 import { INITIAL_CATEGORIAS, MESES_NOMES } from '../constants';
@@ -389,6 +390,8 @@ const NewTransactionScreen: React.FC = () => {
     };
 
     const handleManualAiCategorize = async (overrideDesc?: string) => {
+        // Transferência não tem categoria
+        if (formTipo === 'transferencia') return;
         const desc = overrideDesc || formDescricao;
         if (!desc.trim()) {
             showToast(
@@ -403,12 +406,13 @@ const NewTransactionScreen: React.FC = () => {
             
             if (result.action === 'create' && result.newCategory) {
                 // Verificação estrita do limite do plano gratuito (15 categorias por tipo)
-                const isAtCategoryLimit = !userProfile.isPremium && categorias[formTipo].length >= 15;
+                const typeCategories = getCategoriesForType(categorias, formTipo);
+                const isAtCategoryLimit = !userProfile.isPremium && typeCategories.length >= 15;
                 
                 if (isAtCategoryLimit) {
                     // Limite PRO atingido: não cria para não exceder o limite!
-                    const fallbackCat = categorias[formTipo].find(c => c.name.toLowerCase().includes('outro')) 
-                        || categorias[formTipo][0];
+                    const fallbackCat = typeCategories.find(c => c.name.toLowerCase().includes('outro'))
+                        || typeCategories[0];
                     const fallbackName = fallbackCat ? fallbackCat.name : 'Outros';
                     
                     setFormCategoria(fallbackName);

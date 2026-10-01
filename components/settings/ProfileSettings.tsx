@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CameraIcon, UserCircleIcon, LockIcon } from '../icons';
-import { AppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { fileToBase64 } from '../../utils/helpers';
 import { useTranslation } from '../../i18n';
 
@@ -22,7 +22,7 @@ const PRESET_AVATARS: PresetAvatar[] = [
 ];
 
 const ProfileSettings: React.FC = () => {
-    const { userProfile, updateUserProfile, showToast } = useContext(AppContext);
+    const { userProfile, updateUserProfile, showToast } = useAppContext();
     const { t } = useTranslation();
 
     const [editName, setEditName] = useState('');

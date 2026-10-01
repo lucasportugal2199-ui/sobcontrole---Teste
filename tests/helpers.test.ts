@@ -164,9 +164,9 @@ describe('saldos entre meses', () => {
   };
   it('recalcula em cadeia e preenche meses vazios', () => {
     const r = recalculateBalancesFrom('2026-07', allData);
-    expect(r['2026-07'].saldoFinal).toBe(1000);
-    expect(r['2026-08'].saldoFinal).toBe(1000);
-    expect(r['2026-09'].saldoFinal).toBe(800);
+    expect(r['2026-07']!.saldoFinal).toBe(1000);
+    expect(r['2026-08']!.saldoFinal).toBe(1000);
+    expect(r['2026-09']!.saldoFinal).toBe(800);
   });
   it('getPreviousBalance pega o último mês anterior', () => {
     const r = recalculateBalancesFrom('2026-07', allData);

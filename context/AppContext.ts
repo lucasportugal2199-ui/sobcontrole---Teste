@@ -1,5 +1,6 @@
-import { createContext, FormEvent } from "react";
+import { createContext, FormEvent, useContext } from "react";
 import {
+    CategoryType,
     Account,
     AllData,
     Asset,
@@ -136,21 +137,21 @@ export interface IAppContext {
     handleConfirmDelete: () => void;
     setConfirmingDeleteId: (id: string | null) => void;
     handleAddCategory: (
-        type: TransactionType,
+        type: CategoryType,
         name: string,
         bucket?: "necessidades" | "desejos" | "futuro",
         group?: "Gastos Fixos" | "Gastos Variáveis" | "Reserva Financeira",
         icon?: string,
     ) => void;
     handleEditCategory: (
-        type: TransactionType,
+        type: CategoryType,
         oldName: string,
         newName: string,
         bucket?: "necessidades" | "desejos" | "futuro",
         group?: "Gastos Fixos" | "Gastos Variáveis" | "Reserva Financeira",
         icon?: string,
     ) => void;
-    handleDeleteCategory: (type: TransactionType, name: string) => void;
+    handleDeleteCategory: (type: CategoryType, name: string) => void;
     handleUpdateCategoryColor: (category: string, color: string) => void;
     showToast: (message: string, type?: ToastType) => void;
     handleSetBudget: (category: string, amount: number) => void;
@@ -226,3 +227,10 @@ export interface IAppContext {
 }
 
 export const AppContext = createContext<IAppContext | null>(null);
+
+/** Contexto do app. Só pode ser usado dentro do AppContext.Provider. */
+export const useAppContext = (): IAppContext => {
+    const context = useContext(AppContext);
+    if (!context) throw new Error("useAppContext usado fora do AppContext.Provider");
+    return context;
+};

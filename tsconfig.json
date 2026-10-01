@@ -16,7 +16,9 @@
       "@/*": ["./*"]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "strict": true
   },
-  "exclude": ["supabase/functions"]
+  "include": ["*.ts", "*.tsx", "components", "context", "i18n", "services", "utils", "tests"],
+  "exclude": ["node_modules", "dist", "android", "supabase/functions"]
 }

@@ -76,7 +76,7 @@ export function fixOverflowedCardDueDates(
       if (fix) moved.push({ ...tx, ...fix });
       else keep.push(tx);
     }
-    result[monthKey] = { ...month, transactions: keep };
+    result[monthKey] = { ...month, transactions: keep, saldoFinal: month?.saldoFinal ?? 0 };
   }
   let firstMonth: string | null = null;
   for (const tx of moved) {

@@ -226,6 +226,7 @@ function removeDeleted(data: UserData, deletedIds: Record<string, string>): User
     allData[monthKey] = {
       ...month,
       transactions: (month?.transactions || []).filter(tx => keep(`tx:${tx.id}`)),
+      saldoFinal: month?.saldoFinal ?? 0,
     };
   }
 
@@ -338,10 +339,11 @@ export function smartMerge(local: UserData, remote: UserData): UserData {
   
   // 7. Profile: mais completo vence
   const mergedProfile: UserData['userProfile'] = {
-    name: local.userProfile?.name || remote.userProfile?.name || 'Usuário',
-    email: local.userProfile?.email || remote.userProfile?.email || '',
     ...(remote.userProfile || {}),
     ...(local.userProfile || {}),
+    // Depois dos spreads: um nome/e-mail vazio de um lado não apaga o do outro
+    name: local.userProfile?.name || remote.userProfile?.name || 'Usuário',
+    email: local.userProfile?.email || remote.userProfile?.email || '',
     // Preserva badges de ambos os lados (union)
     badges: [...new Set([
       ...(local.userProfile?.badges || []),

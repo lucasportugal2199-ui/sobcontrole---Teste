@@ -23,7 +23,7 @@ const byMonth = (txs: Transaction[]): AllData => {
   return out;
 };
 const where = (data: AllData, id: string) =>
-  Object.entries(data).flatMap(([k, m]) => m.transactions.filter(t => t.id === id).map(t => ({ month: k, data: t.data, statementDate: t.statementDate })));
+  Object.entries(data).flatMap(([k, m]) => m!.transactions.filter(t => t.id === id).map(t => ({ month: k, data: t.data, statementDate: t.statementDate })));
 
 describe('addMonthsToMonthKey', () => {
   it('soma e vira o ano', () => {
@@ -37,7 +37,7 @@ describe('fixOverflowedCardDueDates', () => {
     const r = fixOverflowedCardDueDates(byMonth([credit('A', '2026-05-01')]), [card31]);
     expect(r.fixed).toBe(1);
     expect(where(r.allData, 'A')).toEqual([{ month: '2026-04', data: '2026-04-30', statementDate: '2026-04' }]);
-    expect(r.allData['2026-05'].transactions).toHaveLength(0);
+    expect(r.allData['2026-05']!.transactions).toHaveLength(0);
     expect(r.firstMonth).toBe('2026-04');
   });
 

@@ -13,7 +13,8 @@
     "android:run": "cmd /c \"set JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr&& set PATH=%JAVA_HOME%\\bin;%PATH%&& npx cap run android\"",
     "android:open": "cmd /c \"set JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr&& set PATH=%JAVA_HOME%\\bin;%PATH%&& npx cap open android\"",
     "test": "vitest run",
-    "test:functions": "npx -y deno@2 run --allow-env --allow-net --allow-read supabase/functions/_tests/verify-purchase.test.ts && npx -y deno@2 run --allow-env --allow-net --allow-read supabase/functions/_tests/gemini.test.ts"
+    "test:functions": "npx -y deno@2 run --allow-env --allow-net --allow-read supabase/functions/_tests/verify-purchase.test.ts && npx -y deno@2 run --allow-env --allow-net --allow-read supabase/functions/_tests/gemini.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
@@ -43,6 +44,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",

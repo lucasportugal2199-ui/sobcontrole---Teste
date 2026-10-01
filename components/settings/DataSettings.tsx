@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import {
     InvoiceDollarIcon, ArrowDownTrayIcon, TrashIcon, LoaderIcon, ClipboardListIcon, SparklesIcon, ChevronRightIcon
 } from '../icons';
-import { AppContext } from '../../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { exportTransactionsToExcel, exportTransactionsToCSV } from '../../utils/helpers';
 import { useTranslation } from '../../i18n';
 
@@ -20,7 +20,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
     iconColor = "text-slate-500",
     isPro = false,
 }) => {
-    const { userProfile } = useContext(AppContext);
+    const { userProfile } = useAppContext();
 
     return (
         <div
@@ -51,7 +51,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 };
 
 interface DataSettingsProps {
-    fileInputRef: React.RefObject<HTMLInputElement>;
+    fileInputRef: React.RefObject<HTMLInputElement | null>;
     handleFileImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isImporting: boolean;
     handleProAction: (action: () => void) => void;
@@ -69,7 +69,7 @@ const DataSettings: React.FC<DataSettingsProps> = ({
     setMenuSubView,
     setIsDeleteAccountModalOpen
 }) => {
-    const { allTransactions, importHistory, handleGenerateMockData } = useContext(AppContext)!;
+    const { allTransactions, importHistory, handleGenerateMockData } = useAppContext();
     const { t } = useTranslation();
 
     return (
