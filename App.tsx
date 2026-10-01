@@ -1140,7 +1140,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   };
 
   // --- ACCOUNTS HANDLERS ---
-  const handleCreateBankAccount = (account: Omit<Account, 'id'>) => {
+  const handleCreateBankAccount = (account: Omit<Account, 'id'>): string => {
     const accountId = generateId();
     // Inicia a conta com saldo 0, pois a transação de "Saldo Inicial" vai atualizar o saldo corretamente
     const newAccount = { ...account, id: accountId, balance: 0 };
@@ -1211,6 +1211,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
     showToast("Conta criada!", "success");
     triggerHaptic(ImpactStyle.Medium);
+    return accountId;
   };
 
   const handleUpdateBankAccount = (id: string, updates: Partial<Account>) => {

@@ -1076,6 +1076,8 @@ const en: TranslationDictionary = {
   'menu.streakOne': "1 day in a row",
   'menu.streakMany': "{{days}} days in a row",
   'menu.badgesCount': "{{count}} badges",
+  'newTx.defaultWallet': "Wallet",
+  'newTx.defaultWalletHint': "Created with your first entry",
 };
 
 export default en;

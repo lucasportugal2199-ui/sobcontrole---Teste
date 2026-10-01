@@ -1274,6 +1274,8 @@ const pt: TranslationDictionary = {
   'menu.streakOne': "1 dia seguido",
   'menu.streakMany': "{{days}} dias seguidos",
   'menu.badgesCount': "{{count}} conquistas",
+  'newTx.defaultWallet': "Carteira",
+  'newTx.defaultWalletHint': "Criada no primeiro lançamento",
 };
 
 export default pt;

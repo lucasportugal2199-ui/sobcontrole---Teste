@@ -209,7 +209,8 @@ export interface IAppContext {
     handleDeleteAsset: (id: string) => void;
 
     // Account Handlers
-    handleCreateBankAccount: (account: Omit<Account, "id">) => void;
+    /** Cria a conta e devolve o id */
+    handleCreateBankAccount: (account: Omit<Account, "id">) => string;
     handleUpdateBankAccount: (id: string, account: Partial<Account>) => void;
     handleDeleteBankAccount: (id: string) => void;
 

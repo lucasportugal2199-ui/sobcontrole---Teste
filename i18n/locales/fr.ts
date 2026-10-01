@@ -752,6 +752,8 @@ const fr: TranslationDictionary = {
   'menu.streakOne': "1 jour d'affilée",
   'menu.streakMany': "{{days}} jours d'affilée",
   'menu.badgesCount': "{{count}} succès",
+  'newTx.defaultWallet': "Portefeuille",
+  'newTx.defaultWalletHint': "Créé lors de la première saisie",
 };
 
 export default fr;

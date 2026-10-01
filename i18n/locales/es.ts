@@ -1070,6 +1070,8 @@ const es: TranslationDictionary = {
   'menu.streakOne': "1 día seguido",
   'menu.streakMany': "{{days}} días seguidos",
   'menu.badgesCount': "{{count}} logros",
+  'newTx.defaultWallet': "Billetera",
+  'newTx.defaultWalletHint': "Se crea en el primer registro",
 };
 
 export default es;

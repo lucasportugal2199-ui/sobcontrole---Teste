@@ -1068,6 +1068,8 @@ const de: TranslationDictionary = {
   'menu.streakOne': "1 Tag in Folge",
   'menu.streakMany': "{{days}} Tage in Folge",
   'menu.badgesCount': "{{count}} Erfolge",
+  'newTx.defaultWallet': "Geldbörse",
+  'newTx.defaultWalletHint': "Wird beim ersten Eintrag erstellt",
 };
 
 export default de;

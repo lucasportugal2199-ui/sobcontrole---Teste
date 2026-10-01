@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext';
 import Calendar from './Calendar';
 import {
     ArrowLeftIcon, LoaderIcon, SparklesIcon, CalendarIcon, ChevronDownIcon, CameraIcon,
-    CreditCardIcon, BankIcon, ViewGridIcon, CalculatorIcon, AiAgentIcon
+    CreditCardIcon, BankIcon, ViewGridIcon, CalculatorIcon, AiAgentIcon, WalletIcon
 } from './icons';
 import CategoryIcon from './CategoryIcon';
 import {
@@ -130,7 +130,7 @@ const NewTransactionScreen: React.FC = () => {
         creditCards, setIsNewTransactionOpen, isNewTransactionOpen, allTransactions,
         setCurrentView, setMenuSubView, incrementAiScans, accounts,
         newTransactionInitialType, setNewTransactionInitialType, categoryColors,
-        triggerHaptic, userProfile
+        triggerHaptic, userProfile, handleCreateBankAccount
     } = context;
 
     const initialTipo = newTransactionInitialType === 'entrada' ? 'entrada' : newTransactionInitialType === 'transferencia' ? 'transferencia' : 'saida';
@@ -316,6 +316,10 @@ const NewTransactionScreen: React.FC = () => {
         }
     }, [isNewTransactionOpen, newTransactionInitialType, context.newTransactionInitialData]);
 
+    // Usuário novo, sem conta: em vez de bloquear o lançamento ("cadastre uma conta
+    // primeiro"), cria uma Carteira automaticamente ao registrar.
+    const willCreateWallet = accounts.length === 0 && formPaymentMethod !== 'credito' && formTipo !== 'transferencia';
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -345,7 +349,7 @@ const NewTransactionScreen: React.FC = () => {
                 errorMessages.push(getValidationErrorMessage('accountId'));
             }
         } else {
-            if (!formAccountId) {
+            if (!formAccountId && !willCreateWallet) {
                 errors.accountId = true;
                 errorMessages.push(formTipo === 'transferencia' ? getValidationErrorMessage('originAccount') : getValidationErrorMessage('accountId'));
             }
@@ -369,6 +373,17 @@ const NewTransactionScreen: React.FC = () => {
             return;
         }
 
+        let accountId = formAccountId;
+        if (willCreateWallet) {
+            accountId = handleCreateBankAccount({
+                bankName: t('newTx.defaultWallet'),
+                accountType: 'Dinheiro',
+                balance: 0,
+                color: '#10B981',
+                initialDate: formData,
+            });
+        }
+
         handleLancamentoSubmit(e, {
             valor: valorNumerico,
             tipo: formTipo,
@@ -377,7 +392,7 @@ const NewTransactionScreen: React.FC = () => {
             paymentMethod: formPaymentMethod,
             descricao: formTipo === 'transferencia' ? formDescricao || getValidationErrorMessage('transferDesc') : formDescricao || (formTipo === 'saida' ? getValidationErrorMessage('newExpense') : getValidationErrorMessage('newIncome')),
             cardId: formPaymentMethod === 'credito' ? formCardId : undefined,
-            accountId: formAccountId,
+            accountId,
             destinationAccountId: formTipo === 'transferencia' ? formDestinationAccountId : undefined,
             isRecurring: launchMode === 'recurring',
             isInstallment: launchMode === 'installment',
@@ -764,11 +779,21 @@ const NewTransactionScreen: React.FC = () => {
                                         </div>
                                         <ChevronDownIcon className="h-4 w-4 text-slate-400 flex-shrink-0" />
                                     </button>
+                                ) : willCreateWallet ? (
+                                    <div className="w-full py-2 px-3 bg-white dark:bg-dark-card text-light-text dark:text-dark-text rounded-xl border border-light-border dark:border-dark-elevated flex items-center gap-2">
+                                        <span className="h-5 w-5 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center flex-shrink-0">
+                                            <WalletIcon className="h-3 w-3" />
+                                        </span>
+                                        <div className="min-w-0 leading-tight">
+                                            <p className="text-xs font-medium truncate">{t('newTx.defaultWallet')}</p>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{t('newTx.defaultWalletHint')}</p>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={() => { setIsNewTransactionOpen(false); setCurrentView('openfinance'); }}
-                                        className="w-full py-2.5 px-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl text-center font-bold text-[8px] border border-rose-100 dark:border-rose-900/30 uppercase tracking-tight"
+                                        className="w-full py-2.5 px-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl text-center font-bold text-[10px] border border-rose-100 dark:border-rose-900/30 tracking-tight"
                                     >
                                         {t('newTx.addAccountFirst')}
                                     </button>
