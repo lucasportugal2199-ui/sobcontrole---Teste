@@ -20,6 +20,7 @@ import ListPickerModal from './ListPickerModal';
 import InvoicePickerModal from './InvoicePickerModal';
 import { getBankLogo } from './BankLogo';
 import { useTranslation } from '../i18n';
+import { AiLimitError } from '../utils/aiClient';
 
 type LaunchMode = 'single' | 'installment' | 'recurring';
 
@@ -488,6 +489,11 @@ const NewTransactionScreen: React.FC = () => {
             showToast(getValidationErrorMessage('scanSuccess'), "success");
 
         } catch (err: any) {
+            if (err instanceof AiLimitError) {
+                setError(t('aichat.limitReached'));
+                showToast(t('aichat.limitReached'), "info");
+                return;
+            }
             setError(err.message || getValidationErrorMessage('scanError'));
             showToast(getValidationErrorMessage('scanFail'), "error");
         } finally {

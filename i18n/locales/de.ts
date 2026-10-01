@@ -761,6 +761,7 @@ const de: TranslationDictionary = {
   'aichat.welcome': 'Hallo {{name}}! Ich bin Ihr Pocket-CFO. Ich habe Zugriff auf alle Ihre Transaktionen. Wie kann ich Ihnen heute helfen? \n\nSie können mich fragen: „Wie viel habe ich diesen Monat für Uber ausgegeben?“ oder „Kann ich heute R$100 ausgeben?“',
   'aichat.errorProcessing': 'Entschuldigung, beim Verarbeiten ist ein Problem aufgetreten.',
   'aichat.connectionError': 'Hoppla! Es gab ein Verbindungsproblem mit der KI. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es in Kürze erneut.',
+  'aichat.limitReached': 'Du hast das heutige KI-Nutzungslimit erreicht. Versuche es morgen erneut oder werde PRO für mehr.',
   'aichat.suggested.summary': 'Monatsübersicht',
   'aichat.suggested.whereSpent': 'Wo habe ich am meisten ausgegeben?',
   'aichat.suggested.savingsAdvice': 'Spartipps',

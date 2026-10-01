@@ -26,13 +26,27 @@ export interface GeminiRequest {
 
 const MODEL = 'gemini-2.5-flash';
 
+/** Recurso que está usando a IA. O servidor aplica um limite diário por recurso. */
+export type AiFeature = 'chat' | 'categorize' | 'receipt' | 'statement';
+
+/** O usuário atingiu o limite diário deste recurso (ou é recurso PRO). */
+export class AiLimitError extends Error {
+  constructor(public feature: AiFeature) {
+    super('Limite diário de uso da IA atingido');
+    this.name = 'AiLimitError';
+  }
+}
+
 /** Envia a requisição ao Gemini (via servidor) e devolve o texto gerado. */
-export const generateWithGemini = async (request: GeminiRequest): Promise<string> => {
+export const generateWithGemini = async (request: GeminiRequest, feature: AiFeature): Promise<string> => {
   const { data, error } = await supabase.functions.invoke<{ text?: string; error?: string }>('gemini', {
-    body: { model: MODEL, request },
+    body: { model: MODEL, feature, request },
   });
 
-  if (error) throw error;
+  if (error) {
+    if ((error as any)?.context?.status === 429) throw new AiLimitError(feature);
+    throw error;
+  }
   if (!data || data.error) throw new Error(data?.error || 'Resposta vazia da IA');
   return data.text || '';
 };

@@ -417,6 +417,7 @@ const fr: TranslationDictionary = {
   'aichat.welcome': 'Bonjour {{name}} ! Je suis votre CFO de Poche. J\'ai accès à toutes vos transactions. Comment puis-je vous aider aujourd\'hui ? \n\nVous pouvez me demander des choses comme : "Combien ai-je dépensé en Uber ce mois-ci ?" ou "Puis-je dépenser 100 € aujourd\'hui ?"',
   'aichat.errorProcessing': 'Désolé, j\'ai rencontré un problème pour traiter cela.',
   'aichat.connectionError': 'Oups ! J\'ai eu un problème de connexion avec l\'IA. Veuillez vérifier votre connexion ou réessayer dans un instant.',
+  'aichat.limitReached': "Vous avez atteint la limite d'utilisation de l'IA pour aujourd'hui. Réessayez demain ou passez PRO pour en profiter davantage.",
   'aichat.suggested.summary': 'Résumé du mois',
   'aichat.suggested.whereSpent': 'Où ai-je le plus dépensé ?',
   'aichat.suggested.savingsAdvice': 'Conseils d\'épargne',

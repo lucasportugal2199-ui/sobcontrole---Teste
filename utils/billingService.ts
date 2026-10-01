@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core';
 import { store, ProductType, Platform } from 'capacitor-plugin-cdv-purchase';
+import { resolvePremiumStatus } from './premiumService';
 
 /**
  * BillingService - Integração real com o faturamento do Google Play (Google Play Billing API)
@@ -8,9 +9,13 @@ import { store, ProductType, Platform } from 'capacitor-plugin-cdv-purchase';
 
 export interface PurchaseResult {
     success: boolean;
+    /** purchaseToken do Google Play (usado para validar no servidor) */
     receipt?: string;
     error?: string;
 }
+
+/** Chamado quando o status da assinatura na loja muda. O token permite validar no servidor. */
+export type BillingStateCallback = (ownedInStore: boolean, purchaseToken?: string) => void;
 
 // Armazena os callbacks da promise de compra ativa
 let activePurchaseResolver: ((result: PurchaseResult) => void) | null = null;
@@ -30,7 +35,7 @@ export const BillingService = {
      * Inicializa a loja de compras (Google Play Store) e configura os listeners de transações
      */
     async initialize(
-        onStateChange?: (isPremium: boolean) => void,
+        onStateChange?: BillingStateCallback,
         showToast?: (msg: string, type: 'success' | 'error') => void
     ): Promise<void> {
         if (!Capacitor.isNativePlatform()) {
@@ -69,16 +74,18 @@ export const BillingService = {
                     // que o produto foi entregue. Caso contrário, a compra é reembolsada automaticamente após 3 dias.
                     receipt.finish();
 
-                    // Atualiza o estado da aplicação local/Supabase para Premium
+                    const purchaseToken: string | undefined = receipt.sourceReceipt?.purchaseToken;
+
+                    // Atualiza o estado da aplicação (o App confere com o servidor)
                     if (onStateChange) {
-                        onStateChange(true);
+                        onStateChange(true, purchaseToken);
                     }
 
                     // Se houver uma Promise de compra pendente na interface, resolve com sucesso
                     if (activePurchaseResolver) {
                         activePurchaseResolver({
                             success: true,
-                            receipt: receipt.id || "verified-receipt"
+                            receipt: purchaseToken
                         });
                         activePurchaseResolver = null;
                     }
@@ -101,7 +108,7 @@ export const BillingService = {
             console.log(`[Billing] Status das Assinaturas: Premium=${isUserPremium}`);
 
             if (onStateChange) {
-                onStateChange(isUserPremium);
+                onStateChange(isUserPremium, this.getOwnedPurchaseToken());
             }
 
         } catch (err: any) {
@@ -219,7 +226,8 @@ export const BillingService = {
             console.log("[Billing] Atualizando informações de assinaturas...");
             await store.update();
 
-            const isUserPremium = store.owned(this.PRODUCTS.SUB_ID);
+            const ownedInStore = store.owned(this.PRODUCTS.SUB_ID);
+            const isUserPremium = await resolvePremiumStatus(ownedInStore, this.getOwnedPurchaseToken());
 
             console.log(`[Billing] Restauração concluída. Usuário é Premium = ${isUserPremium}`);
             onStateChange(isUserPremium);
@@ -229,10 +237,24 @@ export const BillingService = {
     },
 
     /**
-     * Validação direta de recibo (Mantido por compatibilidade da tela PremiumScreen)
+     * Confere a compra recém-feita com o servidor (que valida no Google Play).
+     * Se o servidor não responder, a compra aprovada pela loja vale.
      */
-    async verifyPurchase(receipt: string): Promise<boolean> {
-        console.log(`[Billing] Recibo já validado e processado reativamente via eventos: ${receipt}`);
-        return true;
+    async verifyPurchase(purchaseToken: string | undefined): Promise<boolean> {
+        if (import.meta.env.DEV && purchaseToken?.startsWith('SIMULATED_WEB_')) return true;
+        return resolvePremiumStatus(true, purchaseToken);
+    },
+
+    /** purchaseToken da assinatura ativa no Google Play, se houver. */
+    getOwnedPurchaseToken(): string | undefined {
+        for (const receipt of store.localReceipts) {
+            if (receipt.platform !== Platform.GOOGLE_PLAY) continue;
+            const hasSubscription = receipt.transactions.some(tx =>
+                tx.products.some(p => p.id === this.PRODUCTS.SUB_ID)
+            );
+            const token = (receipt as any).purchaseToken as string | undefined;
+            if (hasSubscription && token) return token;
+        }
+        return undefined;
     }
 };

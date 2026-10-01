@@ -13,6 +13,7 @@ import { parseCurrency, formatCurrencyForInput, fileToBase64, analyzeStatement, 
 import { COLOR_PALETTE, AVAILABLE_BADGES, MESES_NOMES } from '../constants';
 import ListPickerModal from './ListPickerModal';
 import { useTranslation } from '../i18n';
+import { AiLimitError } from '../utils/aiClient';
 
 // Import Settings Subcomponents
 import ProfileSettings from './settings/ProfileSettings';
@@ -554,6 +555,10 @@ const MenuScreen: React.FC = () => {
             showToast(locale === 'en' ? `${addedCount} transactions imported successfully!` : locale === 'es' ? `${addedCount} transacciones importadas con éxito!` : locale === 'fr' ? `${addedCount} transactions importées avec succès !` : locale === 'de' ? `${addedCount} Transaktionen erfolgreich importiert!` : `${addedCount} transações importadas com sucesso!`, "success");
         } catch (error) {
             console.error(error);
+            if (error instanceof AiLimitError) {
+                showToast(t('aichat.limitReached'), "info");
+                return;
+            }
             showToast(locale === 'en' ? 'Failed to import statement. Check the file.' : locale === 'es' ? 'Error al importar el extracto. Verifique el archivo.' : locale === 'fr' ? "Échec de l'importation du relevé. Vérifiez le fichier." : locale === 'de' ? 'Fehler beim Importieren des Belegs. Datei überprüfen.' : 'Falha ao importar extrato. Verifique o arquivo.', "error");
         } finally {
             setIsImporting(false);

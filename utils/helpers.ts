@@ -398,7 +398,7 @@ DIRETRIZES:
           required: ['action', 'categoryName']
         }
       }
-    });
+    }, 'categorize');
 
     const sanitized = sanitizeJsonResponse(responseText);
     const parsed = JSON.parse(sanitized) as CategoryAgentResult;
@@ -459,7 +459,7 @@ export const analyzeReceipt = async (base64Image: string, mimeType: string, cate
                 required: ['valor', 'descricao', 'data', 'categoria']
             }
         }
-    });
+    }, 'receipt');
 
     try {
         const sanitized = sanitizeJsonResponse(responseText);
@@ -527,7 +527,7 @@ export const analyzeStatement = async (file: File, categories: Categorias): Prom
                 }
             }
         }
-    });
+    }, 'statement');
 
     try {
         const sanitized = sanitizeJsonResponse(responseText || "[]");

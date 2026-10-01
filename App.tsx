@@ -69,6 +69,7 @@ import { isEmptyState, isValidPayload, smartMerge, dataSummary, createSyncLogger
 import { NotificationService } from './utils/notificationService';
 import { supabase } from './utils/supabaseClient'; // Importação do cliente
 import { BillingService } from './utils/billingService';
+import { resolvePremiumStatus } from './utils/premiumService';
 import { syncWidgetData } from './utils/widgetSync';
 import confetti from 'canvas-confetti';
 
@@ -376,11 +377,13 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     }
   }, [isAuthenticated, isLoadingData, userProfile.email]);
 
-  // Inicialização do faturamento In-App (Google Play) e sincronização do status PRO
+  // Inicialização do faturamento In-App (Google Play) e sincronização do status PRO.
+  // O status vem do servidor (premium_status), que confere a assinatura com o Google Play.
   useEffect(() => {
     if (isAuthenticated && !isLoadingData) {
       BillingService.initialize(
-        (isPremium) => {
+        async (ownedInStore, purchaseToken) => {
+          const isPremium = await resolvePremiumStatus(ownedInStore, purchaseToken);
           updateUserProfile({ isPremium });
         },
         (msg, type) => {

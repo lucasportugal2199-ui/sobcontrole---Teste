@@ -36,7 +36,7 @@ const PremiumScreen: React.FC = () => {
             const productId = planType === 'Mensal' ? BillingService.PRODUCTS.MONTHLY : BillingService.PRODUCTS.ANNUAL;
             const purchase = await BillingService.requestPurchase(productId);
 
-            if (purchase.success && purchase.receipt) {
+            if (purchase.success) {
                 setStep('verifying');
                 const isValid = await BillingService.verifyPurchase(purchase.receipt);
 
@@ -66,6 +66,11 @@ const PremiumScreen: React.FC = () => {
                         showToast(t('premium.toast.planActivated', { plan: planType }) || `Plano ${planType} ativado com sucesso!`, "success");
                         goBackView();
                     }, 1800);
+                } else {
+                    // O servidor/Google Play não confirmou a assinatura
+                    showToast(t('premium.toast.paymentError') || "Erro ao processar assinatura.", "error");
+                    setIsProcessing(false);
+                    setStep('idle');
                 }
             } else {
                 showToast(purchase.error || t('premium.toast.paymentNotCompleted') || "Pagamento não concluído.", "error");

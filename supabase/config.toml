@@ -399,3 +399,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/gemini/deno.json"
 entrypoint = "./functions/gemini/index.ts"
+
+[functions.verify-purchase]
+enabled = true
+verify_jwt = true
+import_map = "./functions/verify-purchase/deno.json"
+entrypoint = "./functions/verify-purchase/index.ts"

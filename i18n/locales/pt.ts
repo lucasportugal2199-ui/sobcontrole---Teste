@@ -927,6 +927,7 @@ const pt: TranslationDictionary = {
   'aichat.welcome': 'Olá {{name}}! Sou seu CFO de Bolso. Tenho acesso a todas as suas transações. Como posso te ajudar hoje? \n\nVocê pode me perguntar coisas como: "Quanto gastei com Uber esse mês?" ou "Posso gastar R$100 hoje?"',
   'aichat.errorProcessing': 'Desculpe, tive um problema ao processar isso.',
   'aichat.connectionError': 'Ops! Tive um problema de conexão com a IA. Verifique sua internet ou tente novamente em instantes.',
+  'aichat.limitReached': 'Você atingiu o limite de uso da IA por hoje. Tente novamente amanhã ou seja PRO para usar mais.',
   'aichat.suggested.summary': 'Resumo do mês',
   'aichat.suggested.whereSpent': 'Onde mais gastei?',
   'aichat.suggested.savingsAdvice': 'Conselhos de economia',

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useTranslation } from '../i18n';
 import { ArrowLeftIcon, SparklesIcon, LoaderIcon, LockIcon, CrownIcon, CalopsitaIcon } from './icons';
-import { generateWithGemini, GeminiContent } from "../utils/aiClient";
+import { generateWithGemini, GeminiContent, AiLimitError } from "../utils/aiClient";
 import { formatCurrency } from '../utils/helpers';
 
 interface Message {
@@ -152,7 +152,7 @@ const AIChat: React.FC = () => {
                     { "valor": 50.0, "descricao": "Bar", "categoria": "Lazer", "tipo": "saida", "data": "2024-03-08" }
                     [/TRANSACTION_DATA]
                     - Use apenas as categorias fornecidas. Se não souber, use "Outros".` }] },
-            });
+            }, 'chat');
 
             let aiText = responseText || t('aichat.errorProcessing');
             let pendingTransaction = undefined;
@@ -182,7 +182,7 @@ const AIChat: React.FC = () => {
             setMessages(prev => [...prev, {
                 id: 'error',
                 role: 'model',
-                text: t('aichat.connectionError'),
+                text: error instanceof AiLimitError ? t('aichat.limitReached') : t('aichat.connectionError'),
                 timestamp: new Date()
             }]);
         } finally {
