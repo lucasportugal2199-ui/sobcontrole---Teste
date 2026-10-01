@@ -36,7 +36,7 @@ INSERT INTO public.app_config (key, value)
 VALUES (
   'version_config',
   '{
-    "latest_version": "1.9.1",
+    "latest_version": "1.9.2",
     "min_version": "1.0.0",
     "release_notes": "Correções importantes de segurança, sincronização mais confiável e o app funcionando mesmo sem internet."
   }'::jsonb
@@ -44,7 +44,7 @@ VALUES (
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now();
 
 -- Para OBRIGAR todos a atualizar (ex.: fechar o PRO grátis das versões antigas),
--- depois que a 1.9.1 estiver na loja rode:
+-- depois que a 1.9.2 estiver na loja rode:
 --   UPDATE public.app_config
---   SET value = jsonb_set(value, '{min_version}', '"1.9.1"')
+--   SET value = jsonb_set(value, '{min_version}', '"1.9.2"')
 --   WHERE key = 'version_config';
