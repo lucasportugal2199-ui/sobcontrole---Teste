@@ -429,7 +429,7 @@ const RelatorioAnual: React.FC = () => {
                                     </div>
                                     <span className="text-base font-bold text-light-text dark:text-dark-text">{formatCurrency(totalReceitas, appLocale, appCurrency)}</span>
                                     {previousYearTotals.receitas > 0 && (
-                                        <span className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYReceitas.isPositive ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30' : 'bg-red-50 text-red-500 dark:bg-red-900/30'}`}>
+                                        <span className={`text-[10px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYReceitas.isPositive ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30' : 'bg-red-50 text-red-500 dark:bg-red-900/30'}`}>
                                             {yoYReceitas.value} {locale === 'en' ? 'vs Prev. Year' : locale === 'es' ? 'vs Año Ant.' : locale === 'fr' ? 'vs Année Préc.' : locale === 'de' ? 'vs Vorjahr' : 'vs Ano Ant.'}
                                         </span>
                                     )}
@@ -444,7 +444,7 @@ const RelatorioAnual: React.FC = () => {
                                     </div>
                                     <span className="text-base font-bold text-light-text dark:text-dark-text">{formatCurrency(totalDespesas, appLocale, appCurrency)}</span>
                                     {previousYearTotals.despesas > 0 && (
-                                        <span className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYDespesas.isPositive ? 'bg-red-50 text-red-500 dark:bg-red-900/30' : 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30'}`}>
+                                        <span className={`text-[10px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYDespesas.isPositive ? 'bg-red-50 text-red-500 dark:bg-red-900/30' : 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30'}`}>
                                             {yoYDespesas.value} {locale === 'en' ? 'vs Prev. Year' : locale === 'es' ? 'vs Año Ant.' : locale === 'fr' ? 'vs Année Préc.' : locale === 'de' ? 'vs Vorjahr' : 'vs Ano Ant.'}
                                         </span>
                                     )}
@@ -452,14 +452,14 @@ const RelatorioAnual: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
                                         {locale === 'en' ? 'Avg / Month' : locale === 'es' ? 'Promedio / Mes' : locale === 'fr' ? 'Moy. / Mois' : locale === 'de' ? 'Durchschn. / Monat' : 'Média / Mês'}
                                     </span>
                                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(mediaMensalReceitas, appLocale, appCurrency)}</span>
                                 </div>
                                 <div className="flex flex-col items-center relative">
                                     <div className="absolute left-0 top-1 bottom-1 w-px bg-slate-100 dark:bg-dark-bg"></div>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
                                         {locale === 'en' ? 'Avg / Month' : locale === 'es' ? 'Promedio / Mes' : locale === 'fr' ? 'Moy. / Mois' : locale === 'de' ? 'Durchschn. / Monat' : 'Média / Mês'}
                                     </span>
                                     <span className="text-sm font-bold text-red-600 dark:text-red-400">{formatCurrency(mediaMensalDespesas, appLocale, appCurrency)}</span>
@@ -607,7 +607,7 @@ const RelatorioAnual: React.FC = () => {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.topSpending') || 'Top Gasto'}</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.topSpending') || 'Top Gasto'}</span>
                                         <span className="text-xs font-black text-light-text dark:text-dark-text truncate max-w-full">{annualCategoryData[0]?.name}</span>
                                     </div>
                                 </div>
@@ -621,7 +621,7 @@ const RelatorioAnual: React.FC = () => {
                                                     <span className="text-slate-600 dark:text-slate-200 truncate">{entry.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[9px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
+                                                    <span className="text-[10px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
                                                     <span className="text-light-text dark:text-dark-text tabular-nums">{formatCurrency(entry.value)}</span>
                                                 </div>
                                             </div>
@@ -667,7 +667,7 @@ const RelatorioAnual: React.FC = () => {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.primaryPaymentMethod') || 'Principal'}</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.primaryPaymentMethod') || 'Principal'}</span>
                                         <span className="text-xs font-black text-light-text dark:text-dark-text truncate max-w-full">{paymentMethodsData[0]?.name}</span>
                                     </div>
                                 </div>
@@ -686,7 +686,7 @@ const RelatorioAnual: React.FC = () => {
                                                     <span className="text-slate-600 dark:text-slate-200 truncate">{entry.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[9px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
+                                                    <span className="text-[10px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
                                                     <span className="text-light-text dark:text-dark-text tabular-nums">{formatCurrency(entry.value)}</span>
                                                 </div>
                                             </div>

@@ -1070,6 +1070,10 @@ const de: TranslationDictionary = {
   'menu.badgesCount': "{{count}} Erfolge",
   'newTx.defaultWallet': "Geldbörse",
   'newTx.defaultWalletHint': "Wird beim ersten Eintrag erstellt",
+  'a11y.previousMonth': "Vorheriger Monat",
+  'a11y.nextMonth': "Nächster Monat",
+  'a11y.goToToday': "Zu heute",
+  'a11y.openMenu': "Menü und Profil öffnen",
 };
 
 export default de;

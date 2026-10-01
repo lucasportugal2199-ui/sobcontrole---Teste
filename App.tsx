@@ -1093,6 +1093,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
       // Notificar usuário e Confetti
       confetti({
+        disableForReducedMotion: true,
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },

@@ -22,13 +22,13 @@ const useAppLocale = () => {
 };
 
 const PercentageBadge: React.FC<{ current: number; previous: number; invertColors?: boolean }> = ({ current, previous, invertColors }) => {
-    if (previous === 0 && current === 0) return <span className="text-[9px] font-bold text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded-full">—</span>;
+    if (previous === 0 && current === 0) return <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded-full">—</span>;
     const diff = previous > 0 ? ((current - previous) / previous) * 100 : (current > 0 ? 100 : 0);
     const isUp = diff > 0;
     const colorUp = invertColors ? 'text-rose-500 bg-rose-50 dark:bg-rose-950/30' : 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30';
     const colorDown = invertColors ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30' : 'text-rose-500 bg-rose-50 dark:bg-rose-950/30';
     return (
-        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 ${isUp ? colorUp : colorDown}`}>
+        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 ${isUp ? colorUp : colorDown}`}>
             {isUp ? '▲' : '▼'} {Math.abs(diff).toFixed(0)}%
         </span>
     );
@@ -134,7 +134,7 @@ export const FinancialHealthScore: React.FC<{
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-3xl font-black text-light-text dark:text-dark-text">{score}</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest mt-0.5" style={{ color }}>{label}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest mt-0.5" style={{ color }}>{label}</span>
                 </div>
             </div>
 
@@ -148,7 +148,7 @@ export const FinancialHealthScore: React.FC<{
                 ].map(item => (
                     <div key={item.label} className="bg-slate-50 dark:bg-dark-surface/40 p-2.5 rounded-xl border border-light-border dark:border-dark-elevated/50">
                         <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{item.icon} {item.label}</span>
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.icon} {item.label}</span>
                             <span className="text-[10px] font-black text-light-text dark:text-dark-text">{item.value}/{item.max}</span>
                         </div>
                         <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -212,7 +212,7 @@ export const MonthlyComparison: React.FC<{
                     </div>
                     <div className="flex flex-col items-end gap-1">
                         <PercentageBadge current={item.current} previous={item.previous} invertColors={item.invertColors} />
-                        <span className="text-[9px] text-slate-400 font-medium">
+                        <span className="text-[10px] text-slate-400 font-medium">
                             ant: {formatCurrency(item.previous, appLocale, appCurrency)}
                         </span>
                     </div>
@@ -505,7 +505,7 @@ export const TopCategoriesRanking: React.FC<{
                         <div className="flex-1 h-2 bg-slate-100 dark:bg-dark-bg rounded-full overflow-hidden">
                             <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(cat.value / maxValue) * 100}%`, backgroundColor: cat.color }} />
                         </div>
-                        <span className="text-[9px] font-bold text-slate-400 w-8 text-right">{cat.percentage.toFixed(0)}%</span>
+                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{cat.percentage.toFixed(0)}%</span>
                     </div>
                 </div>
             ))}
@@ -560,11 +560,11 @@ export const EndOfMonthForecast: React.FC<{
             {/* Projeções */}
             <div className="grid grid-cols-2 gap-3">
                 <div className="p-3.5 bg-slate-50 dark:bg-dark-surface/40 rounded-xl border border-light-border dark:border-dark-elevated/50">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">Gasto Diário Médio</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">Gasto Diário Médio</span>
                     <span className="text-base font-black text-light-text dark:text-dark-text">{formatCurrency(forecast.dailyRate, appLocale, appCurrency)}</span>
                 </div>
                 <div className={`p-3.5 rounded-xl border ${isOverBudget ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800/50' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50'}`}>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">Saldo Projetado</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-1">Saldo Projetado</span>
                     <span className={`text-base font-black ${isOverBudget ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {formatCurrency(forecast.projectedBalance, appLocale, appCurrency)}
                     </span>
@@ -712,7 +712,7 @@ export const SavingsRateHistory: React.FC<{
                     </BarChart>
                 </ResponsiveContainer>
             </div>
-            <div className="flex items-center justify-center gap-4 text-[9px] font-bold text-slate-500">
+            <div className="flex items-center justify-center gap-4 text-[10px] font-bold text-slate-500">
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" />≥ 20% Ideal</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" />0-20% Atenção</span>
                 <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500" />&lt; 0% Crítico</span>

@@ -46,6 +46,7 @@ const PremiumScreen: React.FC = () => {
 
                     try {
                         confetti({
+        disableForReducedMotion: true,
                             particleCount: 100,
                             spread: 70,
                             origin: { y: 0.6 }

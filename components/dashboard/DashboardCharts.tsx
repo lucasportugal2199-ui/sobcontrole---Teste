@@ -368,7 +368,7 @@ export const SavingsRateWidget: React.FC<{
                     <span className="text-xl font-black text-light-text dark:text-dark-text leading-none">
                         {rate.toFixed(0)}%
                     </span>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('dashboard.savingsRate')}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('dashboard.savingsRate')}</span>
                 </div>
             </div>
 
@@ -516,7 +516,7 @@ export const CategoryPieWidget: React.FC<{
                     <span className="text-2xl font-black text-light-text dark:text-dark-text leading-none tracking-tight">
                         {formatAbbrev(total)}
                     </span>
-                    <span className="text-[9px] font-medium text-light-text-muted dark:text-dark-text-muted mt-1">
+                    <span className="text-[10px] font-medium text-light-text-muted dark:text-dark-text-muted mt-1">
                         {type === 'despesas' ? (t('dashboard.expenseThisMonth') || 'gastos esse mês') : type === 'receitas' ? (t('dashboard.incomeThisMonth') || 'receitas esse mês') : t('common.total')}
                     </span>
                 </div>
@@ -547,7 +547,7 @@ export const CategoryPieWidget: React.FC<{
                 {activeData.length > 5 && (
                     <button 
                         onClick={() => setShowAll(!showAll)} 
-                        className="w-full text-center text-[9px] text-[#EA580C] dark:text-[#F97316] font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
+                        className="w-full text-center text-[10px] text-[#EA580C] dark:text-[#F97316] font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
                     >
                         {showAll ? `− ${t('common.close')}` : `+ ${t('common.all')} (${activeData.length})`}
                     </button>

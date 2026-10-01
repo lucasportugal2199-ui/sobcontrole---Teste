@@ -680,7 +680,7 @@ const NewTransactionScreen: React.FC = () => {
                                         {locale === 'en' ? 'Scan Receipt' : locale === 'es' ? 'Escanear Recibo' : locale === 'fr' ? 'Scanner le Reçu' : locale === 'de' ? 'Beleg Scannen' : 'Escanear Recibo'}
                                     </span>
                                     {!userProfile.isPremium && (
-                                        <span className="bg-amber-500/20 text-amber-500 border border-amber-500/30 text-[9px] font-bold px-1.5 py-0.5 rounded ml-1">
+                                        <span className="bg-amber-500/20 text-amber-500 border border-amber-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded ml-1">
                                             PRO
                                         </span>
                                     )}
@@ -874,7 +874,7 @@ const NewTransactionScreen: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={() => { setIsNewTransactionOpen(false); setCurrentView('openfinance'); }}
-                                        className="w-full py-2.5 px-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl text-center font-bold text-[8px] border border-rose-100 dark:border-rose-900/30 uppercase tracking-tight"
+                                        className="w-full py-2.5 px-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl text-center font-bold text-[10px] border border-rose-100 dark:border-rose-900/30 uppercase tracking-tight"
                                     >
                                         {t('newTx.addAccountFirst')}
                                     </button>

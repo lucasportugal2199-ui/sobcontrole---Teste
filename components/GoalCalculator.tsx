@@ -305,14 +305,14 @@ const GoalCalculator: React.FC = () => {
 
                         <div className="grid grid-cols-2 gap-3">
                             <div className="bg-white/10 p-3 rounded-2xl">
-                                <p className="text-[9px] text-indigo-200 font-bold uppercase mb-1">{t('goalCalc.timeToTarget')}</p>
+                                <p className="text-[10px] text-indigo-200 font-bold uppercase mb-1">{t('goalCalc.timeToTarget')}</p>
                                 <p className="text-xl font-black">{formatMonths(simulation.monthsToFinish)}</p>
-                                <p className="text-[9px] text-blue-300 mt-0.5">{t('goalCalc.fromToday')}</p>
+                                <p className="text-[10px] text-blue-300 mt-0.5">{t('goalCalc.fromToday')}</p>
                             </div>
                             <div className="bg-white/10 p-3 rounded-2xl">
-                                <p className="text-[9px] text-indigo-200 font-bold uppercase mb-1">{t('goalCalc.stillMissing')}</p>
+                                <p className="text-[10px] text-indigo-200 font-bold uppercase mb-1">{t('goalCalc.stillMissing')}</p>
                                 <p className="text-xl font-black">{formatCurrency(simulation.remaining)}</p>
-                                <p className="text-[9px] text-blue-300 mt-0.5">{t('goalCalc.toReachTarget')}</p>
+                                <p className="text-[10px] text-blue-300 mt-0.5">{t('goalCalc.toReachTarget')}</p>
                             </div>
                         </div>
                     </div>
@@ -342,7 +342,7 @@ const GoalCalculator: React.FC = () => {
                     <div className="flex justify-between items-center mb-1">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('goalCalc.simulateMonthlyAporte')}</label>
                         {averageMonthlyAporte > 0 && (
-                            <span className="text-[9px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">{t('goalCalc.yourAverage', { average: formatCurrency(averageMonthlyAporte) })}</span>
+                            <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">{t('goalCalc.yourAverage', { average: formatCurrency(averageMonthlyAporte) })}</span>
                         )}
                     </div>
                     <p className="text-[10px] text-light-text-muted dark:text-dark-text-muted mb-3 ml-1">{t('goalCalc.howMuchToSave')}</p>
@@ -369,7 +369,7 @@ const GoalCalculator: React.FC = () => {
                             background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(sliderValue / sliderMax) * 100}%, ${theme === 'dark' ? '#1e293b' : '#e2e8f0'} ${(sliderValue / sliderMax) * 100}%, ${theme === 'dark' ? '#1e293b' : '#e2e8f0'} 100%)`
                         }}
                     />
-                    <div className="flex justify-between text-[9px] text-slate-400 font-bold px-0.5">
+                    <div className="flex justify-between text-[10px] text-slate-400 font-bold px-0.5">
                         <span>{t('goalCalc.minAporte')}</span>
                         <span>{formatCurrency(sliderMax)}</span>
                     </div>
@@ -410,7 +410,7 @@ const GoalCalculator: React.FC = () => {
                                 background: `linear-gradient(to right, #10b981 0%, #10b981 ${(annualRate / 20) * 100}%, ${theme === 'dark' ? '#1e293b' : '#e2e8f0'} ${(annualRate / 20) * 100}%, ${theme === 'dark' ? '#1e293b' : '#e2e8f0'} 100%)`
                             }}
                         />
-                        <div className="flex justify-between text-[9px] text-slate-400 font-bold px-0.5">
+                        <div className="flex justify-between text-[10px] text-slate-400 font-bold px-0.5">
                             <span>{t('goalCalc.noYield')}</span>
                             <span>{t('goalCalc.variableYield')}</span>
                         </div>

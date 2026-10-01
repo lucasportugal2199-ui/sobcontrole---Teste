@@ -754,6 +754,10 @@ const fr: TranslationDictionary = {
   'menu.badgesCount': "{{count}} succès",
   'newTx.defaultWallet': "Portefeuille",
   'newTx.defaultWalletHint': "Créé lors de la première saisie",
+  'a11y.previousMonth': "Mois précédent",
+  'a11y.nextMonth': "Mois suivant",
+  'a11y.goToToday': "Aller à aujourd'hui",
+  'a11y.openMenu': "Ouvrir le menu et le profil",
 };
 
 export default fr;

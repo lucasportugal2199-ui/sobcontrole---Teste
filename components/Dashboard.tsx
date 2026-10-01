@@ -410,7 +410,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-center justify-between mb-2.5">
                     {/* Avatar */}
                     <div 
-                        onClick={() => setCurrentView('menu')}
+                        onClick={() => setCurrentView('menu')} role="button" aria-label={t('a11y.openMenu')}
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile.avatar
                                 ? 'shadow-md'
@@ -427,13 +427,13 @@ const Dashboard: React.FC = () => {
 
                     {/* Seletor de Mês centralizado */}
                     <div className="flex items-center gap-1">
-                        <button onClick={() => changeMonth(-1)} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
+                        <button onClick={() => changeMonth(-1)} aria-label={t('a11y.previousMonth')} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
                             <ArrowLeftIcon className="h-4 w-4" />
                         </button>
                         <button onClick={() => setIsMonthYearPickerOpen(true)} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full text-sm font-bold text-slate-900 dark:text-white border border-[#D7E0EB] dark:border-[#1F1F1F] active:scale-95 transition-transform shadow-sm">
                             {formatarMesAno(currentDate, locale, monthNames)}
                         </button>
-                        <button onClick={() => changeMonth(1)} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
+                        <button onClick={() => changeMonth(1)} aria-label={t('a11y.nextMonth')} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
                             <ArrowRightIcon className="h-4 w-4" />
                         </button>
                     </div>
@@ -481,7 +481,7 @@ const Dashboard: React.FC = () => {
                         <CreditCardIcon className="h-3 w-3 shrink-0" />
                         <span>Parceladas</span>
                         {activeInstallmentsCount > 0 && (
-                            <span className={`px-1 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
+                            <span className={`px-1 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
                                 financasSubTab === 'parcelas'
                                     ? 'bg-slate-200 dark:bg-white/15 text-slate-900 dark:text-white'
                                     : 'bg-slate-300/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400'

@@ -95,7 +95,7 @@ const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 )}
             </div>
 
-            <p className="absolute bottom-8 text-[9px] font-black text-slate-700 uppercase tracking-[0.3em]">
+            <p className="absolute bottom-8 text-[10px] font-black text-slate-700 uppercase tracking-[0.3em]">
                 {t('lock.protectedBy')}
             </p>
         </div>

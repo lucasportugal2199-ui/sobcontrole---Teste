@@ -1276,6 +1276,10 @@ const pt: TranslationDictionary = {
   'menu.badgesCount': "{{count}} conquistas",
   'newTx.defaultWallet': "Carteira",
   'newTx.defaultWalletHint': "Criada no primeiro lançamento",
+  'a11y.previousMonth': "Mês anterior",
+  'a11y.nextMonth': "Próximo mês",
+  'a11y.goToToday': "Ir para hoje",
+  'a11y.openMenu': "Abrir menu e perfil",
 };
 
 export default pt;

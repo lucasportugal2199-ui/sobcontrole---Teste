@@ -311,7 +311,7 @@ const MiniCreditCardBadge: React.FC<{ name: string; color: string }> = ({ name, 
             </div>
 
             {/* Sigla do Cartão na base */}
-            <span className="text-[8px] font-black tracking-wider text-white truncate relative z-10 leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">
+            <span className="text-[10px] font-black tracking-wider text-white truncate relative z-10 leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">
                 {initials}
             </span>
         </div>

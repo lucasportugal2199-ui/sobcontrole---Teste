@@ -284,7 +284,7 @@ const AIChat: React.FC = () => {
                                 </div>
                             )}
 
-                            <div className={`text-[9px] font-black uppercase tracking-widest mt-2 opacity-60 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                            <div className={`text-[10px] font-black uppercase tracking-widest mt-2 opacity-60 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                                 {msg.timestamp.toLocaleTimeString(appLocale, { hour: '2-digit', minute: '2-digit' })}
                             </div>
                         </div>

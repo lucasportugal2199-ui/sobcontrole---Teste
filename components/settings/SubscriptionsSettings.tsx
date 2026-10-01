@@ -269,7 +269,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                     <CreditCardIcon className="h-3.5 w-3.5 shrink-0 stroke-[2.2]" />
                     <span>Parceladas</span>
                     {installmentList.length > 0 && (
-                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
                             tabMode === 'installments'
                                 ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white'
                                 : 'bg-slate-300/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
@@ -291,7 +291,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                     <RepeatIcon className="h-3.5 w-3.5 shrink-0 stroke-[2.2]" />
                     <span>Assinaturas</span>
                     {recurringList.length > 0 && (
-                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
+                        <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black shrink-0 ${
                             tabMode === 'subscriptions'
                                 ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white'
                                 : 'bg-slate-300/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
@@ -393,7 +393,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                                     style={{ height: `${m.heightPercent}%` }}
                                                 />
                                             </div>
-                                            <span className={`text-[9px] font-bold tracking-tight transition-colors ${
+                                            <span className={`text-[10px] font-bold tracking-tight transition-colors ${
                                                 isFocused
                                                     ? 'text-slate-900 dark:text-[#EA580C] font-black scale-105'
                                                     : m.isCurrent

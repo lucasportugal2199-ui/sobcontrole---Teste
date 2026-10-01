@@ -125,7 +125,7 @@ const ProfileSettings: React.FC = () => {
 
                                     {isSelected && (
                                         <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#EA580C] text-white flex items-center justify-center shadow-sm">
-                                            <span className="text-[8px] font-black leading-none">✓</span>
+                                            <span className="text-[10px] font-black leading-none">✓</span>
                                         </div>
                                     )}
                                 </button>

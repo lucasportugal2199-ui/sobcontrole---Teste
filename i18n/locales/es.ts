@@ -1072,6 +1072,10 @@ const es: TranslationDictionary = {
   'menu.badgesCount': "{{count}} logros",
   'newTx.defaultWallet': "Billetera",
   'newTx.defaultWalletHint': "Se crea en el primer registro",
+  'a11y.previousMonth': "Mes anterior",
+  'a11y.nextMonth': "Mes siguiente",
+  'a11y.goToToday': "Ir a hoy",
+  'a11y.openMenu': "Abrir menú y perfil",
 };
 
 export default es;

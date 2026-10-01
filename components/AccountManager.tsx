@@ -250,7 +250,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title }) => {
 
                             {isBankDropdownOpen && (
                                 <div className="mt-2 bg-light-card-elevated dark:bg-dark-card border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
-                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2 block ml-1">{t('accountManager.labelPopularBanks')}</label>
+                                    <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2 block ml-1">{t('accountManager.labelPopularBanks')}</label>
                                     <div className="grid grid-cols-7 gap-2 justify-items-center">
                                         {POPULAR_BANKS.map(bank => {
                                             const isSelected = form.bankName.toLowerCase().trim() === bank.name.toLowerCase();
@@ -276,7 +276,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title }) => {
                                     
                                     {/* Campo de texto livre caso não queira usar um banco popular ou queira personalizar o nome */}
                                     <div className="mt-3 border-t border-slate-200/50 dark:border-slate-800/80 pt-3">
-                                        <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.orTypeAnotherName')}</label>
+                                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.orTypeAnotherName')}</label>
                                         <input
                                             type="text"
                                             value={form.bankName}

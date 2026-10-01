@@ -427,7 +427,7 @@ const CardsSettings: React.FC<CardsSettingsProps> = ({
 
                             {isBankDropdownOpen && (
                                 <div className="mt-2 bg-light-card-elevated dark:bg-dark-card border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
                                         Bancos Populares
                                     </label>
                                     <div className="grid grid-cols-7 gap-2 justify-items-center mb-3">
@@ -454,7 +454,7 @@ const CardsSettings: React.FC<CardsSettingsProps> = ({
                                     </div>
                                     
                                     <div className="border-t border-slate-200/50 dark:border-slate-800/80 pt-2.5">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">
                                             Ou digite outro nome
                                         </label>
                                         <input

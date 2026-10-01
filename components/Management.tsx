@@ -430,7 +430,7 @@ const Management: React.FC = () => {
             <header className="px-4 py-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-light-bg dark:bg-dark-bg z-20 flex-shrink-0 sticky top-0">
                 <div className="flex items-center justify-between">
                     <div 
-                        onClick={() => setCurrentView('menu')}
+                        onClick={() => setCurrentView('menu')} role="button" aria-label={t('a11y.openMenu')}
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile?.avatar
                                 ? 'shadow-md'
@@ -448,7 +448,7 @@ const Management: React.FC = () => {
                     {/* Seletor de Mês */}
                     <div className="flex items-center gap-1">
                         <button 
-                            onClick={() => changeMonth(-1)} 
+                            onClick={() => changeMonth(-1)} aria-label={t('a11y.previousMonth')} 
                             className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform"
                         >
                             <ArrowLeftIcon className="h-4 w-4" />
@@ -460,7 +460,7 @@ const Management: React.FC = () => {
                             {formatarMesAno(currentDate, locale, monthNames)}
                         </button>
                         <button 
-                            onClick={() => changeMonth(1)} 
+                            onClick={() => changeMonth(1)} aria-label={t('a11y.nextMonth')} 
                             className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform"
                         >
                             <ArrowRightIcon className="h-4 w-4" />
@@ -971,7 +971,7 @@ const Management: React.FC = () => {
                             </span>
                             <p className="font-bold text-base text-light-text dark:text-dark-text mt-2">{detailsTx.descricao}</p>
                             <div className="flex items-center justify-center gap-2 mt-2">
-                                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                                <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
                                     detailsTx.tipo === 'entrada' 
                                         ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' 
                                         : detailsTx.tipo === 'saida'
@@ -981,12 +981,12 @@ const Management: React.FC = () => {
                                     {detailsTx.tipo === 'entrada' ? t('dashboard.income') : detailsTx.tipo === 'saida' ? t('dashboard.expenses') : t('payMethod.transfer')}
                                 </span>
                                 {detailsTx.isRecurring && (
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 flex items-center gap-1">
                                         <RepeatIcon className="h-2.5 w-2.5" /> {t('common.recurrence')}
                                     </span>
                                 )}
                                 {detailsTx.installment && (
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
+                                    <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
                                         {detailsTx.installment.current}/{detailsTx.installment.total}
                                     </span>
                                 )}
@@ -996,7 +996,7 @@ const Management: React.FC = () => {
                         {/* Seção: Informações */}
                         <div className="bg-light-card-elevated dark:bg-dark-bg rounded-2xl border border-light-border dark:border-dark-elevated overflow-hidden">
                             <div className="px-4 py-2.5 border-b border-light-border dark:border-dark-elevated">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">{t('common.details')}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{t('common.details')}</p>
                             </div>
                             
                             {/* Categoria */}
@@ -1039,7 +1039,7 @@ const Management: React.FC = () => {
                         {(detailsTx.accountId || detailsTx.cardId || (detailsTx.paymentMethod === 'credito' && detailsTx.statementDate)) && (
                             <div className="bg-light-card-elevated dark:bg-dark-bg rounded-2xl border border-light-border dark:border-dark-elevated overflow-hidden">
                                 <div className="px-4 py-2.5 border-b border-light-border dark:border-dark-elevated">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">{t('newTx.paymentMethod')}</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{t('newTx.paymentMethod')}</p>
                                 </div>
 
                                 {detailsTx.accountId && (

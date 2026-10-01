@@ -151,7 +151,7 @@ const InvestmentModule: React.FC = () => {
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
                                         <p className="text-sm font-black">{formatCurrency(asset.value)}</p>
-                                        <p className="text-[9px] font-bold text-emerald-500 uppercase">{t('investments.assetStatus')}</p>
+                                        <p className="text-[10px] font-bold text-emerald-500 uppercase">{t('investments.assetStatus')}</p>
                                     </div>
                                     <button
                                         onClick={() => handleDeleteAsset(asset.id)}

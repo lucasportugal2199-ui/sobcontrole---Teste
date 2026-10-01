@@ -1078,6 +1078,10 @@ const en: TranslationDictionary = {
   'menu.badgesCount': "{{count}} badges",
   'newTx.defaultWallet': "Wallet",
   'newTx.defaultWalletHint': "Created with your first entry",
+  'a11y.previousMonth': "Previous month",
+  'a11y.nextMonth': "Next month",
+  'a11y.goToToday': "Go to today",
+  'a11y.openMenu': "Open menu and profile",
 };
 
 export default en;
