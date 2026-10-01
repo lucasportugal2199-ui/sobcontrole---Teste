@@ -354,6 +354,7 @@ const fr: TranslationDictionary = {
   // ============================================================
   'lancamento.title': 'Feuille journalière',
   'lancamento.accountBalance': 'Solde des comptes',
+  'lancamento.currentBalance': "Solde actuel",
   'lancamento.forecastEndMonth': 'Prévisions fin de mois',
   'lancamento.newIncome': 'Nouveau Revenu',
   'lancamento.newExpense': 'Nouvelle Dépense',

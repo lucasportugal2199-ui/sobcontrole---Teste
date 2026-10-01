@@ -712,6 +712,7 @@ const en: TranslationDictionary = {
   'subscriptions.totalYearly': 'Total Yearly',
   'lancamento.title': 'Daily Sheet',
   'lancamento.accountBalance': 'Account Balance',
+  'lancamento.currentBalance': "Current balance",
   'lancamento.forecastEndMonth': 'Month-End Forecast',
   'lancamento.newIncome': 'New Income',
   'lancamento.newExpense': 'New Expense',

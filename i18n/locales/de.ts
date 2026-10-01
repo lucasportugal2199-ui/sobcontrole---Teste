@@ -704,6 +704,7 @@ const de: TranslationDictionary = {
   'subscriptions.totalYearly': 'Jährliche Summe',
   'lancamento.title': 'Tagesübersicht',
   'lancamento.accountBalance': 'Kontostand',
+  'lancamento.currentBalance': "Aktueller Saldo",
   'lancamento.forecastEndMonth': 'Monatsendprognose',
   'lancamento.newIncome': 'Neue Einnahme',
   'lancamento.newExpense': 'Neue Ausgabe',

@@ -92,9 +92,18 @@ const Lancamento: React.FC = () => {
         return { diasComSaldo: calculateDailyBalancesForMonth(transactionsForMonth, saldoInicial, ano, mes) };
     }, [currentDate, allData, allTransactions]);
 
+    // Sem contas cadastradas, a soma das contas seria sempre R$ 0,00: usa o saldo da
+    // própria planilha no dia de referência (hoje / fim do mês passado / início do futuro).
+    const hasAccounts = accounts.length > 0;
     const saldoEmContas = useMemo(() => {
-        return accounts.reduce((acc, curr) => acc + calculateAccountBalance(curr.id, allTransactions, getSaldoLimitDate(currentDate)), 0);
-    }, [accounts, allTransactions, currentDate]);
+        if (accounts.length > 0) {
+            return accounts.reduce((acc, curr) => acc + calculateAccountBalance(curr.id, allTransactions, getSaldoLimitDate(currentDate)), 0);
+        }
+        const limit = getSaldoLimitDate(currentDate);
+        const sameMonth = limit.getFullYear() === currentDate.getFullYear() && limit.getMonth() === currentDate.getMonth();
+        if (!sameMonth) return getPreviousBalance(getMonthKey(currentDate), allData); // mês futuro: saldo inicial
+        return diasComSaldo[limit.getDate() - 1]?.saldo ?? 0;
+    }, [accounts, allTransactions, currentDate, diasComSaldo, allData]);
 
     const previsaoFimDoMes = useMemo(() => {
         return diasComSaldo[diasComSaldo.length - 1]?.saldo || 0;
@@ -191,7 +200,7 @@ const Lancamento: React.FC = () => {
                         {/* Topo: Saldo e Previsão + Botão Recolher */}
                         <div className="flex justify-between items-center">
                             <div>
-                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">{t('lancamento.accountBalance')}</span>
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">{hasAccounts ? t('lancamento.accountBalance') : t('lancamento.currentBalance')}</span>
                                 <p className={`text-xl font-bold mt-0.5 tabular-nums ${saldoEmContas < 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
                                     {formatCurrency(saldoEmContas, appLocale, appCurrency)}
                                 </p>

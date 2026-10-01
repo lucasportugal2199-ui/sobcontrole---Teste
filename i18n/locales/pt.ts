@@ -862,6 +862,7 @@ const pt: TranslationDictionary = {
   // ============================================================
   'lancamento.title': 'Planilha diária',
   'lancamento.accountBalance': 'Saldo em contas',
+  'lancamento.currentBalance': "Saldo atual",
   'lancamento.forecastEndMonth': 'Previsão fim do mês',
   'lancamento.newIncome': 'Nova Receita',
   'lancamento.newExpense': 'Nova Despesa',

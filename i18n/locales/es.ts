@@ -706,6 +706,7 @@ const es: TranslationDictionary = {
   'subscriptions.totalYearly': 'Total Anual',
   'lancamento.title': 'Hoja Diaria',
   'lancamento.accountBalance': 'Saldo en Cuentas',
+  'lancamento.currentBalance': "Saldo actual",
   'lancamento.forecastEndMonth': 'Previsión Fin de Mes',
   'lancamento.newIncome': 'Nuevo Ingreso',
   'lancamento.newExpense': 'Nuevo Gasto',
