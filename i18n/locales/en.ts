@@ -1060,6 +1060,22 @@ const en: TranslationDictionary = {
   'tx.recurring': "Recurring",
   'nav.home': "Home",
   'nav.menu': "Main navigation",
+
+  // Menu
+  'menu.proMember': "PRO member",
+  'menu.planProActive': "PRO plan active",
+  'menu.planProDesc': "All features unlocked",
+  'menu.manageSubscription': "Manage",
+  'menu.planFreeTitle': "Go PRO",
+  'menu.planFreeDesc': "Receipt scanner, reports and up to 100 AI queries a day",
+  'menu.shortcut.goals': "Goals",
+  'menu.shortcut.assistant': "AI Assistant",
+  'menu.shortcut.annualReport': "Annual Report",
+  'menu.shortcut.calculator': "Calculator",
+  'menu.streakNone': "Start your streak today",
+  'menu.streakOne': "1 day in a row",
+  'menu.streakMany': "{{days}} days in a row",
+  'menu.badgesCount': "{{count}} badges",
 };
 
 export default en;

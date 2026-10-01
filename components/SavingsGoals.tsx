@@ -2,7 +2,7 @@ import React, { useState, useMemo, useContext, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppContext } from '../context/AppContext';
 import { SavingsGoal } from '../types';
-import { PiggyBankIcon, PlusIcon, DotsVerticalIcon, EditIcon, TrashIcon, CalendarIcon, ChartBarIcon, LockIcon, CheckCircleIcon, ClipboardListIcon, LoaderIcon } from './icons';
+import { ArrowLeftIcon, PiggyBankIcon, PlusIcon, DotsVerticalIcon, EditIcon, TrashIcon, CalendarIcon, ChartBarIcon, LockIcon, CheckCircleIcon, ClipboardListIcon, LoaderIcon } from './icons';
 import { formatCurrency, formatCurrencyForInput, parseCurrency, formatDateToInput } from '../utils/helpers';
 import Modal from './Modal';
 import Calendar from './Calendar';
@@ -306,6 +306,18 @@ const SavingsGoals: React.FC = () => {
 
     return (
         <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text-secondary h-full p-4 flex flex-col transition-colors duration-300">
+            {/* Título: Metas é aberta pelo Menu (não tem aba na barra) */}
+            <div className="flex items-center gap-2 mb-3 flex-shrink-0">
+                <button
+                    onClick={() => setCurrentView('menu')}
+                    aria-label={t('common.back')}
+                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white dark:bg-dark-card border border-light-border dark:border-white/[0.08] text-light-text dark:text-dark-text active:scale-95 transition-transform"
+                >
+                    <ArrowLeftIcon className="h-4 w-4" />
+                </button>
+                <h1 className="text-lg font-bold text-light-text dark:text-dark-text">{t('menu.shortcut.goals')}</h1>
+            </div>
+
             <header className="flex justify-between items-center mb-4 flex-shrink-0">
                 <button
                     onClick={handleCalculatorClick}

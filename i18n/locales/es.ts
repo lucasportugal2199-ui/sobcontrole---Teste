@@ -1054,6 +1054,22 @@ const es: TranslationDictionary = {
   'tx.recurring': "Recurrente",
   'nav.home': "Inicio",
   'nav.menu': "Navegación principal",
+
+  // Menu
+  'menu.proMember': "Suscriptor PRO",
+  'menu.planProActive': "Plan PRO activo",
+  'menu.planProDesc': "Todas las funciones desbloqueadas",
+  'menu.manageSubscription': "Gestionar",
+  'menu.planFreeTitle': "Hazte PRO",
+  'menu.planFreeDesc': "Escáner de recibos, informes y hasta 100 consultas diarias a la IA",
+  'menu.shortcut.goals': "Metas",
+  'menu.shortcut.assistant': "Asistente IA",
+  'menu.shortcut.annualReport': "Informe Anual",
+  'menu.shortcut.calculator': "Calculadora",
+  'menu.streakNone': "Empieza tu racha hoy",
+  'menu.streakOne': "1 día seguido",
+  'menu.streakMany': "{{days}} días seguidos",
+  'menu.badgesCount': "{{count}} logros",
 };
 
 export default es;

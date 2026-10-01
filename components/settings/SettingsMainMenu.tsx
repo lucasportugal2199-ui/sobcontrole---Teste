@@ -4,7 +4,7 @@ import { useTranslation } from '../../i18n';
 import { Capacitor } from '@capacitor/core';
 import { useAppVersion } from '../../utils/useAppVersion';
 import { isBiometricAvailable, verifyBiometric, getBiometricPreference, setBiometricPreference } from '../../utils/biometric';
-import { ChevronRightIcon } from '../icons';
+import { ChevronRightIcon, CrownIcon, TargetIcon, ChartBarIcon, CalculatorIcon } from '../icons';
 import Modal from '../Modal';
 
 interface SettingsMainMenuProps {
@@ -124,7 +124,7 @@ const SettingsMainMenu: React.FC<SettingsMainMenuProps> = ({
     const context = useContext(AppContext);
     if (!context) throw new Error("SettingsMainMenu missing AppContext");
     
-    const { userProfile, showToast, updateUserProfile } = context;
+    const { userProfile, showToast, updateUserProfile, setCurrentTab } = context;
     const { t } = useTranslation();
     const appVersion = useAppVersion();
 
@@ -279,41 +279,92 @@ Usuário: ${userProfile.name} (${userProfile.email})
                     <p className="text-xs text-slate-500 dark:text-neutral-400 truncate mt-0.5 font-normal">
                         {userProfile.email || 'lucas@exemplo.com'}
                     </p>
-                    {userProfile.isPremium ? (
+                    {userProfile.isPremium && (
                         <span className="inline-flex items-center gap-1 mt-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                            👑 Assinante PRO
+                            👑 {t('menu.proMember')}
                         </span>
-                    ) : (
-                        <button 
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setCurrentView('premium'); }} 
-                            className="inline-flex items-center gap-1 mt-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm active:scale-95 transition-all"
-                        >
-                            👑 Seja PRO
-                        </button>
                     )}
                 </div>
             </div>
 
-            {/* Gamification Streak & Conquistas */}
-            <div 
+            {/* Plano */}
+            {userProfile.isPremium ? (
+                <div className="bg-white dark:bg-[#111111] border border-amber-500/25 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <span className="shrink-0 w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                            <CrownIcon className="h-5 w-5 text-amber-500" />
+                        </span>
+                        <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white">{t('menu.planProActive')}</p>
+                            <p className="text-xs text-slate-500 dark:text-neutral-400 truncate">{t('menu.planProDesc')}</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => window.open('https://play.google.com/store/account/subscriptions?sku=sobcontrole_premium&package=com.sobcontrole.app', '_system')}
+                        className="shrink-0 text-xs font-semibold text-amber-600 dark:text-amber-400 px-3 py-2 rounded-xl bg-amber-500/10 active:scale-95 transition-transform"
+                    >
+                        {t('menu.manageSubscription')}
+                    </button>
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    onClick={() => setCurrentView('premium')}
+                    className="w-full text-left rounded-2xl p-4 bg-gradient-to-br from-brand-accent to-brand-accent-hover text-white shadow-lg shadow-brand-accent/20 active:scale-[0.99] transition-transform"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="shrink-0 w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                            <CrownIcon className="h-5 w-5 text-white" />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold">{t('menu.planFreeTitle')}</p>
+                            <p className="text-xs text-white/85 leading-snug">{t('menu.planFreeDesc')}</p>
+                        </div>
+                        <ChevronRightIcon className="h-5 w-5 text-white/90 shrink-0" />
+                    </div>
+                </button>
+            )}
+
+            {/* Atalhos */}
+            <div className="grid grid-cols-4 gap-2">
+                {[
+                    { label: t('menu.shortcut.goals'), icon: TargetIcon, color: 'text-emerald-500', onClick: () => { setCurrentView('main'); setCurrentTab('metas'); } },
+                    { label: t('menu.shortcut.assistant'), icon: SparklesIcon, color: 'text-brand-accent', onClick: () => setCurrentView('chat') },
+                    { label: t('menu.shortcut.annualReport'), icon: ChartBarIcon, color: 'text-sky-500', onClick: () => setCurrentView('anual') },
+                    { label: t('menu.shortcut.calculator'), icon: CalculatorIcon, color: 'text-violet-500', onClick: () => setCurrentView('calculadora') },
+                ].map(item => (
+                    <button
+                        key={item.label}
+                        type="button"
+                        onClick={item.onClick}
+                        className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] shadow-sm active:scale-95 transition-transform"
+                    >
+                        <span className={`w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/[0.05] flex items-center justify-center ${item.color}`}>
+                            <item.icon className="h-5 w-5" />
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-700 dark:text-neutral-300 text-center leading-tight">{item.label}</span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Sequência e conquistas */}
+            <div
                 onClick={() => setMenuSubView('achievements')}
-                className="bg-white dark:bg-[#111111] border border-amber-500/20 dark:border-white/[0.06] rounded-2xl p-3.5 flex items-center justify-between cursor-pointer hover:border-amber-500/40 dark:hover:border-white/[0.12] active:scale-[0.99] transition-all shadow-sm group"
+                className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3.5 flex items-center justify-between cursor-pointer hover:border-amber-500/40 dark:hover:border-white/[0.12] active:scale-[0.99] transition-all shadow-sm group"
             >
-                <div className="flex items-center gap-3">
-                    <span className="text-base w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">🔥</span>
-                    <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-neutral-200">
-                        {currentStreak === 1 
-                            ? '1 dia de ofensiva' 
-                            : currentStreak > 1 
-                            ? `${currentStreak} dias consecutivos de ofensiva!` 
-                            : 'Mantenha o foco diário!'}
-                    </span>
+                <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-base w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">🔥</span>
+                    <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-neutral-200 truncate">
+                            {currentStreak > 0
+                                ? t(currentStreak === 1 ? 'menu.streakOne' : 'menu.streakMany', { days: currentStreak })
+                                : t('menu.streakNone')}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-neutral-400">{t('menu.badgesCount', { count: (userProfile.badges || []).length })}</p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform">
-                    <span>Ver Conquistas</span>
-                    <ChevronRightIcon className="h-3.5 w-3.5" />
-                </div>
+                <ChevronRightIcon className="h-4 w-4 text-slate-400 dark:text-neutral-600 group-hover:translate-x-0.5 transition-transform shrink-0" />
             </div>
 
             {/* GESTÃO & FINANÇAS */}
