@@ -1036,6 +1036,21 @@ const es: TranslationDictionary = {
   'management.onlyThis': 'Solo esta',
   'management.thisAndNext': 'Esta y las siguientes',
   'management.payMethod': 'Pago',
+
+  // Textos que faltavam (apareciam como chave na tela)
+  'update.title': "¡Actualización disponible!",
+  'update.subtitle': "Hay una nueva versión de SobControle en Play Store.",
+  'update.button': "Actualizar en Play Store",
+  'common.later': "Recordar más tarde",
+  'common.deleted': "Elemento eliminado",
+  'common.clear': "Limpiar",
+  'common.years': "años",
+  'common.months': "meses",
+  'data.importHistoryCleared': "Historial de importación borrado",
+  'data.importedFiles': "Archivos procesados",
+  'payMethod.transfer': "Transferencia",
+  'newTx.noAccountLinked': "Ninguna cuenta vinculada",
+  'tx.recurring': "Recurrente",
 };
 
 export default es;
