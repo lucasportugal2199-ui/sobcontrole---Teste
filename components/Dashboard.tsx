@@ -279,7 +279,8 @@ const Dashboard: React.FC = () => {
             let rec = 0, desp = 0;
             for (const tx of monthTxs) {
                 if (tx.tipo === 'entrada') rec += Number(tx.valor || 0);
-                else desp += Number(tx.valor || 0);
+                // Transferência entre contas não é despesa
+                else if (tx.tipo === 'saida') desp += Number(tx.valor || 0);
             }
 
             // 3. Aplica o fluxo deste mês ao saldo acumulado (running balance)
@@ -294,6 +295,12 @@ const Dashboard: React.FC = () => {
                 Saldo: !isFutureMonth ? currentRunningBalance : undefined,
                 SaldoPrevisto: (isFutureMonth || isCurrentMonth) ? currentRunningBalance : undefined
             });
+        }
+
+        // Quem começou a usar há pouco tempo via meses zerados no início do gráfico:
+        // remove os meses iniciais sem movimento e sem saldo (mantém pelo menos 3)
+        while (data.length > 3 && data[0].Receitas === 0 && data[0].Despesas === 0 && !data[0].Saldo) {
+            data.shift();
         }
         return data;
     }, [allData, currentDate]);
