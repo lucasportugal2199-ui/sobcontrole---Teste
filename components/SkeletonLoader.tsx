@@ -1,53 +1,33 @@
 import React from 'react';
+import { LogoIcon } from './icons';
 
-const SkeletonLoader: React.FC = () => {
-    const SkeletonBlock: React.FC<{ className?: string }> = ({ className }) => (
-        <div className={`bg-slate-200 dark:bg-dark-surface/80 rounded-md skeleton-pulse ${className}`} />
-    );
+interface SkeletonLoaderProps {
+    message?: string;
+}
 
+const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({ message }) => {
     return (
-        <div className="bg-slate-50 dark:bg-dark-bg p-4 h-full overflow-hidden">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <div className="w-8 h-8" />
-                <SkeletonBlock className="w-40 h-7" />
-                <SkeletonBlock className="w-8 h-8 rounded-full" />
-            </div>
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white px-6 select-none transition-colors duration-300">
+            {/* Glow sutil atrás do logo */}
+            <div className="relative flex flex-col items-center">
+                <div className="absolute -inset-6 bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
 
-            {/* Month Selector */}
-            <div className="flex items-center justify-between mt-4 bg-white dark:bg-dark-surface/50 rounded-xl p-2 w-full mb-6">
-                <SkeletonBlock className="w-10 h-10 rounded-full" />
-                <SkeletonBlock className="w-48 h-8" />
-                <SkeletonBlock className="w-10 h-10 rounded-full" />
-            </div>
-
-            {/* Lancamento Form */}
-            <div className="bg-white dark:bg-dark-surface/50 p-4 rounded-xl mb-6 space-y-4">
-                <SkeletonBlock className="w-32 h-6 mb-4" />
-                <SkeletonBlock className="w-full h-12" />
-                <div className="grid grid-cols-2 gap-4">
-                    <SkeletonBlock className="h-12" />
-                    <SkeletonBlock className="h-12" />
+                {/* Ícone oficial do app em tamanho e destaque nobre */}
+                <div className="relative flex items-center justify-center">
+                    <LogoIcon className="h-20 w-20 sm:h-24 sm:w-24 text-slate-900 dark:text-white drop-shadow-xl animate-pulse" />
                 </div>
-                <SkeletonBlock className="w-full h-12" />
-                <SkeletonBlock className="w-full h-12" />
-                <SkeletonBlock className="w-full h-12" />
-            </div>
 
-            {/* Daily History */}
-            <div>
-                <SkeletonBlock className="w-32 h-6 mb-4" />
-                <div className="space-y-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="bg-white dark:bg-dark-surface/50 p-3 rounded-lg flex items-center gap-4">
-                            <SkeletonBlock className="w-9 h-9 rounded-full flex-shrink-0" />
-                            <div className="flex-grow grid grid-cols-3 gap-2">
-                                <SkeletonBlock className="h-8" />
-                                <SkeletonBlock className="h-8" />
-                                <SkeletonBlock className="h-8" />
-                            </div>
-                        </div>
-                    ))}
+                {/* Nome do aplicativo com tipografia oficial */}
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-4">
+                    Sob<span className="text-blue-600 dark:text-blue-400">Controle</span>
+                </h1>
+
+                {/* Indicador refinado e limpo de carregamento */}
+                <div className="flex items-center gap-2.5 mt-6 px-3.5 py-1.5 rounded-full bg-slate-200/50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.06]">
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 dark:border-white/20 border-t-blue-600 dark:border-t-blue-400 animate-spin shrink-0" />
+                    <span className="text-xs font-medium text-slate-600 dark:text-neutral-300 tracking-normal">
+                        {message || 'Carregando...'}
+                    </span>
                 </div>
             </div>
         </div>

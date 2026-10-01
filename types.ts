@@ -10,6 +10,7 @@ export interface CreditCard {
   dueDay: number;
   limit: number;
   color: string;
+  accountId?: string;
 }
 
 export interface UserProfile {
@@ -24,8 +25,15 @@ export interface UserProfile {
   currentStreak?: number;
   lastUsageDate?: string;
   aiScansCount?: number;
+  cfoInteractionsCount?: number;
+  cfoDailyQueriesCount?: number;
+  cfoLastQueryDate?: string;
   hasSeenTutorial?: boolean;
   hasAnsweredNotificationPrompt?: boolean;
+  simplifiedMode?: boolean;
+  dismissedTips?: string[];
+  locale?: string;
+  currency?: string;
 }
 
 export type AssetType = 'acao' | 'crypto' | 'fixa' | 'fisico' | 'outros';

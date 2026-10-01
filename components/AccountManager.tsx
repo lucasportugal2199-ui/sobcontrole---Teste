@@ -1,12 +1,15 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
+import { useTranslation } from '../i18n';
 import {
     ArrowLeftIcon, PlusIcon, InformationCircleIcon,
-    ShieldCheckIcon, TrashIcon, EditIcon, CalendarIcon
+    ShieldCheckIcon, TrashIcon, EditIcon, CalendarIcon,
+    BankIcon, PiggyBankIcon, WalletIcon, TrendingUpIcon, ChevronRightIcon
 } from './icons';
-import { formatCurrency, parseCurrency, formatCurrencyForInput, calculateAccountBalance } from '../utils/helpers';
+import { formatCurrency, parseCurrency, formatCurrencyForInput, calculateAccountBalance, getSaldoLimitDate, formatDateToInput } from '../utils/helpers';
 import Modal from './Modal';
 import Calendar from './Calendar';
+import ListPickerModal from './ListPickerModal';
 import { COLOR_PALETTE } from '../constants';
 import { BankLogoSVG, POPULAR_BANKS, getBankLogo } from './BankLogo';
 
@@ -14,39 +17,73 @@ interface AccountManagerProps {
     title?: string;
 }
 
-const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas" }) => {
+const getAccountIcon = (type: string, className = "h-6 w-6") => {
+    switch (type) {
+        case 'Poupança':
+            return <PiggyBankIcon className={className} />;
+        case 'Dinheiro':
+            return <WalletIcon className={className} />;
+        case 'Investimento':
+            return <TrendingUpIcon className={className} />;
+        default:
+            return <BankIcon className={className} />;
+    }
+};
+
+const AccountManager: React.FC<AccountManagerProps> = ({ title }) => {
     const context = useContext(AppContext);
     if (!context) throw new Error("AccountManager missing AppContext");
 
     const {
         userProfile, accounts, allTransactions, currentDate,
         handleCreateBankAccount, handleUpdateBankAccount, handleDeleteBankAccount,
-        setCurrentView, handleLancamentoSubmit, showToast
+        setCurrentView, goBackView, handleLancamentoSubmit, showToast
     } = context;
+
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
+    const displayTitle = title || t('accountManager.title');
+
+    const getAccountTypeLabel = (type: string) => {
+        const keyMap: { [key: string]: string } = {
+            'corrente': 'accountManager.type.corrente',
+            'poupança': 'accountManager.type.poupanca',
+            'poupanca': 'accountManager.type.poupanca',
+            'investimento': 'accountManager.type.investimento',
+            'dinheiro': 'accountManager.type.dinheiro',
+            'outros': 'accountManager.type.outros'
+        };
+        const key = keyMap[type.toLowerCase()];
+        return key ? t(key) : type;
+    };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
+    const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
     const [form, setForm] = useState({
         bankName: '',
         balance: '',
-        initialDate: new Date().toISOString().split('T')[0],
+        initialDate: formatDateToInput(new Date()),
         accountType: 'Corrente',
         color: COLOR_PALETTE[0]
     });
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
     const [isColorDropdownOpen, setIsColorDropdownOpen] = useState(false);
+    const [isAccountTypePickerOpen, setIsAccountTypePickerOpen] = useState(false);
 
     const openModal = (acc?: any) => {
         setIsBankDropdownOpen(false);
         setIsColorDropdownOpen(false);
+        setIsAccountTypePickerOpen(false);
         if (acc) {
             setEditingAccountId(acc.id);
-            const dynamicBalance = calculateAccountBalance(acc.id, allTransactions);
+            const dynamicBalance = calculateAccountBalance(acc.id, allTransactions, new Date());
             setForm({
                 bankName: acc.bankName,
                 balance: formatCurrencyForInput(dynamicBalance.toFixed(2)),
-                initialDate: acc.initialDate || new Date().toISOString().split('T')[0],
+                initialDate: acc.initialDate || formatDateToInput(new Date()),
                 accountType: acc.accountType,
                 color: acc.color
             });
@@ -55,7 +92,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
             setForm({
                 bankName: '',
                 balance: '',
-                initialDate: new Date().toISOString().split('T')[0],
+                initialDate: formatDateToInput(new Date()),
                 accountType: 'Corrente',
                 color: COLOR_PALETTE[0]
             });
@@ -79,7 +116,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
             handleUpdateBankAccount(editingAccountId, accountData);
             
             // Adjust balance dynamically
-            const currentBalance = calculateAccountBalance(editingAccountId, allTransactions);
+            const currentBalance = calculateAccountBalance(editingAccountId, allTransactions, new Date());
             const targetBalance = parseCurrency(form.balance);
             const difference = targetBalance - currentBalance;
             
@@ -90,7 +127,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                     categoria: difference > 0 ? 'Investimentos' : 'Outros',
                     paymentMethod: 'debito',
                     accountId: editingAccountId,
-                    descricao: `Ajuste de Saldo: ${form.bankName}`,
+                    descricao: `${t('accountManager.balanceAdjustment')}: ${form.bankName}`,
                     data: new Date().toISOString().split('T')[0],
                     isRecurring: false,
                     isInstallment: false
@@ -104,15 +141,22 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-dark-bg h-full flex flex-col overflow-hidden text-slate-900 dark:text-white">
-            <header className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-dark-bg/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between pt-[calc(1rem+env(safe-area-inset-top))]">
+        <div className="bg-light-card-elevated dark:bg-dark-bg h-full flex flex-col overflow-hidden text-light-text dark:text-dark-text">
+            <header className="p-4 border-b border-light-border dark:border-dark-elevated bg-white/80 dark:bg-dark-bg/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between pt-[calc(1rem+var(--sat))]">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => setCurrentView('menu')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-surface transition">
+                    <button onClick={goBackView} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-surface transition">
                         <ArrowLeftIcon className="h-6 w-6 " />
                     </button>
                     <div>
-                        <h1 className="text-lg font-black tracking-tighter uppercase">{title}</h1>
-                        <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">Saldo Total: {formatCurrency(accounts.reduce((acc, curr) => acc + calculateAccountBalance(curr.id, allTransactions, currentDate), 0))}</span>
+                        <h1 className="text-lg font-black tracking-tighter uppercase">{displayTitle}</h1>
+                        {(() => {
+                            const totalAccountsBalance = accounts.reduce((acc, curr) => acc + calculateAccountBalance(curr.id, allTransactions, getSaldoLimitDate(currentDate)), 0);
+                            return (
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${totalAccountsBalance < 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                                    {t('accountManager.totalBalance')}: {formatCurrency(totalAccountsBalance, appLocale, appCurrency)}
+                                </span>
+                            );
+                        })()}
                     </div>
                 </div>
                 <button
@@ -125,57 +169,52 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
 
             <main className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar pb-24">
                 {accounts.length > 0 ? (
-                    <div className="space-y-3">
-                        {accounts.map(acc => (
-                            <div key={acc.id} className="bg-white dark:bg-dark-surface p-5 rounded-[32px] border border-slate-100 dark:border-slate-700 flex items-center justify-between shadow-sm">
-                                <div className="flex items-center gap-4">
-                                    {getBankLogo(acc.bankName, "w-12 h-12 rounded-2xl shadow-inner") || (
-                                        <div
-                                            className="h-12 w-12 rounded-2xl flex items-center justify-center text-xl text-white font-black shadow-inner"
-                                            style={{ backgroundColor: acc.color }}
-                                        >
-                                            {acc.bankName.charAt(0).toUpperCase()}
+                    <div className="divide-y divide-light-border dark:divide-dark-elevated">
+                        {accounts.map(acc => {
+                            const accBal = calculateAccountBalance(acc.id, allTransactions, getSaldoLimitDate(currentDate));
+                            return (
+                                <div 
+                                    key={acc.id} 
+                                    onClick={() => openModal(acc)}
+                                    className="flex items-center justify-between py-4 active:opacity-75 cursor-pointer transition-all"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {getBankLogo(acc.bankName, "w-6 h-6 rounded-lg flex-shrink-0 overflow-hidden") || (
+                                            <div style={{ color: acc.color }}>
+                                                {getAccountIcon(acc.accountType, "h-6 w-6 flex-shrink-0")}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="font-bold text-base text-light-text dark:text-dark-text">{acc.bankName}</p>
+                                            <p className="text-[10px] font-bold text-light-text-muted dark:text-dark-text-muted uppercase tracking-widest">{getAccountTypeLabel(acc.accountType)}</p>
                                         </div>
-                                    )}
-                                    <div>
-                                        <p className="font-black tracking-tight">{acc.bankName}</p>
-                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{acc.accountType}</p>
-                                        <p className="text-sm font-black text-emerald-500 mt-0.5">{formatCurrency(calculateAccountBalance(acc.id, allTransactions, currentDate))}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2.5">
+                                        <span className={`font-bold text-base ${accBal < 0 ? 'text-rose-500' : 'text-light-text dark:text-dark-text'}`}>
+                                            {formatCurrency(accBal, appLocale, appCurrency)}
+                                        </span>
+                                        <ChevronRightIcon className="h-4 w-4 text-slate-400 dark:text-slate-600 flex-shrink-0" />
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => openModal(acc)}
-                                        className="p-2 text-slate-400 hover:text-light-accent transition-colors"
-                                    >
-                                        <EditIcon className="h-5 w-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteBankAccount(acc.id)}
-                                        className="p-2 text-slate-400 hover:text-rose-500 transition-colors"
-                                    >
-                                        <TrashIcon className="h-5 w-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
-                    <div className="py-20 text-center px-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[40px] opacity-50">
+                    <div className="py-20 text-center px-8 border-2 border-dashed border-light-border dark:border-dark-elevated rounded-[40px] opacity-50">
                         <InformationCircleIcon className="h-12 w-12 mx-auto mb-4 text-slate-300" />
-                        <h2 className="text-lg font-black uppercase tracking-tighter mb-2">Sem contas registradas</h2>
-                        <p className="text-sm font-bold text-slate-500 leading-snug">Adicione suas contas bancárias ou carteiras para ver seu saldo unificado.</p>
+                        <h2 className="text-lg font-black uppercase tracking-tighter mb-2">{t('accountManager.noAccountsRegistered')}</h2>
+                        <p className="text-sm font-bold text-slate-500 leading-snug">{t('accountManager.noAccountsDesc')}</p>
                     </div>
                 )}
 
                 <div className="bg-teal-50 dark:bg-teal-900/10 border border-teal-100 dark:border-teal-900/30 p-5 rounded-[32px] flex items-start gap-4">
                     <div className="p-2 bg-teal-100 dark:bg-teal-900/40 rounded-xl mt-1">
-                        <ShieldCheckIcon className="h-5 w-5 text-light-accent dark:text-dark-accent" />
+                        <ShieldCheckIcon className="h-5 w-5 text-light-accent dark:text-[#3B82F6]" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-light-accent dark:text-dark-accent uppercase tracking-widest">Saldo Centralizado</p>
-                        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
-                            O saldo total exibido aqui é a soma de todas as suas contas. Conforme você cadastra novas despesas ou receitas e vincula a uma conta, o valor é atualizado automaticamente.
+                        <p className="text-[10px] font-black text-light-accent dark:text-[#3B82F6] uppercase tracking-widest">{t('accountManager.centralizedBalance')}</p>
+                        <p className="text-[11px] font-bold text-light-text-secondary dark:text-dark-text-secondary leading-relaxed">
+                            {t('accountManager.centralizedBalanceDesc')}
                         </p>
                     </div>
                 </div>
@@ -184,25 +223,25 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <div className="space-y-6">
                     <h2 className="text-xl font-black uppercase tracking-tighter">
-                        {editingAccountId ? 'Editar Conta' : 'Nova Conta'}
+                        {editingAccountId ? t('accountManager.editAccount') : t('accountManager.newAccount')}
                     </h2>
 
                     <div className="space-y-4">
                         {/* Seletor de Banco Premium e Colapsável */}
                         <div className="relative">
-                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Instituição / Banco</label>
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.labelBank')}</label>
                             <button
                                 type="button"
                                 onClick={() => setIsBankDropdownOpen(!isBankDropdownOpen)}
-                                className="w-full bg-slate-100 dark:bg-dark-bg rounded-2xl py-4 px-5 font-bold text-slate-900 dark:text-white flex justify-between items-center transition hover:bg-slate-200/50 dark:hover:bg-dark-surface"
+                                className="w-full bg-slate-100 dark:bg-dark-bg rounded-2xl py-4 px-5 font-bold text-light-text dark:text-dark-text flex justify-between items-center transition hover:bg-slate-200/50 dark:hover:bg-dark-surface"
                             >
                                 <div className="flex items-center gap-3">
                                     {getBankLogo(form.bankName, "w-6 h-6 rounded-full shadow-inner") || (
-                                        <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                                        <div className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-light-text-muted dark:text-dark-text-muted">
                                             🏦
                                         </div>
                                     )}
-                                    <span>{form.bankName || "Selecionar seu Banco..."}</span>
+                                    <span>{form.bankName || t('accountManager.selectBank')}</span>
                                 </div>
                                 <svg className={`h-4 w-4 text-slate-400 transition-transform ${isBankDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -210,8 +249,8 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                             </button>
 
                             {isBankDropdownOpen && (
-                                <div className="mt-2 bg-slate-50 dark:bg-dark-surface border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
-                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2 block ml-1">Bancos Principais</label>
+                                <div className="mt-2 bg-light-card-elevated dark:bg-dark-card border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
+                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-2 block ml-1">{t('accountManager.labelPopularBanks')}</label>
                                     <div className="grid grid-cols-7 gap-2 justify-items-center">
                                         {POPULAR_BANKS.map(bank => {
                                             const isSelected = form.bankName.toLowerCase().trim() === bank.name.toLowerCase();
@@ -237,13 +276,13 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                                     
                                     {/* Campo de texto livre caso não queira usar um banco popular ou queira personalizar o nome */}
                                     <div className="mt-3 border-t border-slate-200/50 dark:border-slate-800/80 pt-3">
-                                        <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Ou digite outro nome:</label>
+                                        <label className="text-[9px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.orTypeAnotherName')}</label>
                                         <input
                                             type="text"
                                             value={form.bankName}
                                             onChange={e => setForm({ ...form, bankName: e.target.value })}
-                                            placeholder="Ex: Minha Carteira, Outro Banco..."
-                                            className="w-full bg-slate-100/80 dark:bg-dark-bg border-none rounded-xl py-3 px-4 font-bold text-sm text-slate-900 dark:text-white"
+                                            placeholder={t('accountManager.placeholderBank')}
+                                            className="w-full bg-slate-100/80 dark:bg-dark-bg border-none rounded-xl py-3 px-4 font-bold text-sm text-light-text dark:text-dark-text"
                                         />
                                     </div>
                                 </div>
@@ -251,54 +290,68 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                         </div>
 
                         <div>
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Saldo Atual</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">{t('accountManager.labelCurrentBalance')}</label>
                             <input
                                 type="tel"
                                 value={form.balance}
                                 onChange={e => setForm({ ...form, balance: formatCurrencyForInput(e.target.value) })}
-                                placeholder="R$ 0,00"
+                                placeholder={t('accountManager.placeholderBalance')}
                                 className="w-full bg-slate-100 dark:bg-dark-bg border-none rounded-2xl py-4 px-5 font-bold text-emerald-500"
                             />
                         </div>
 
                         {!editingAccountId && (
                             <div>
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Data do Saldo Inicial</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">{t('accountManager.labelInitialBalanceDate')}</label>
                                 <button
                                     type="button"
                                     onClick={() => setIsCalendarOpen(true)}
-                                    className="w-full bg-slate-100 dark:bg-dark-bg border-none rounded-2xl py-4 px-5 font-bold text-slate-900 dark:text-white flex justify-between items-center"
+                                    className="w-full bg-slate-100 dark:bg-dark-bg border-none rounded-2xl py-4 px-5 font-bold text-light-text dark:text-dark-text flex justify-between items-center"
                                 >
-                                    <span>{new Date(form.initialDate + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                                    <span>{new Date(form.initialDate + 'T00:00:00').toLocaleDateString(appLocale)}</span>
                                     <CalendarIcon className="h-4 w-4 text-slate-400" />
                                 </button>
                             </div>
                         )}
 
+                        {/* Seletor de Tipo de Conta */}
                         <div>
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Tipo de Conta</label>
-                            <select
-                                value={form.accountType}
-                                onChange={e => setForm({ ...form, accountType: e.target.value })}
-                                className="w-full bg-slate-100 dark:bg-dark-bg border-none rounded-2xl py-4 px-5 font-bold text-slate-900 dark:text-white appearance-none"
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.labelAccountType')}</label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsAccountTypePickerOpen(true);
+                                    setIsBankDropdownOpen(false);
+                                    setIsColorDropdownOpen(false);
+                                }}
+                                className="w-full bg-slate-100 dark:bg-dark-bg border-none rounded-2xl py-4 px-5 font-bold text-light-text dark:text-dark-text flex justify-between items-center transition hover:bg-slate-200/50 dark:hover:bg-dark-surface"
                             >
-                                <option value="Corrente">Conta Corrente</option>
-                                <option value="Poupança">Poupança</option>
-                                <option value="Investimento">Investimento</option>
-                                <option value="Dinheiro">Dinheiro Físico</option>
-                                <option value="Outros">Outros</option>
-                            </select>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-light-text-muted dark:text-dark-text-muted">
+                                        {getAccountIcon(form.accountType, "w-5 h-5")}
+                                    </div>
+                                    <span>
+                                        {form.accountType === 'Corrente' ? t('accountManager.type.corrente') :
+                                         form.accountType === 'Poupança' ? t('accountManager.type.poupanca') :
+                                         form.accountType === 'Investimento' ? t('accountManager.type.investimento') :
+                                         form.accountType === 'Dinheiro' ? t('accountManager.type.dinheiro') : t('accountManager.type.outros')}
+                                    </span>
+                                </div>
+                                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
                         </div>
 
                         {/* Seletor de Cor Expansível */}
                         <div>
-                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Cor da Conta</label>
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">{t('accountManager.labelAccountColor')}</label>
                             <button
                                 type="button"
                                 onClick={() => setIsColorDropdownOpen(!isColorDropdownOpen)}
                                 className="w-full bg-slate-100 dark:bg-dark-bg rounded-2xl py-3 px-5 flex justify-between items-center transition hover:bg-slate-200/50 dark:hover:bg-dark-surface"
                             >
-                                <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Personalizar Cor</span>
+                                <span className="text-sm font-bold text-light-text-muted dark:text-dark-text-muted">{t('accountManager.customizeColor')}</span>
                                 <div className="flex items-center gap-2">
                                     <div
                                         className="h-7 w-7 rounded-full border-2 border-white dark:border-slate-800 shadow-md"
@@ -311,7 +364,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                             </button>
 
                             {isColorDropdownOpen && (
-                                <div className="mt-2 bg-slate-50 dark:bg-dark-surface border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
+                                <div className="mt-2 bg-light-card-elevated dark:bg-dark-card border border-slate-200/60 dark:border-slate-800 p-3 rounded-2xl animate-fadeIn">
                                     <div className="grid grid-cols-6 gap-2 justify-items-center">
                                         {COLOR_PALETTE.map(c => (
                                             <button
@@ -331,18 +384,34 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleSubmit}
-                        className="w-full py-4 bg-light-accent text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-light-accent/30 active:scale-95 transition-all"
-                    >
-                        Salvar Conta
-                    </button>
+                    <div className="flex flex-col gap-3">
+                        <button
+                            onClick={handleSubmit}
+                            className="w-full py-3 bg-teal-600 dark:bg-teal-700 text-white rounded-xl font-bold uppercase tracking-widest active:scale-95 transition-all shadow-md hover:bg-teal-700 dark:hover:bg-teal-600"
+                        >
+                            {editingAccountId ? t('accountManager.saveChanges') : t('accountManager.saveAccount')}
+                        </button>
+
+                        {editingAccountId && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsModalOpen(false);
+                                    setDeletingAccountId(editingAccountId);
+                                }}
+                                className="w-full py-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all border border-rose-100 dark:border-rose-900/30 flex items-center justify-center gap-2"
+                            >
+                                <TrashIcon className="h-4 w-4" />
+                                <span>{t('accountManager.deleteAccount')}</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </Modal>
 
             <Modal isOpen={isCalendarOpen} onClose={() => setIsCalendarOpen(false)}>
                 <div className="text-center mb-4">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-tight">Data do Saldo Inicial</h3>
+                    <h3 className="text-lg font-bold text-light-text dark:text-dark-text uppercase tracking-tight">{t('accountManager.labelInitialBalanceDate')}</h3>
                 </div>
                 <Calendar
                     selectedDate={form.initialDate}
@@ -350,6 +419,55 @@ const AccountManager: React.FC<AccountManagerProps> = ({ title = "Minhas Contas"
                     initialDisplayDate={new Date(form.initialDate + 'T00:00:00')}
                 />
             </Modal>
+
+            <Modal isOpen={deletingAccountId !== null} onClose={() => setDeletingAccountId(null)} verticalAlign="popup">
+                <div className="space-y-4 text-center">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center text-rose-500 mb-2">
+                        <TrashIcon className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-lg font-bold text-light-text dark:text-dark-text uppercase tracking-tight">{t('accountManager.confirmDeleteTitle')}</h3>
+                    <p className="text-xs text-light-text-muted dark:text-dark-text-muted font-medium leading-relaxed">
+                        {t('accountManager.confirmDeleteDesc')}
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                            onClick={() => setDeletingAccountId(null)}
+                            className="w-full py-3 bg-slate-100 dark:bg-dark-bg text-light-text-secondary dark:text-dark-text-muted rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+                        >
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (deletingAccountId) {
+                                    handleDeleteBankAccount(deletingAccountId);
+                                    setDeletingAccountId(null);
+                                }
+                            }}
+                            className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-rose-500/10"
+                        >
+                            {t('common.delete') || 'Excluir'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            <ListPickerModal
+                isOpen={isAccountTypePickerOpen}
+                onClose={() => setIsAccountTypePickerOpen(false)}
+                title={t('accountManager.labelAccountType')}
+                items={[
+                    { id: 'Corrente', name: t('accountManager.type.corrente'), icon: <BankIcon className="h-5 w-5 text-slate-500" /> },
+                    { id: 'Poupança', name: t('accountManager.type.poupanca'), icon: <PiggyBankIcon className="h-5 w-5 text-slate-500" /> },
+                    { id: 'Investimento', name: t('accountManager.type.investimento'), icon: <TrendingUpIcon className="h-5 w-5 text-slate-500" /> },
+                    { id: 'Dinheiro', name: t('accountManager.type.dinheiro'), icon: <WalletIcon className="h-5 w-5 text-slate-500" /> },
+                    { id: 'Outros', name: t('accountManager.type.outros'), icon: <BankIcon className="h-5 w-5 text-slate-500" /> }
+                ]}
+                selectedId={form.accountType}
+                onSelect={item => {
+                    setForm({ ...form, accountType: item.id });
+                    setIsAccountTypePickerOpen(false);
+                }}
+            />
         </div>
     );
 };

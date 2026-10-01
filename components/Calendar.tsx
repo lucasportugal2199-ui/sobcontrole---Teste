@@ -3,6 +3,7 @@ import { MESES_NOMES } from '../constants';
 import { getDiasNoMes, formatDateToInput } from '../utils/helpers';
 import { ArrowLeftIcon, ArrowRightIcon } from './icons';
 import { Transaction } from '../types';
+import { useTranslation } from '../i18n';
 
 const Calendar: React.FC<{
   selectedDate: string;
@@ -12,6 +13,8 @@ const Calendar: React.FC<{
 }> = ({ selectedDate, onDateSelect, initialDisplayDate, transactions = [] }) => {
   const [displayDate, setDisplayDate] = useState(initialDisplayDate);
   const [viewMode, setViewMode] = useState<'days' | 'months' | 'years'>('days');
+  const { locale } = useTranslation();
+  const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
 
   const changeDisplayMonth = (direction: number) => {
     setDisplayDate(prev => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
@@ -21,7 +24,14 @@ const Calendar: React.FC<{
     setDisplayDate(prev => new Date(prev.getFullYear() + direction, prev.getMonth(), 1));
   };
 
-  const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const daysOfWeek = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(appLocale, { weekday: 'short' });
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(2026, 6, 5 + i); // 5 de Julho de 2026 é Domingo
+      const str = formatter.format(date).replace('.', '');
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    });
+  }, [appLocale]);
 
   const { calendarGrid, monthName, year } = useMemo(() => {
     const year = displayDate.getFullYear();
@@ -91,7 +101,7 @@ const Calendar: React.FC<{
         <button
           type="button"
           onClick={() => viewMode === 'days' ? changeDisplayMonth(-1) : viewMode === 'years' ? changeDisplayYear(-12) : changeDisplayYear(-1)}
-          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-800 dark:text-slate-200"
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-light-text dark:text-dark-text-secondary"
         >
           <ArrowLeftIcon className="h-5 w-5" />
         </button>
@@ -99,13 +109,13 @@ const Calendar: React.FC<{
         <div className="flex gap-1 font-bold">
           <button
             onClick={() => setViewMode(viewMode === 'months' ? 'days' : 'months')}
-            className="px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition-colors"
+            className="px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-light-text dark:text-dark-text transition-colors"
           >
             {monthName}
           </button>
           <button
             onClick={() => setViewMode(viewMode === 'years' ? 'days' : 'years')}
-            className="px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition-colors"
+            className="px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-light-text dark:text-dark-text transition-colors"
           >
             {year}
           </button>
@@ -114,7 +124,7 @@ const Calendar: React.FC<{
         <button
           type="button"
           onClick={() => viewMode === 'days' ? changeDisplayMonth(1) : viewMode === 'years' ? changeDisplayYear(12) : changeDisplayYear(1)}
-          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-800 dark:text-slate-200"
+          className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-light-text dark:text-dark-text-secondary"
         >
           <ArrowRightIcon className="h-5 w-5" />
         </button>
@@ -122,7 +132,7 @@ const Calendar: React.FC<{
 
       {viewMode === 'days' && (
         <>
-          <div className="grid grid-cols-7 gap-1 text-center text-xs text-slate-500 dark:text-slate-300 mb-2">
+          <div className="grid grid-cols-7 gap-1 text-center text-xs text-light-text-muted dark:text-dark-text-secondary mb-2">
             {daysOfWeek.map(day => <div key={day}>{day}</div>)}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -135,9 +145,9 @@ const Calendar: React.FC<{
                 if (isSelected) {
                   buttonClass += "bg-light-accent text-white";
                 } else if (isToday) {
-                  buttonClass += "bg-teal-100 dark:bg-teal-900/50 text-light-accent dark:text-dark-accent";
+                  buttonClass += "bg-teal-100 dark:bg-teal-900/50 text-light-accent dark:text-[#3B82F6]";
                 } else {
-                  buttonClass += "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700";
+                  buttonClass += "text-light-text dark:text-dark-text-secondary hover:bg-slate-100 dark:hover:bg-slate-700";
                 }
               } else {
                 buttonClass += "text-slate-400 dark:text-slate-400";
@@ -171,7 +181,7 @@ const Calendar: React.FC<{
                 setDisplayDate(new Date(displayDate.getFullYear(), index, 1));
                 setViewMode('days');
               }}
-              className={`py-4 rounded-xl font-bold text-sm transition-all ${displayDate.getMonth() === index ? 'bg-light-accent text-white shadow-lg shadow-light-accent/20' : 'bg-slate-50 dark:bg-dark-bg/50 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+              className={`py-4 rounded-xl font-bold text-sm transition-all ${displayDate.getMonth() === index ? 'bg-light-accent text-white shadow-lg shadow-light-accent/20' : 'bg-light-card-elevated dark:bg-dark-bg/50 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
             >
               {name.substring(0, 3)}
             </button>
@@ -188,7 +198,7 @@ const Calendar: React.FC<{
                 setDisplayDate(new Date(y, displayDate.getMonth(), 1));
                 setViewMode('days');
               }}
-              className={`py-4 rounded-xl font-bold text-sm transition-all ${displayDate.getFullYear() === y ? 'bg-light-accent text-white shadow-lg shadow-light-accent/20' : 'bg-slate-50 dark:bg-dark-bg/50 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+              className={`py-4 rounded-xl font-bold text-sm transition-all ${displayDate.getFullYear() === y ? 'bg-light-accent text-white shadow-lg shadow-light-accent/20' : 'bg-light-card-elevated dark:bg-dark-bg/50 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
             >
               {y}
             </button>

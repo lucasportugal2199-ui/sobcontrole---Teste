@@ -124,7 +124,13 @@ export const MoonIcon = React.memo(({ className = "h-6 w-6" }: { className?: str
 
 export const ViewGridIcon = React.memo(({ className = "h-5 w-5" }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+    </svg>
+));
+
+export const PhotoLibraryIcon = React.memo(({ className = "h-5 w-5" }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
     </svg>
 ));
 
@@ -160,26 +166,40 @@ export const CategoryIcon = React.memo(({ className = "h-6 w-6" }: { className?:
 
 export const TodayCalendarIcon = React.memo(({ day, className = "h-6 w-6" }: { day: number, className?: string }) => (
     <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="4" width="20" height="18" rx="3" fill="#F8FAFC" stroke="#CBD5E1" strokeWidth="1.5" />
-        <path d="M2 7C2 5.34315 3.34315 4 5 4H19C20.6569 4 22 5.34315 22 7V9H2V7Z" fill="#14B8A6" />
-        <rect x="6" y="2" width="2" height="4" rx="1" fill="#0F766E" />
-        <rect x="16" y="2" width="2" height="4" rx="1" fill="#0F766E" />
-        <text x="50%" y="19.5" textAnchor="middle" fontSize="12" fontWeight="800" fill="#14B8A6" style={{ fontFamily: 'sans-serif' }}>{String(day).padStart(2, '0')}</text>
+        <rect x="2" y="4" width="20" height="18" rx="3" className="fill-[#F8FAFC] dark:fill-dark-surface stroke-[#CBD5E1] dark:stroke-slate-800" strokeWidth="1.5" />
+        <path d="M2 7C2 5.34315 3.34315 4 5 4H19C20.6569 4 22 5.34315 22 7V9H2V7Z" className="fill-light-accent dark:fill-dark-accent" />
+        <rect x="6" y="2" width="2" height="4" rx="1" className="fill-amber-800 dark:fill-blue-900" />
+        <rect x="16" y="2" width="2" height="4" rx="1" className="fill-amber-800 dark:fill-blue-900" />
+        <text x="50%" y="19.5" textAnchor="middle" fontSize="12" fontWeight="800" className="fill-light-accent dark:fill-dark-accent" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>{String(day).padStart(2, '0')}</text>
     </svg>
 ));
 
 export const InvoiceDollarIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14 2V8H20" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 13H16" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 17H16" stroke="#14B8A6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" className="stroke-light-accent dark:stroke-dark-accent" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 2V8H20" className="stroke-light-accent dark:stroke-dark-accent" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 13H16" className="stroke-light-accent dark:stroke-dark-accent" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 17H16" className="stroke-light-accent dark:stroke-dark-accent" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 ));
 
 export const SparklesIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+    </svg>
+));
+
+export const AiAgentIcon = React.memo(({ className = "h-5 w-5", active = false }: { className?: string; active?: boolean }) => (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <path d="M12 2V5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="12" cy="2" r="1.5" fill="currentColor" />
+        <rect x="3.5" y="5.5" width="17" height="13" rx="4.5" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M1.75 10.5V13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M22.25 10.5V13.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <rect x="6.5" y="8" width="11" height="6" rx="2.5" fill="currentColor" fillOpacity={active ? 0.28 : 0.12} stroke="currentColor" strokeWidth="0.8" />
+        <circle cx="9.25" cy="11" r="1.25" fill="currentColor" />
+        <circle cx="14.75" cy="11" r="1.25" fill="currentColor" />
+        <path d="M10 16H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 ));
 
@@ -220,8 +240,8 @@ export const CameraIcon = React.memo(({ className = "h-6 w-6" }: { className?: s
     </svg>
 ));
 
-export const CreditCardIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+export const CreditCardIcon = React.memo(({ className = "h-6 w-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className} style={style}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
     </svg>
 ));
@@ -315,8 +335,12 @@ export const TrophyIcon = React.memo(({ className = "h-6 w-6" }: { className?: s
 ));
 
 export const FingerPrintIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.048-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 22a7 7 0 0 0 7-7c0-4.3-3-7-7-7s-7 2.7-7 7" />
+        <path d="M19 15.5a14 14 0 0 0-14 0" />
+        <path d="M12 2a13 13 0 0 0-11 10.4" />
+        <path d="M12 22a10 10 0 0 0 10-10c0-5.12-3.88-8.8-9-9" />
+        <path d="M8 15a4 4 0 0 1 8 0" />
     </svg>
 ));
 
@@ -401,7 +425,57 @@ export const GripVerticalIcon = React.memo(({ className = "h-6 w-6" }: { classNa
 ));
 
 export const CalculatorIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm2.498-4.501h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm2.504-4.501h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm2.498-4.501h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" />
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <rect x="4" y="2" width="16" height="20" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="8" y1="6" x2="16" y2="6" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="16" y1="14" x2="16" y2="18" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} />
     </svg>
 ));
+
+export const MenuIcon = React.memo(({ className = "h-6 w-6" }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+));
+
+export const CalopsitaIcon = React.memo(({ className = "h-8 w-8", alt = "Calopsita CFO" }: { className?: string; alt?: string }) => {
+    const [imgError, setImgError] = React.useState(false);
+
+    if (imgError) {
+        return (
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                {/* Topete / Crista Amarela da Calopsita */}
+                <path d="M21 5C19 0.5 14 1.5 12 3.5C10 5.5 11 10.5 15 12.5C11 8.5 7 12.5 9 17.5C11 20.5 15 18.5 18 17.5" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="#FBBF24" />
+                <path d="M22 9C23 3 27 2 29 4C31 7 29 12 24 14" stroke="#F59E0B" strokeWidth="2.2" strokeLinecap="round" fill="#FDE047" />
+                {/* Corpo e Cabeça */}
+                <ellipse cx="24" cy="28" rx="14" ry="14" fill="#CBD5E1" className="dark:fill-[#334155]" />
+                {/* Máscara Facial Amarela Característica */}
+                <path d="M14 25C14 19 19 16 24 16C29 16 34 19 34 25C34 31 29 34 24 34C19 34 14 31 14 25Z" fill="#FEF08A" />
+                {/* Bochechas Laranjas Clássicas de Calopsita */}
+                <circle cx="16.5" cy="27" r="3.2" fill="#F97316" />
+                <circle cx="31.5" cy="27" r="3.2" fill="#F97316" />
+                {/* Bico Curvado */}
+                <path d="M22 24C22 24 24 29.5 24 30C24 29.5 26 24 26 24C26 22 22 22 22 24Z" fill="#78716C" stroke="#57534E" strokeWidth="0.8" strokeLinejoin="round" />
+                {/* Olhinhos Curiosos com Brilho */}
+                <circle cx="19" cy="22" r="2.2" fill="#0F172A" />
+                <circle cx="18.3" cy="21.3" r="0.8" fill="#FFFFFF" />
+                <circle cx="29" cy="22" r="2.2" fill="#0F172A" />
+                <circle cx="28.3" cy="21.3" r="0.8" fill="#FFFFFF" />
+                {/* Gravatinha de CFO */}
+                <path d="M20.5 38L24 40.5L27.5 38L27.5 43L24 40.5L20.5 43Z" fill="#3B82F6" stroke="#1D4ED8" strokeWidth="0.8" />
+                <circle cx="24" cy="40.5" r="1.3" fill="#1E40AF" />
+            </svg>
+        );
+    }
+
+    return (
+        <img
+            src="/cfo-avatar.jpg"
+            alt={alt}
+            onError={() => setImgError(true)}
+            className={`${className} object-cover rounded-xl select-none`}
+            draggable={false}
+        />
+    );
+});

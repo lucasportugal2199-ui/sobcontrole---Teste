@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade de Ícones Extraídos - Figma</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 32px 16px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #0f172a;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+        .icon-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            color: #334155;
+            transition: background-color 0.2s;
+        }
+        .card:hover .icon-container {
+            background-color: #e2e8f0;
+        }
+        .icon-id {
+            font-weight: 700;
+            font-size: 14px;
+            color: #334155;
+        }
+        .icon-coords {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .copied-toast {
+            position: absolute;
+            bottom: 8px;
+            background: #22c55e;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .card.copied .copied-toast {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grade de Ícones do Figma</h1>
+        <p class="subtitle">Clique em qualquer ícone da lista abaixo para copiar o código do SVG e seu respectivo transform pronto para ser adicionado no código do SobControle!</p>
+        <div class="grid" id="icons-grid">
+            <!-- Os ícones serão injetados dinamicamente via JS client-side -->
+        </div>
+    </div>
+
+    <script>
+        // Função utilitária para buscar o JSON gerado
+        async function init() {
+            try {
+                let response;
+                try {
+                    response = await fetch('extracted_icons.json');
+                } catch(e) {
+                    response = await fetch('public/extracted_icons.json');
+                }
+                if (!response || !response.ok) {
+                    response = await fetch('public/extracted_icons.json');
+                }
+                const icons = await response.json();
+                renderGrid(icons);
+            } catch (err) {
+                console.error("Erro ao carregar os ícones:", err);
+                document.getElementById('icons-grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Não foi possível carregar os ícones extraídos. Certifique-se de acessar este arquivo a partir de um servidor local (como http://localhost) ou que a pasta .gemini/ está acessível.</p>';
+            }
+        }
+
+        function renderGrid(icons) {
+            const grid = document.getElementById('icons-grid');
+            grid.innerHTML = '';
+            
+            // Filtra lixo do header
+            const validIcons = icons.filter(icon => icon.content.length <= 2000);
+
+            validIcons.forEach(icon => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Formato do SVG com translação para exibição
+                const svgString = `<svg viewBox="0 0 100 100" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(${-icon.cellX}, ${-icon.cellY})">
+        ${icon.content}
+    </g>
+</svg>`;
+
+                card.innerHTML = `
+                    <div class="icon-container">
+                        ${svgString}
+                    </div>
+                    <div class="icon-id">ID #${icon.id}</div>
+                    <div class="icon-coords">Grid: ${icon.cellX}, ${icon.cellY}</div>
+                    <div class="copied-toast">Copiado!</div>
+                `;
+
+                card.addEventListener('click', () => {
+                    navigator.clipboard.writeText(svgString).then(() => {
+                        card.classList.add('copied');
+                        setTimeout(() => card.classList.remove('copied'), 1500);
+                    });
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

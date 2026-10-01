@@ -28,7 +28,7 @@ const ListPickerModal: React.FC<ListPickerModalProps> = ({
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="flex flex-col max-h-[70vh]">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 px-1">{title}</h3>
+                <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-6 px-1">{title}</h3>
                 
                 <div className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2">
                     <div className="space-y-1">
@@ -43,7 +43,7 @@ const ListPickerModal: React.FC<ListPickerModalProps> = ({
                                     }}
                                     className="w-full flex items-center justify-between p-4 rounded-xl transition-colors active:bg-slate-100 dark:active:bg-slate-700/50 group"
                                 >
-                                    <span className={`text-base font-semibold text-left flex-1 flex items-center gap-3 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'}`}>
+                                    <span className={`text-base font-semibold text-left flex-1 flex items-center gap-3 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-light-text dark:text-dark-text-secondary'}`}>
                                         <span className="w-9 h-9 flex items-center justify-center text-2xl leading-none flex-shrink-0 rounded-xl bg-slate-100 dark:bg-slate-700">
                                             {item.icon || '📂'}
                                         </span>

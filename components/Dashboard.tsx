@@ -1,69 +1,128 @@
 
 import React, { useMemo, useContext, useEffect, useState, useRef, Suspense } from 'react';
-import { getMonthKey, formatarMesAno, formatCurrency, getPreviousBalance, calculateDailyBalancesForMonth } from '../utils/helpers';
-import { MESES_NOMES } from '../constants';
+import { getMonthKey, formatarMesAno, getPreviousBalance, calculateDailyBalancesForMonth } from '../utils/helpers';
 import { Transaction } from '../types';
-import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, ChartBarIcon } from './icons';
+import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, ChartBarIcon, CreditCardIcon, InformationCircleIcon } from './icons';
 import { AppContext } from '../context/AppContext';
 import MonthYearPickerModal from './MonthYearPickerModal';
-import { SummaryWidget, AIInsightsWidget, QuickStatsWidget, BudgetWidget, PaymentMethodWidget, CreditCardInvoicesWidget, AccountBalancesWidget, Distribution502030Widget } from './dashboard/DashboardCards';
+import { ContextualTip } from './ContextualTip';
+import { SummaryWidget, AIInsightsWidget, QuickStatsWidget, BudgetWidget, PaymentMethodWidget, CreditCardInvoicesWidget, AccountBalancesWidget, Distribution502030Widget, PatrimonioWidget } from './dashboard/DashboardCards';
+import { InstallmentsWidget } from './dashboard/InstallmentsWidget';
+import SubscriptionsSettings from './settings/SubscriptionsSettings';
+import { getInstallmentList } from '../utils/installmentsHelper';
+import { useTranslation } from '../i18n';
+import { FinancialHealthScore, MonthlyComparison, SmartAlerts, DailyCashFlow, FixedVsVariable, TopCategoriesRanking, EndOfMonthForecast, SpendingPace, SavingsRateHistory } from './dashboard/templates/NewWidgets';
 
 const TrendsWidget = React.lazy(() => import('./dashboard/DashboardCharts').then(module => ({ default: module.TrendsWidget })));
 const CategoryPieWidget = React.lazy(() => import('./dashboard/DashboardCharts').then(module => ({ default: module.CategoryPieWidget })));
-const DailySpendingWidget = React.lazy(() => import('./dashboard/DashboardCharts').then(module => ({ default: module.DailySpendingWidget })));
 const SavingsRateWidget = React.lazy(() => import('./dashboard/DashboardCharts').then(module => ({ default: module.SavingsRateWidget })));
 
 const ChartSkeleton = () => (
-    <div className="w-full h-full min-h-[200px] flex items-center justify-center bg-light-bg dark:bg-dark-surface/30 rounded-lg">
+    <div className="w-full h-full min-h-[200px] flex items-center justify-center bg-light-bg dark:bg-dark-card/30 rounded-lg">
         <div className="h-40 w-40 rounded-full bg-slate-200 dark:bg-slate-600/50"></div>
     </div>
 );
 
 // --- 1. Novo Componente Empty State Visual ---
-const EmptyGraphState = ({ message, onAction }: { message: string, onAction: () => void }) => (
-    <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full min-h-[200px] animate-in fade-in duration-500">
-        <div className="bg-light-bg dark:bg-dark-surface p-4 rounded-full mb-3">
-            <ChartBarIcon className="h-8 w-8 text-slate-400 dark:text-slate-400" />
+const EmptyGraphState = ({ message, onAction }: { message: string, onAction: () => void }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="flex flex-col items-center justify-center py-8 px-4 text-center h-full min-h-[200px] animate-in fade-in duration-500">
+            <div className="bg-light-bg-secondary dark:bg-white/[0.04] p-4 rounded-full mb-3">
+                <ChartBarIcon className="h-8 w-8 text-slate-400 dark:text-dark-text-muted" />
+            </div>
+            <p className="text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-5 max-w-[220px] leading-relaxed">{message}</p>
+            <button
+                onClick={onAction}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#EA580C] hover:bg-[#F97316] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-lg shadow-[#EA580C]/20"
+            >
+                <PlusIcon className="h-4 w-4" />
+                {t('dashboard.launchNow')}
+            </button>
         </div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-300 mb-5 max-w-[220px] leading-relaxed">{message}</p>
-        <button
-            onClick={onAction}
-            className="flex items-center gap-2 px-5 py-2.5 bg-light-accent hover:opacity-90 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-lg shadow-light-accent/20"
-        >
-            <PlusIcon className="h-4 w-4" />
-            Lançar Agora
-        </button>
-    </div>
-);
+    );
+};
+
+// ...
+// e no avatar fallback e streak:
 
 const Dashboard: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("Dashboard must be used within an AppProvider");
-    // --- 2. Adicionado setIsNewTransactionOpen ao destructure do context ---
-    const { currentDate, changeMonth, setCurrentDate, allData, categoryColors, categorias, theme, dashboardLayout, handleUpdateLayout, savingsGoals, allTransactions, budgets, setCurrentView, creditCards, accounts, setIsTransactionMenuOpen, userProfile, handleAddCreditCard, handleLancamentoSubmit } = context;
+    const { currentDate, changeMonth, setCurrentDate, allData, categoryColors, categorias, theme, dashboardLayout, handleUpdateLayout, savingsGoals, allTransactions, budgets, setCurrentView, creditCards, accounts, setIsTransactionMenuOpen, userProfile, handleAddCreditCard, handleLancamentoSubmit, setShowTutorial, assets } = context;
+    const { t, monthNames, locale } = useTranslation();
 
     // Mocks já injetados em sessão anterior
 
     useEffect(() => {
         const idealOrder = [
-            'resumo', 'contas', 'invoices', 'resumoDiario', 'fluxoDiario', 
-            'orcamento', 'insights', 'distribuicao502030', 'tendencias', 
-            'despesasCategoria', 'receitasCategoria', 'metodosPagamentoChart', 'taxaPoupanca'
+            'resumo',
+            'monthlyComparison',
+            'contas',
+            'patrimonio',
+            'invoices',
+            'installments',
+            'endOfMonthForecast',
+            'dailyCashFlow',
+            'fixedVsVariable',
+            'orcamento',
+            'tendencias',
+            'despesasCategoria',
+            'receitasCategoria',
+            'resumoDiario',
+            'spendingPace',
+            'savingsRateHistory',
+            'taxaPoupanca',
+            'distribuicao502030',
+            'metodosPagamentoChart',
+            'insights'
         ];
         
-        const hasAllKeys = idealOrder.every(k => dashboardLayout.order.includes(k));
+        // Filtra chaves do layout atual que não pertencem ao idealOrder (remove obsoletos)
+        const currentValidOrder = dashboardLayout.order.filter(k => idealOrder.includes(k));
         
-        // Se estiver faltando alguma chave (novo widget), forçamos o layout ideal para organizar tudo
-        if (!hasAllKeys) {
+        // Encontra chaves que faltam no layout atual
+        const missingKeys = idealOrder.filter(k => !currentValidOrder.includes(k));
+        
+        // Se houver qualquer discrepância (obsoletos a remover ou novos a adicionar)
+        if (missingKeys.length > 0 || currentValidOrder.length !== dashboardLayout.order.length) {
+            const nextOrder = [...currentValidOrder, ...missingKeys];
+            const nextVisibility = { ...dashboardLayout.visibility };
+            
+            // Garante visibilidade das novas chaves
+            missingKeys.forEach(k => {
+                nextVisibility[k] = true;
+            });
+            
+            // Limpa chaves obsoletas da visibilidade
+            Object.keys(nextVisibility).forEach(k => {
+                if (!idealOrder.includes(k)) {
+                    delete nextVisibility[k];
+                }
+            });
+
             handleUpdateLayout({
-                order: idealOrder,
-                visibility: idealOrder.reduce((acc, key) => ({ ...acc, [key]: true }), { ...dashboardLayout.visibility })
+                order: nextOrder,
+                visibility: nextVisibility
             });
         }
     }, [dashboardLayout.order, dashboardLayout.visibility, handleUpdateLayout]);
 
     const [isMonthYearPickerOpen, setIsMonthYearPickerOpen] = useState(false);
     const [balanceAnimationKey, setBalanceAnimationKey] = useState(0);
+    const [financasSubTab, setFinancasSubTab] = useState<'geral' | 'parcelas'>('geral');
+    const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+    const mainScrollRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        if (mainScrollRef.current) {
+            mainScrollRef.current.scrollTop = 0;
+        }
+    }, [financasSubTab]);
+
+    const activeInstallmentsCount = useMemo(() => {
+        return getInstallmentList(allTransactions, creditCards).length;
+    }, [allTransactions, creditCards]);
 
     // --- Lógica de Swipe (refs para evitar re-renders nos gráficos) ---
     const touchStartRef = useRef<{ x: number, y: number } | null>(null);
@@ -80,6 +139,7 @@ const Dashboard: React.FC = () => {
     };
 
     const onTouchEnd = () => {
+        if (financasSubTab !== 'geral') return;
         const start = touchStartRef.current;
         const end = touchEndRef.current;
         if (!start || !end) return;
@@ -100,6 +160,11 @@ const Dashboard: React.FC = () => {
         const monthKey = getMonthKey(currentDate);
         return (allData[monthKey]?.transactions || []).filter(tx => tx && typeof tx === 'object');
     }, [allData, currentDate]);
+
+    const previousBalance = useMemo(() => {
+        const currentMonthKey = getMonthKey(currentDate);
+        return getPreviousBalance(currentMonthKey, allData);
+    }, [currentDate, allData]);
 
     const { totalReceitas, totalDespesas, saldoAtual, saldoPrevisto, despesasPorCategoria, receitasPorCategoria, maxExpense, statsMetodoPagamento, savingsRate } = useMemo(() => {
         let receitas = 0; let despesas = 0;
@@ -160,12 +225,12 @@ const Dashboard: React.FC = () => {
             if (sorted.length <= 5) return sorted;
             const top5 = sorted.slice(0, 5);
             const others = sorted.slice(5).reduce((sum, item) => sum + item.value, 0);
-            return [...top5, { name: 'Outros', value: others }];
+            return [...top5, { name: t('catIcon.box') || 'Outros', value: others }];
         };
 
         const chartDataMetodoPagamento = [
-            { name: 'Débito', value: debitoTotal },
-            { name: 'Crédito', value: creditoTotal }
+            { name: t('txType.debit') || 'Débito', value: debitoTotal },
+            { name: t('txType.credit') || 'Crédito', value: creditoTotal }
         ];
 
         return {
@@ -181,48 +246,7 @@ const Dashboard: React.FC = () => {
         };
     }, [filteredData, allData, currentDate]);
 
-    const dailySpendingData = useMemo(() => {
-        const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-        const data = [];
-        let accumulated = 0;
 
-        // Mapear gastos por dia
-        const spendingByDay: Record<number, number> = {};
-        filteredData.forEach(tx => {
-            if (tx.tipo === 'saida') {
-                const day = new Date(tx.data + 'T00:00:00').getDate();
-                spendingByDay[day] = (spendingByDay[day] || 0) + Number(tx.valor || 0);
-            }
-        });
-
-        const today = new Date();
-        const isPastMonth = currentDate.getFullYear() < today.getFullYear() || (currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() < today.getMonth());
-        const isCurrentMonth = currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear();
-        const lastDayToShow = isPastMonth ? daysInMonth : (isCurrentMonth ? today.getDate() : 0);
-
-        const currentMonthKey = getMonthKey(currentDate);
-        const previousBalance = getPreviousBalance(currentMonthKey, allData);
-        const dailyBalances = calculateDailyBalancesForMonth(filteredData, previousBalance, currentDate.getFullYear(), currentDate.getMonth());
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const saldoNoDia = dailyBalances[i - 1]?.saldo || 0;
-            if (i <= lastDayToShow) {
-                accumulated += (spendingByDay[i] || 0);
-                data.push({ 
-                    day: i, 
-                    value: accumulated,
-                    SaldoRealizado: saldoNoDia,
-                    SaldoPrevisto: i === lastDayToShow ? saldoNoDia : undefined
-                });
-            } else {
-                data.push({ 
-                    day: i,
-                    SaldoPrevisto: saldoNoDia
-                });
-            }
-        }
-        return data;
-    }, [filteredData, currentDate, allData]);
 
     const budgetLimit = useMemo(() => {
         return Object.values(budgets).reduce((sum, val) => sum + (val as number), 0);
@@ -261,7 +285,7 @@ const Dashboard: React.FC = () => {
             // 3. Aplica o fluxo deste mês ao saldo acumulado (running balance)
             currentRunningBalance += (rec - desp);
 
-            const nameBase = MESES_NOMES[date.getMonth()].substring(0, 3);
+            const nameBase = monthNames[date.getMonth()].substring(0, 3);
 
             data.push({
                 name: nameBase,
@@ -284,84 +308,301 @@ const Dashboard: React.FC = () => {
         switch (cardId) {
             case 'resumo': return <SummaryWidget saldoAtual={saldoAtual} saldoPrevisto={saldoPrevisto} totalReceitas={totalReceitas} totalDespesas={totalDespesas} balanceAnimationKey={balanceAnimationKey} onViewAnnualReport={() => setCurrentView('anual')} />;
             case 'contas': return <AccountBalancesWidget accounts={accounts} allTransactions={allTransactions} currentDate={currentDate} />;
+            case 'patrimonio': return <PatrimonioWidget assets={assets || []} onClick={() => setCurrentView('investimentos')} />;
             case 'distribuicao502030': return <Distribution502030Widget transactions={filteredData} categorias={categorias} />;
             case 'invoices': return <CreditCardInvoicesWidget cards={creditCards} allTransactions={allTransactions} currentDate={currentDate} />;
+            case 'installments': return <InstallmentsWidget allTransactions={allTransactions} creditCards={creditCards} currentDate={currentDate} onOpenFullView={() => setFinancasSubTab('parcelas')} />;
             case 'insights': return filteredData.length > 0 ? <AIInsightsWidget filteredData={filteredData} /> : null;
-            case 'resumoDiario': return <div className="space-y-6"><QuickStatsWidget currentDate={currentDate} totalDespesas={totalDespesas} maxExpense={maxExpense} /><div className="pt-2 border-t border-slate-100 dark:border-slate-700"><h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Uso por Modo de Pagamento</h3><PaymentMethodWidget transactions={filteredData} /></div></div>;
+            case 'resumoDiario': return <div className="space-y-6"><QuickStatsWidget currentDate={currentDate} totalDespesas={totalDespesas} maxExpense={maxExpense} /><div className="pt-2 border-t border-light-border dark:border-dark-elevated"><h3 className="text-[10px] font-black uppercase tracking-widest text-light-text-muted dark:text-dark-text-muted mb-3">{t('dashboard.paymentMethodUsage')}</h3><PaymentMethodWidget transactions={filteredData} /></div></div>;
             case 'orcamento': return Object.keys(budgets).length > 0 ? <BudgetWidget budgets={budgets} despesasPorCategoria={despesasPorCategoria} /> : null;
 
             case 'tendencias':
                 // Exibe empty state se não houver NENHUMA transação no app inteiro
                 return allTransactions.length > 0
                     ? <Suspense fallback={<ChartSkeleton />}><TrendsWidget data={trendsData} theme={theme} /></Suspense>
-                    : <EmptyGraphState message="Seu histórico financeiro aparecerá aqui." onAction={() => setIsTransactionMenuOpen(true)} />;
+                    : <EmptyGraphState message={t('dashboard.emptyGraph')} onAction={() => setIsTransactionMenuOpen(true)} />;
             case 'despesasCategoria':
                 return totalDespesas > 0
                     ? <Suspense fallback={<ChartSkeleton />}><CategoryPieWidget data={pieDataDespesas} total={totalDespesas} categoryColors={categoryColors} theme={theme} type="despesas" /></Suspense>
-                    : <EmptyGraphState message="Nenhuma despesa registrada neste mês." onAction={() => setIsTransactionMenuOpen(true)} />;
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
             case 'receitasCategoria':
                 return totalReceitas > 0
                     ? <Suspense fallback={<ChartSkeleton />}><CategoryPieWidget data={pieDataReceitas} total={totalReceitas} categoryColors={categoryColors} theme={theme} type="receitas" /></Suspense>
-                    : <EmptyGraphState message="Nenhuma receita registrada neste mês." onAction={() => setIsTransactionMenuOpen(true)} />;
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
             case 'metodosPagamentoChart':
                 return totalDespesas > 0
                     ? <Suspense fallback={<ChartSkeleton />}><CategoryPieWidget data={statsMetodoPagamento} total={totalDespesas} categoryColors={{}} theme={theme} type="recurring" customColors={['#10B981', '#9333EA']} /></Suspense>
-                    : <EmptyGraphState message="Acompanhe seus métodos de pagamento aqui." onAction={() => setIsTransactionMenuOpen(true)} />;
-            case 'fluxoDiario':
-                return totalDespesas > 0
-                    ? <Suspense fallback={<ChartSkeleton />}><DailySpendingWidget data={dailySpendingData} theme={theme} expectedLimit={budgetLimit > 0 ? budgetLimit : undefined} /></Suspense>
-                    : <EmptyGraphState message="Veja seu fluxo de gastos diários aqui." onAction={() => setIsTransactionMenuOpen(true)} />;
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
+
             case 'taxaPoupanca':
                 return (totalReceitas > 0 || totalDespesas > 0)
                     ? <Suspense fallback={<ChartSkeleton />}><SavingsRateWidget rate={savingsRate} theme={theme} /></Suspense>
-                    : <EmptyGraphState message="Analise sua economia mensal aqui." onAction={() => setIsTransactionMenuOpen(true)} />;
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
+
+            // ========== NOVOS WIDGETS ==========
+            case 'monthlyComparison':
+                return <MonthlyComparison totalReceitas={totalReceitas} totalDespesas={totalDespesas} saldoPrevisto={saldoPrevisto} allData={allData} currentDate={currentDate} />;
+            case 'smartAlerts':
+                return null;
+            case 'dailyCashFlow':
+                return filteredData.length > 0
+                    ? <DailyCashFlow filteredData={filteredData} currentDate={currentDate} previousBalance={previousBalance} theme={theme} />
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
+            case 'fixedVsVariable':
+                return totalDespesas > 0 ? <FixedVsVariable filteredData={filteredData} /> : null;
+            case 'endOfMonthForecast':
+                return <EndOfMonthForecast totalReceitas={totalReceitas} totalDespesas={totalDespesas} currentDate={currentDate} saldoPrevisto={saldoPrevisto} />;
+            case 'spendingPace':
+                return allTransactions.length > 0
+                    ? <SpendingPace filteredData={filteredData} allData={allData} currentDate={currentDate} theme={theme} />
+                    : <EmptyGraphState message={t('management.noTransactions')} onAction={() => setIsTransactionMenuOpen(true)} />;
+            case 'savingsRateHistory':
+                return <SavingsRateHistory allData={allData} currentDate={currentDate} theme={theme} />;
             default: return null;
         }
     };
 
-    const cardTitles: { [key: string]: string } = { contas: "Minhas Contas", distribuicao502030: "Método 50/30/20", resumo: "Resumo Mensal", invoices: "Minhas Faturas", insights: "CFO de Bolso", resumoDiario: "Métricas Rápidas", orcamento: "Orçamentos", tendencias: "Patrimônio e Fluxo", despesasCategoria: "Gastos por Categoria", receitasCategoria: "Receitas por Categoria", despesasRecorrentes: "Despesas Recorrentes", metodosPagamentoChart: "Métodos de Pagamento", fluxoDiario: "Fluxo Diário", taxaPoupanca: "Taxa de Poupança" };
+    const cardTitles: { [key: string]: string } = { 
+        contas: t('dashboard.accounts'), 
+        patrimonio: 'Patrimônio & Investimentos',
+        distribuicao502030: t('dashboard.distribution502030'), 
+        resumo: t('dashboard.summary'), 
+        invoices: t('dashboard.invoices'), 
+        installments: 'Parcelas & Assinaturas',
+        insights: 'Assistente IA', 
+        resumoDiario: t('dashboard.dailySummary'), 
+        orcamento: t('dashboard.budget'), 
+        tendencias: t('dashboard.trends'), 
+        despesasCategoria: t('dashboard.expensesByCategory'), 
+        receitasCategoria: t('dashboard.incomeByCategory'), 
+        despesasRecorrentes: t('dashboard.recurringExpenses'), 
+        metodosPagamentoChart: t('dashboard.paymentMethods'), 
+        taxaPoupanca: t('dashboard.savingsRate'),
+        monthlyComparison: 'Comparativo Mensal',
+        smartAlerts: 'Alertas Inteligentes',
+        dailyCashFlow: 'Fluxo de Caixa Diário',
+        fixedVsVariable: 'Fixos vs Variáveis',
+        endOfMonthForecast: 'Projeção do Mês',
+        spendingPace: 'Ritmo de Gastos',
+        savingsRateHistory: 'Histórico de Poupança',
+    };
+
+    // Saudação dinâmica baseada no horário
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return t('dashboard.goodMorning') || 'Bom dia';
+        if (hour < 18) return t('dashboard.goodAfternoon') || 'Boa tarde';
+        return t('dashboard.goodEvening') || 'Boa noite';
+    };
+
+    const firstName = (userProfile.name || '').split(' ')[0] || '';
 
     return (
         <div 
-            className="bg-light-bg dark:bg-dark-bg text-slate-800 dark:text-slate-200 h-full flex flex-col transition-colors duration-300 relative"
+            className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text-secondary h-full flex flex-col transition-colors duration-300 relative"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
         >
-            <header className="bg-light-bg/95 dark:bg-dark-bg/95 backdrop-blur-md z-20 p-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b border-slate-200 dark:border-dark-surface flex-shrink-0 sticky top-0">
-                <div className="flex items-center justify-between bg-white dark:bg-dark-surface rounded-2xl p-1.5 w-full shadow-sm border border-slate-100 dark:border-slate-700">
-                    <button onClick={() => changeMonth(-1)} className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-300"><ArrowLeftIcon className="h-5 w-5" /></button>
-                    <button onClick={() => setIsMonthYearPickerOpen(true)} className="flex-grow flex items-center justify-center gap-2 text-center font-bold text-lg text-slate-800 dark:text-white py-2 px-2 rounded-xl">
-                        {formatarMesAno(currentDate)}
-                        {(userProfile.currentStreak || 0) > 0 && (
-                            <div className="flex items-center gap-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full text-xs font-black shadow-sm" title={`${userProfile.currentStreak} dias seguidos!`}>
-                                <span className="animate-pulse">🔥</span> {userProfile.currentStreak}
-                            </div>
+            {/* Header: Avatar | Seletor de Mês | Foguinho */}
+            <header className="px-4 py-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-light-bg dark:bg-dark-bg z-20 flex-shrink-0 sticky top-0">
+                {/* Linha única: Avatar + Mês + Streak */}
+                <div className="flex items-center justify-between mb-2.5">
+                    {/* Avatar */}
+                    <div 
+                        onClick={() => setCurrentView('menu')}
+                        className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
+                            userProfile.avatar
+                                ? 'shadow-md'
+                                : 'bg-gradient-to-br from-[#EA580C] to-[#F97316] text-white shadow-lg shadow-[#EA580C]/20'
+                        }`}
+                        title="Configurações & Perfil"
+                    >
+                        {userProfile.avatar ? (
+                            <img src={userProfile.avatar} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                            firstName.charAt(0).toUpperCase() || '?'
+                        )}
+                    </div>
+
+                    {/* Seletor de Mês centralizado */}
+                    <div className="flex items-center gap-1">
+                        <button onClick={() => changeMonth(-1)} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
+                            <ArrowLeftIcon className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setIsMonthYearPickerOpen(true)} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full text-sm font-bold text-slate-900 dark:text-white border border-[#D7E0EB] dark:border-[#1F1F1F] active:scale-95 transition-transform shadow-sm">
+                            {formatarMesAno(currentDate, locale, monthNames)}
+                        </button>
+                        <button onClick={() => changeMonth(1)} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
+                            <ArrowRightIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+
+                    {/* Foguinho diário */}
+                    <div
+                        className={`h-10 w-10 flex items-center justify-center rounded-full text-xs font-black flex-shrink-0 border shadow-sm ${
+                            (userProfile.currentStreak || 0) > 0
+                                ? 'bg-[#FFEDD5] dark:bg-[#431407] border-[#EA580C]/20 text-[#EA580C] dark:text-[#F97316]'
+                                : 'bg-slate-100 dark:bg-white/[0.06] border-[#D7E0EB] dark:border-[#1F1F1F] text-slate-400'
+                        }`}
+                        title={`${userProfile.currentStreak || 0} dias seguidos!`}
+                    >
+                        {(userProfile.currentStreak || 0) > 0 ? (
+                            <><span>🔥</span><span className="text-[10px]">{userProfile.currentStreak}</span></>
+                        ) : (
+                            <span>🔥</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sub-Aba: Visão Geral vs Compras Parceladas */}
+                <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-dark-card rounded-2xl border border-slate-300/40 dark:border-white/[0.06]">
+                    <button
+                        type="button"
+                        onClick={() => setFinancasSubTab('geral')}
+                        className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
+                            financasSubTab === 'geral'
+                                ? 'bg-white dark:bg-dark-elevated text-slate-900 dark:text-white border border-transparent dark:border-white/10 shadow-sm font-extrabold'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <ChartBarIcon className="h-3 w-3 shrink-0" />
+                        <span>Visão Geral</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFinancasSubTab('parcelas')}
+                        className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
+                            financasSubTab === 'parcelas'
+                                ? 'bg-white dark:bg-dark-elevated text-slate-900 dark:text-white border border-transparent dark:border-white/10 shadow-sm font-extrabold'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                    >
+                        <CreditCardIcon className="h-3 w-3 shrink-0" />
+                        <span>Parceladas</span>
+                        {activeInstallmentsCount > 0 && (
+                            <span className={`px-1 py-0.5 rounded-full text-[9px] font-black shrink-0 ${
+                                financasSubTab === 'parcelas'
+                                    ? 'bg-slate-200 dark:bg-white/15 text-slate-900 dark:text-white'
+                                    : 'bg-slate-300/80 dark:bg-slate-800 text-slate-700 dark:text-slate-400'
+                            }`}>
+                                {activeInstallmentsCount}
+                            </span>
                         )}
                     </button>
-                    <button onClick={() => changeMonth(1)} className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-300"><ArrowRightIcon className="h-5 w-5" /></button>
                 </div>
-            </header>
-            <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar p-4 grid grid-cols-1 gap-5 pb-24">
-                {dashboardLayout.order.map(cardId => {
-                    if (cardId === 'distribuicao502030' && !userProfile.isPremium) return null;
-                    if (!dashboardLayout.visibility[cardId]) return null;
-                    const content = renderCard(cardId);
-                    if (!content) return null;
-                    return (
-                        <div
-                            key={cardId}
-                            id={cardId === 'insights' ? 'tour-cfo-ia' : undefined}
-                            className="bg-white dark:bg-dark-surface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative"
-                        >
-                            {cardTitles[cardId] && <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-2">{cardTitles[cardId]}</h2>}
-                            <div>{content}</div>
+
+                {/* Info sobre a tela quando na aba de parcelas */}
+                {financasSubTab === 'parcelas' && (
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-light-border/60 dark:border-white/[0.05]">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                            Assinaturas &amp; Parcelas
+                        </span>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsInfoTooltipOpen(v => !v)}
+                                className="flex items-center gap-1 px-2 py-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+                                title="O que aparece aqui?"
+                            >
+                                <InformationCircleIcon className="h-4 w-4" />
+                            </button>
+                            {isInfoTooltipOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-30" onClick={() => setIsInfoTooltipOpen(false)} />
+                                    <div className="absolute right-0 top-full mt-2 z-40 w-72 bg-white dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <h4 className="text-sm font-black text-slate-900 dark:text-white mb-2">O que aparece aqui?</h4>
+                                        <div className="space-y-2.5">
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-base shrink-0">💳</span>
+                                                <div>
+                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">Compras Parceladas</p>
+                                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Lançamentos do tipo <strong>Parcelado</strong> feitos no botão +, com cronograma de parcelas.</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <span className="text-base shrink-0">🔄</span>
+                                                <div>
+                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">Assinaturas</p>
+                                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">Apenas lançamentos com categoria <strong>Assinaturas</strong> (Netflix, Spotify, academia, etc.).</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                                                <p className="text-[11px] text-amber-700 dark:text-amber-300 font-medium leading-snug">
+                                                    💡 Lançamentos <strong>Fixos</strong> de outras categorias (aluguel, etc.) <strong>não aparecem</strong> aqui. Eles ficam no extrato normal.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    );
-                })}
-            </main>
+                    </div>
+                )}
+            </header>
+
+            {financasSubTab === 'parcelas' ? (
+                <main ref={mainScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar p-4 pb-28">
+                    <SubscriptionsSettings
+                        initialTab="installments"
+                    />
+                </main>
+            ) : (
+                <main ref={mainScrollRef} className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar p-4 grid grid-cols-1 gap-4 pb-24">
+                    {!userProfile.hasSeenTutorial && (
+                        <div className="w-full flex-shrink-0">
+                            <ContextualTip
+                                id="tip-onboarding-tutorial"
+                                title={t('tip.onboarding.title')}
+                                description={t('tip.onboarding.desc')}
+                                actionLabel={t('tip.onboarding.action')}
+                                onAction={() => setShowTutorial(true)}
+                            />
+                        </div>
+                    )}
+                    <div className="w-full flex-shrink-0">
+                        <ContextualTip
+                            id="tip-personalizar-painel"
+                            title={t('tip.personalizar-painel.title')}
+                            description={t('tip.personalizar-painel.desc')}
+                        />
+                    </div>
+                    {dashboardLayout.order.map((cardId, index) => {
+                        if (cardId === 'distribuicao502030' && !userProfile.isPremium) return null;
+                        if (!dashboardLayout.visibility[cardId]) return null;
+                        const content = renderCard(cardId);
+                        if (!content) return null;
+
+                        // Se for o widget de insights da Calopsita CFO, renderiza como card direto sem moldura dupla nem título redundante
+                        if (cardId === 'insights') {
+                            return (
+                                <div
+                                    key={cardId}
+                                    id="tour-cfo-ia"
+                                    className="stagger-card"
+                                    style={{ animationDelay: `${index * 60}ms` }}
+                                >
+                                    {content}
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div
+                                key={cardId}
+                                className="bg-white dark:bg-dark-card p-4 rounded-2xl shadow-sm border border-light-border dark:border-white/[0.05] relative stagger-card"
+                                style={{ animationDelay: `${index * 60}ms` }}
+                            >
+                                {cardTitles[cardId] && <h2 className="text-[15px] font-semibold text-light-text dark:text-dark-text mb-3 flex items-center gap-2">{cardTitles[cardId]}</h2>}
+                                <div>{content}</div>
+                            </div>
+                        );
+                    })}
+                </main>
+            )}
             <MonthYearPickerModal isOpen={isMonthYearPickerOpen} onClose={() => setIsMonthYearPickerOpen(false)} currentDate={currentDate} allData={allData} onSelectDate={setCurrentDate} />
         </div>
     );
 };
+export { Dashboard };
 export default Dashboard;

@@ -6,7 +6,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  verticalAlign?: 'top' | 'center';
+  verticalAlign?: 'top' | 'center' | 'popup';
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, verticalAlign = 'center' }) => {
@@ -22,12 +22,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, verticalAlign 
 
   if (!isOpen) return null;
 
-  // Para modais com inputs, posicionamos próximo ao topo + overflow-y-auto
-  // para que o conteúdo suba automaticamente quando o teclado virtual aparecer
-  const isInputModal = verticalAlign !== 'top';
-  const overlayClass = isInputModal
-    ? 'fixed inset-0 bg-black bg-opacity-75 flex items-end justify-center z-50 pb-0'
-    : 'fixed inset-0 bg-black bg-opacity-75 flex items-start pt-20 justify-center z-50 p-4';
+  let overlayClass = 'fixed inset-0 bg-black bg-opacity-75 flex items-end justify-center z-[150] pb-0';
+  let containerClass = 'bg-slate-100 dark:bg-dark-card w-full p-6 relative shadow-2xl animate-in fade-in duration-300 text-light-text dark:text-dark-text overflow-y-auto max-h-[90dvh] rounded-t-[32px] slide-in-from-bottom-4';
+
+  if (verticalAlign === 'top') {
+    overlayClass = 'fixed inset-0 bg-black bg-opacity-75 flex items-start pt-20 justify-center z-[150] p-4';
+    containerClass = 'bg-slate-100 dark:bg-dark-card w-full p-6 relative shadow-2xl animate-in fade-in duration-300 text-light-text dark:text-dark-text overflow-y-auto max-h-[90dvh] rounded-[32px] slide-in-from-top-4';
+  } else if (verticalAlign === 'popup') {
+    overlayClass = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[150] p-4';
+    containerClass = 'bg-slate-100 dark:bg-dark-card w-[calc(100%-2rem)] max-w-sm p-6 relative shadow-2xl animate-in fade-in zoom-in-95 duration-200 text-light-text dark:text-dark-text overflow-y-auto max-h-[85dvh] rounded-[32px]';
+  }
 
   const modalContent = (
     <div
@@ -37,13 +41,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, verticalAlign 
       onTouchMove={(e) => e.stopPropagation()}
     >
       <div
-        className={`bg-light-bg dark:bg-dark-surface w-full rounded-t-[32px] p-6 relative shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300 text-slate-900 dark:text-white overflow-y-auto max-h-[90dvh]`}
+        className={containerClass}
         onClick={(e) => e.stopPropagation()}
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+        style={{ paddingBottom: verticalAlign === 'popup' ? '1.5rem' : 'calc(1.5rem + var(--sab))' }}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors z-10"
+          className="absolute top-4 right-4 text-light-text-muted dark:text-dark-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors z-10"
           aria-label="Fechar"
         >
           <CloseIcon />
@@ -52,6 +56,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, verticalAlign 
       </div>
     </div>
   );
+
 
   return createPortal(modalContent, document.body);
 };

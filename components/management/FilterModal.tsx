@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon } from '../icons';
+import { useTranslation } from '../../i18n';
 
 export const FilterModal: React.FC<{
     isOpen: boolean;
@@ -11,6 +12,7 @@ export const FilterModal: React.FC<{
     onApply: (categories: string[]) => void;
 }> = ({ isOpen, onClose, incomeCategories, expenseCategories, selectedCategories, onApply }) => {
     const [localSelection, setLocalSelection] = useState<string[]>(selectedCategories);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isOpen) {
@@ -42,7 +44,7 @@ export const FilterModal: React.FC<{
         const id = `${type}:${cat}`;
         const isSelected = localSelection.includes(id);
         const activeClass = 'bg-light-accent border-light-accent text-white shadow-md shadow-light-accent/20';
-        const inactiveClass = 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-light-accent dark:hover:border-dark-accent';
+        const inactiveClass = 'bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-light-text dark:text-dark-text-secondary hover:border-light-accent dark:hover:border-dark-accent';
 
         return (
             <button
@@ -60,15 +62,15 @@ export const FilterModal: React.FC<{
     const modalContent = (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[110] p-4" onClick={onClose}>
             <div 
-                className="bg-white dark:bg-dark-surface w-full max-w-[340px] rounded-[32px] shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-white dark:bg-dark-card w-full max-w-[340px] rounded-[32px] shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center flex-shrink-0">
+                <div className="p-6 border-b border-light-border dark:border-dark-elevated flex justify-between items-center flex-shrink-0">
                     <div>
-                        <h3 className="font-black text-xl text-slate-900 dark:text-white uppercase tracking-tighter">Filtrar</h3>
-                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mt-0.5">Por Categorias</p>
+                        <h3 className="font-black text-xl text-light-text dark:text-dark-text uppercase tracking-tighter">{t('filterModal.title')}</h3>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest mt-0.5">{t('filterModal.subtitle')}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-300 transition-colors active:scale-90">
+                    <button onClick={onClose} className="p-2 rounded-xl bg-slate-50 dark:bg-slate-700 text-light-text-muted dark:text-dark-text-secondary transition-colors active:scale-90">
                         <CloseIcon className="h-5 w-5" />
                     </button>
                 </div>
@@ -77,38 +79,38 @@ export const FilterModal: React.FC<{
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
-                            <h4 className="text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-[0.2em]">Receitas</h4>
+                            <h4 className="text-[10px] font-black text-light-text-muted dark:text-dark-text-secondary uppercase tracking-[0.2em]">{t('filterModal.income')}</h4>
                         </div>
                         <div className="flex flex-wrap gap-2.5">
                             {incomeCategories.map(cat => renderCategoryButton('entrada', cat))}
-                            {incomeCategories.length === 0 && <p className="text-xs text-slate-400 dark:text-slate-400 italic font-semibold">Nenhuma categoria.</p>}
+                            {incomeCategories.length === 0 && <p className="text-xs text-slate-400 dark:text-slate-400 italic font-semibold">{t('filterModal.noCategory')}</p>}
                         </div>
                     </div>
 
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <span className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"></span>
-                            <h4 className="text-[10px] font-black text-slate-500 dark:text-slate-300 uppercase tracking-[0.2em]">Despesas</h4>
+                            <h4 className="text-[10px] font-black text-light-text-muted dark:text-dark-text-secondary uppercase tracking-[0.2em]">{t('filterModal.expenses')}</h4>
                         </div>
                         <div className="flex flex-wrap gap-2.5">
                             {expenseCategories.map(cat => renderCategoryButton('saida', cat))}
-                            {expenseCategories.length === 0 && <p className="text-xs text-slate-400 dark:text-slate-400 italic font-semibold">Nenhuma categoria.</p>}
+                            {expenseCategories.length === 0 && <p className="text-xs text-slate-400 dark:text-slate-400 italic font-semibold">{t('filterModal.noCategory')}</p>}
                         </div>
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-dark-bg/50 flex gap-3 flex-shrink-0">
+                <div className="p-6 border-t border-light-border dark:border-dark-elevated bg-light-card-elevated dark:bg-dark-bg/50 flex gap-3 flex-shrink-0">
                     <button 
                         onClick={handleClear}
-                        className="flex-1 px-4 py-3.5 rounded-2xl text-slate-500 dark:text-slate-300 font-black text-[10px] uppercase tracking-widest active:bg-slate-200 dark:active:bg-slate-700 transition-colors"
+                        className="flex-1 px-4 py-3.5 rounded-2xl text-light-text-muted dark:text-dark-text-secondary font-black text-[10px] uppercase tracking-widest active:bg-slate-200 dark:active:bg-slate-700 transition-colors"
                     >
-                        Limpar
+                        {t('filterModal.clear')}
                     </button>
                     <button 
                         onClick={handleApply}
                         className="flex-[2] px-4 py-3.5 rounded-2xl bg-light-accent text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-light-accent/20 active:scale-95 transition-all"
                     >
-                        Aplicar {localSelection.length > 0 ? `(${localSelection.length})` : ''}
+                        {t('filterModal.apply')} {localSelection.length > 0 ? `(${localSelection.length})` : ''}
                     </button>
                 </div>
             </div>

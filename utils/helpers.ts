@@ -3,11 +3,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MESES_NOMES } from '../constants';
 import { Transaction, Categorias, TransactionType, ReceiptAnalysisResult, DailyBalance, ImportedTransaction, PaymentMethod, AllData, CreditCard } from '../types';
+import { parseOFXOffline } from './ofxParser';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import * as XLSX from 'xlsx';
 
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
+export const formatCurrency = (value: number, locale = 'pt-BR', currency = 'BRL'): string => {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'BRL',
+    currency: currency,
   }).format(value);
 };
 
@@ -15,16 +20,49 @@ export const getCorPorCategoria = (categoria: string, cores: { [key: string]: st
   return cores[categoria] || cores.DEFAULT;
 };
 
-export const formatarMesAno = (date: Date): string => {
-  const mes = MESES_NOMES[date.getMonth()];
-  const ano = date.getFullYear();
-  return `${mes} de ${ano}`;
+export const formatarMesAno = (date: Date, locale = 'pt-BR', monthNames?: string[]): string => {
+  if (monthNames && monthNames[date.getMonth()]) {
+    const mes = monthNames[date.getMonth()];
+    const ano = date.getFullYear();
+    if (locale.startsWith('pt') || locale.startsWith('es')) {
+      return `${mes} de ${ano}`;
+    }
+    return `${mes} ${ano}`;
+  }
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
+  return formatter.format(date);
 };
 
 export const getMonthKey = (date: Date): string => {
   const ano = date.getFullYear();
   const mes = date.getMonth() + 1;
   return `${ano}-${mes.toString().padStart(2, '0')}`;
+};
+
+export const getTranslatedCategoryName = (name: string, t: any): string => {
+  const defaultCategoriesMap: Record<string, string> = {
+    'Salário': 'cat.salario',
+    'Investimentos': 'cat.investimentos',
+    'Vendas': 'cat.vendas',
+    'Outras Receitas': 'cat.outrasReceitas',
+    'Saldo Inicial': 'cat.saldoInicial',
+    'Moradia': 'cat.moradia',
+    'Alimentação': 'cat.alimentacao',
+    'Transporte': 'cat.transporte',
+    'Lazer': 'cat.lazer',
+    'Saúde': 'cat.saude',
+    'Educação': 'cat.educacao',
+    'Outras Despesas': 'cat.outrasDespesas'
+  };
+  
+  const key = defaultCategoriesMap[name];
+  if (key) {
+    const val = t(key);
+    if (val && val !== key) {
+      return val;
+    }
+  }
+  return name;
 };
 
 export const getDiasNoMes = (ano: number, mes: number): number => {
@@ -135,14 +173,30 @@ export const calcularSaldoFinal = (transactions: Transaction[], saldoInicial: nu
     return saldoInicial + totalEntradas - totalSaidas;
 };
 
-export const calculateAccountBalance = (accountId: string, allTransactions: Transaction[], currentDate?: Date): number => {
+export const getSaldoLimitDate = (currentDate: Date): Date => {
+  const today = new Date();
+  const isPastMonth = currentDate.getFullYear() < today.getFullYear() || (currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() < today.getMonth());
+  const isCurrentMonth = currentDate.getFullYear() === today.getFullYear() && currentDate.getMonth() === today.getMonth();
+
+  if (isPastMonth) {
+    // Último dia do mês selecionado
+    return new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  } else if (isCurrentMonth) {
+    // Hoje
+    return today;
+  } else {
+    // Mês futuro: último dia do mês anterior (para mostrar o saldo inicial do mês selecionado)
+    return new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+  }
+};
+
+export const calculateAccountBalance = (accountId: string, allTransactions: Transaction[], limitDate?: Date): number => {
     let balance = 0;
-    const limitMonth = currentDate ? getMonthKey(currentDate) : null;
+    const limitDateStr = limitDate ? formatDateToInput(limitDate) : null;
 
     for (const tx of allTransactions) {
-        if (limitMonth) {
-            const txMonth = getMonthKey(new Date(tx.data + 'T00:00:00'));
-            if (txMonth > limitMonth) {
+        if (limitDateStr) {
+            if (tx.data > limitDateStr) {
                 continue;
             }
         }
@@ -265,21 +319,120 @@ export const fileToText = (file: File): Promise<string> => {
     });
 };
 
-export const suggestCategory = async (description: string, type: TransactionType, categories: Categorias): Promise<string> => {
+export interface CategoryAgentResult {
+  action: 'match' | 'create';
+  categoryName: string;
+  newCategory?: {
+    name: string;
+    icon: string;
+    bucket?: 'necessidades' | 'desejos' | 'futuro';
+    group?: 'Gastos Fixos' | 'Gastos Variáveis' | 'Reserva Financeira';
+  };
+  reason?: string;
+}
+
+export const suggestCategoryWithAgent = async (
+  description: string,
+  type: TransactionType,
+  categories: Categorias
+): Promise<CategoryAgentResult> => {
   if (!description.trim()) throw new Error("A descrição não pode estar vazia.");
   const ai = getAIClient();
-  const currentCategories = categories[type].map(c => c.name);
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: `Analise a descrição: "${description}" e escolha uma destas categorias: [${currentCategories.join(', ')}]`,
-    config: {
-        systemInstruction: `Responda APENAS o nome da categoria. Se nada servir, use "Outros" ou a mais próxima.`,
+  const currentCategories = categories[type]?.map(c => c.name) || [];
+
+  const availableIcons = [
+    'shopping-basket', 'utensils', 'coffee', 'pizza', 'burger', 'beer', 'cookie', 'shopping-cart',
+    'car', 'bus', 'gas-pump', 'plane', 'bike', 'parking', 'route',
+    'home', 'bolt', 'droplet', 'wifi', 'lightbulb', 'tools', 'building', 'key',
+    'medkit', 'heart', 'dumbbell', 'shield', 'pill', 'glasses',
+    'sun', 'gamepad', 'music', 'film', 'camera', 'clapperboard', 'dices',
+    'shopping-bag', 'shirt', 'scissors', 'phone', 'gift', 'cpu',
+    'flask', 'book', 'graduation', 'pencil',
+    'pet', 'baby', 'leaf', 'box', 'tag', 'heart-handshake', 'umbrella',
+    'wallet', 'money', 'coins', 'bank', 'card', 'chart-pie', 'receipt', 'briefcase'
+  ];
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Você é o Agente Inteligente de Categorização Financeira do app SobControle.
+Analise a transação com descrição: "${description}" e tipo: "${type}".
+Categorias já existentes no app do usuário: [${currentCategories.join(', ')}].
+
+DIRETRIZES:
+1. Caso a descrição se encaixe bem ou de forma aceitável em uma das categorias já existentes (ex: 'Supermercado' -> 'Alimentação', 'Uber' -> 'Transporte', 'Netflix' -> 'Assinatura', 'Aluguel' -> 'Moradia', 'Salário' -> 'Salário'):
+   - Use action: "match"
+   - Use categoryName com o nome EXATO da categoria existente correspondente.
+
+2. Caso a descrição represente claramente um nicho específico que NÃO tem categoria correspondente adequada (ex: 'Ração de gato', 'Pet Shop' e não existe categoria Pet; ou 'Farmácia', 'Remédios' e não existe Saúde; ou 'Curso de Figma' e não existe Educação):
+   - Use action: "create"
+   - Defina categoryName com um nome conciso e elegante para a nova categoria (em português, ex: "Pet", "Farmácia", "Beleza", "Impostos", "Cursos").
+   - Em newCategory:
+     - name: o mesmo nome da nova categoria.
+     - icon: selecione o iconId mais adequado da lista: [${availableIcons.join(', ')}].
+     - bucket: se for saída, escolha entre "necessidades", "desejos" ou "futuro".
+     - group: se for saída, escolha entre "Gastos Fixos", "Gastos Variáveis" ou "Reserva Financeira".
+     - reason: justificativa breve.`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            action: { type: Type.STRING, enum: ['match', 'create'] },
+            categoryName: { type: Type.STRING },
+            newCategory: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                icon: { type: Type.STRING },
+                bucket: { type: Type.STRING, enum: ['necessidades', 'desejos', 'futuro'] },
+                group: { type: Type.STRING, enum: ['Gastos Fixos', 'Gastos Variáveis', 'Reserva Financeira'] },
+                reason: { type: Type.STRING }
+              }
+            },
+            reason: { type: Type.STRING }
+          },
+          required: ['action', 'categoryName']
+        }
+      }
+    });
+
+    const sanitized = sanitizeJsonResponse(response.text || "");
+    const parsed = JSON.parse(sanitized) as CategoryAgentResult;
+
+    // Se o modelo sugeriu criar uma categoria cujo nome já existe (case-insensitive), faça match nela
+    const exactOrSimilar = currentCategories.find(c => c.toLowerCase() === parsed.categoryName.toLowerCase());
+    if (exactOrSimilar) {
+      return {
+        action: 'match',
+        categoryName: exactOrSimilar,
+        reason: parsed.reason
+      };
     }
-  });
-  const cleaned = response.text?.trim().replace(/\.$/, "") || "";
-  if (currentCategories.includes(cleaned)) return cleaned;
-  const match = currentCategories.find(c => c.toLowerCase() === cleaned.toLowerCase());
-  return match || currentCategories[0];
+
+    if (parsed.action === 'create' && !parsed.newCategory) {
+      parsed.newCategory = {
+        name: parsed.categoryName,
+        icon: 'tag',
+        bucket: type === 'saida' ? 'desejos' : undefined,
+        group: type === 'saida' ? 'Gastos Variáveis' : undefined
+      };
+    }
+
+    return parsed;
+  } catch (err) {
+    console.warn("Agente de Categorização fallback:", err);
+    const fallbackMatch = currentCategories.find(c => description.toLowerCase().includes(c.toLowerCase()));
+    return {
+      action: 'match',
+      categoryName: fallbackMatch || currentCategories[0] || 'Outros'
+    };
+  }
+};
+
+export const suggestCategory = async (description: string, type: TransactionType, categories: Categorias): Promise<string> => {
+  const result = await suggestCategoryWithAgent(description, type, categories);
+  return result.categoryName;
 };
 
 export const analyzeReceipt = async (base64Image: string, mimeType: string, categories: Categorias): Promise<ReceiptAnalysisResult> => {
@@ -326,9 +479,22 @@ export const analyzeReceipt = async (base64Image: string, mimeType: string, cate
 };
 
 export const analyzeStatement = async (file: File, categories: Categorias): Promise<ImportedTransaction[]> => {
-    const ai = getAIClient();
     const isOFX = file.name.toLowerCase().endsWith('.ofx');
     
+    // Leitura instantânea e 100% offline para arquivos OFX
+    if (isOFX) {
+        try {
+            const text = await fileToText(file);
+            const parsed = parseOFXOffline(text, categories);
+            if (parsed && parsed.length > 0) {
+                return parsed;
+            }
+        } catch (e) {
+            console.warn('[analyzeStatement] Erro no parser OFX local, tentando fallback com IA...', e);
+        }
+    }
+
+    const ai = getAIClient();
     const catEntrada = categories.entrada.map(c => c.name).join(', ');
     const catSaida = categories.saida.map(c => c.name).join(', ');
 
@@ -389,15 +555,21 @@ export const analyzeStatement = async (file: File, categories: Categorias): Prom
     }
 };
 
-export const formatCurrencyForInput = (value: string): string => {
+export const formatCurrencyForInput = (value: string, locale = 'pt-BR', currency = 'BRL'): string => {
   if (!value) return '';
   let numericValue = value.replace(/\D/g, '');
   if (numericValue === '') return '';
   while (numericValue.length < 3) numericValue = '0' + numericValue;
   const cents = numericValue.slice(-2);
   const integerPart = numericValue.slice(0, -2);
-  const formattedInteger = new Intl.NumberFormat('pt-BR').format(parseInt(integerPart, 10));
-  return `R$ ${formattedInteger},${cents}`;
+  const formattedInteger = new Intl.NumberFormat(locale).format(parseInt(integerPart, 10));
+  const decimalSeparator = locale.startsWith('en') ? '.' : ',';
+  
+  let symbol = 'R$';
+  if (currency === 'USD') symbol = '$';
+  else if (currency === 'EUR') symbol = '€';
+  
+  return `${symbol} ${formattedInteger}${decimalSeparator}${cents}`;
 };
 
 export const parseCurrency = (formattedValue: string): number => {
@@ -448,56 +620,87 @@ export const sanitizeTransactions = (transactions: any[]): Transaction[] => {
     });
 };
 
-export const exportTransactionsToExcel = async (transactions: Transaction[], customFileName?: string) => {
+const saveAndShareFile = async (base64Data: string, fileName: string, contentType: string) => {
+    if (Capacitor.isNativePlatform()) {
+        try {
+            const result = await Filesystem.writeFile({
+                path: fileName,
+                data: base64Data,
+                directory: Directory.Cache,
+            });
+            await Share.share({
+                title: fileName,
+                text: 'Exportação Financeira Sob Controle',
+                url: result.uri,
+                dialogTitle: 'Salvar ou enviar exportação',
+            });
+        } catch (error) {
+            console.error('Erro ao exportar arquivo no mobile:', error);
+            alert('Erro ao exportar arquivo. Verifique se o app tem as permissões necessárias.');
+        }
+    } else {
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
+export const exportTransactionsToExcel = async (transactions: Transaction[], customFileName?: string, locale = 'pt-BR', t: (key: string) => string = (k) => k) => {
     const fileName = customFileName || `Exportacao_Financeira_${Date.now()}.xlsx`;
-    // @ts-ignore
-    const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
     const data = transactions.sort((a, b) => a.data.localeCompare(b.data)).map(tx => ({
-        'Data': new Date(tx.data + 'T00:00:00').toLocaleDateString('pt-BR'),
-        'Descrição': tx.descricao,
-        'Valor': tx.valor,
-        'Tipo': tx.tipo === 'entrada' ? 'Receita' : 'Despesa',
-        'Categoria': tx.categoria,
-        'Pagamento': tx.paymentMethod.toUpperCase(),
-        'Recorrente': tx.isRecurring ? 'Sim' : 'Não'
+        [t('common.date')]: new Date(tx.data + 'T00:00:00').toLocaleDateString(locale),
+        [t('common.description')]: tx.descricao,
+        [t('common.value')]: tx.valor,
+        [t('common.type')]: tx.tipo === 'entrada' ? t('txType.income') : t('txType.expense'),
+        [t('common.category')]: tx.categoria,
+        [t('management.payMethod') || 'Pagamento']: tx.paymentMethod.toUpperCase(),
+        [t('management.recurring') || 'Recorrente']: tx.isRecurring ? t('common.yes') : t('common.no')
     }));
     const worksheet = XLSX.utils.json_to_sheet(data);
     const wscols = [{ wch: 12 }, { wch: 30 }, { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 12 }];
     worksheet['!cols'] = wscols;
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Lançamentos");
-    XLSX.writeFile(workbook, fileName);
+    XLSX.utils.book_append_sheet(workbook, worksheet, t('nav.transactions') || "Lançamentos");
+    
+    const base64XLSX = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
+    await saveAndShareFile(base64XLSX, fileName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 };
 
-export const exportTransactionsToCSV = (transactions: Transaction[], customFileName?: string) => {
+export const exportTransactionsToCSV = async (transactions: Transaction[], customFileName?: string, locale = 'pt-BR', t: (key: string) => string = (k) => k) => {
     const fileName = customFileName || `Exportacao_Financeira_${Date.now()}.csv`;
-    const header = "Data,Descrição,Valor,Tipo,Categoria,Pagamento,Recorrente\n";
+    const header = `${t('common.date')},${t('common.description')},${t('common.value')},${t('common.type')},${t('common.category')},${t('management.payMethod') || 'Pagamento'},${t('management.recurring') || 'Recorrente'}\n`;
     const body = transactions.sort((a, b) => a.data.localeCompare(b.data)).map(tx => {
         const row = [
-            new Date(tx.data + 'T00:00:00').toLocaleDateString('pt-BR'),
+            new Date(tx.data + 'T00:00:00').toLocaleDateString(locale),
             `"${tx.descricao.replace(/"/g, '""')}"`,
             tx.valor,
-            tx.tipo === 'entrada' ? 'Receita' : 'Despesa',
+            tx.tipo === 'entrada' ? t('txType.income') : t('txType.expense'),
             tx.categoria,
             tx.paymentMethod.toUpperCase(),
-            tx.isRecurring ? 'Sim' : 'Não'
+            tx.isRecurring ? t('common.yes') : t('common.no')
         ];
         return row.join(',');
     }).join('\n');
 
     const csvContent = "\uFEFF" + header + body; // Adiciona BOM para Excel ler UTF-8 corretamente
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const base64CSV = btoa(unescape(encodeURIComponent(csvContent)));
+    await saveAndShareFile(base64CSV, fileName, 'text/csv');
 };
 
-export const exportTransactionsToPDF = async (transactions: Transaction[], customFileName?: string, title?: string) => {
+export const exportTransactionsToPDF = async (transactions: Transaction[], customFileName?: string, title?: string, locale = 'pt-BR', currency = 'BRL', t: (key: string) => string = (k) => k) => {
     const fileName = customFileName || `Exportacao_Financeira_${Date.now()}.pdf`;
     
     // @ts-ignore
@@ -506,19 +709,19 @@ export const exportTransactionsToPDF = async (transactions: Transaction[], custo
     await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js');
 
     const doc = new jsPDF();
-    const tableTitle = title || "Relatório Financeiro";
+    const tableTitle = title || t('data.exportPDF') || "Relatório Financeiro";
     
     doc.setFontSize(18);
     doc.text(tableTitle, 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 30);
+    doc.text(`${t('common.loading') ? t('common.loading').replace('...', '') : 'Gerado em'}: ${new Date().toLocaleString(locale)}`, 14, 30);
     
     const tableData = transactions.sort((a, b) => a.data.localeCompare(b.data)).map(tx => [
-        new Date(tx.data + 'T00:00:00').toLocaleDateString('pt-BR'),
+        new Date(tx.data + 'T00:00:00').toLocaleDateString(locale),
         tx.descricao,
-        tx.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-        tx.tipo === 'entrada' ? 'Receita' : 'Despesa',
+        new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(tx.valor),
+        tx.tipo === 'entrada' ? t('txType.income') : t('txType.expense'),
         tx.categoria,
         tx.paymentMethod.toUpperCase()
     ]);
@@ -526,7 +729,7 @@ export const exportTransactionsToPDF = async (transactions: Transaction[], custo
     // @ts-ignore
     doc.autoTable({
         startY: 35,
-        head: [['Data', 'Descrição', 'Valor', 'Tipo', 'Categoria', 'Pagamento']],
+        head: [[t('common.date'), t('common.description'), t('common.value'), t('common.type'), t('common.category'), t('management.payMethod') || 'Pagamento']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [37, 99, 235] }, // Azul primário do app
@@ -624,3 +827,92 @@ export const getBankColor = (name: string): string | null => {
   if (n.includes('safra')) return '#AF9341';
   return null;
 };
+
+export const recalculateBalancesFrom = (startKey: string, data: AllData): AllData => {
+  const updated: AllData = { ...data };
+  const sorted = Object.keys(updated).sort();
+  if (sorted.length === 0) return updated;
+
+  const idx = sorted.indexOf(startKey);
+  const effectiveStartIdx = idx === -1 ? 0 : idx;
+  const effectiveStartKey = sorted[effectiveStartIdx];
+  const lastKey = sorted[sorted.length - 1];
+
+  // Calcula o saldo anterior ao primeiro mês a recalcular
+  let lastSaldo = getPreviousBalance(effectiveStartKey, updated);
+
+  // Itera por todos os meses desde o startKey até o último mês com dados,
+  // incluindo meses intermediários que possam não existir em allData (gaps)
+  const [startYear, startMonth] = effectiveStartKey.split('-').map(Number);
+  const [endYear, endMonth] = lastKey.split('-').map(Number);
+
+  let curYear = startYear;
+  let curMonth = startMonth;
+
+  while (curYear < endYear || (curYear === endYear && curMonth <= endMonth)) {
+    const key = `${curYear}-${String(curMonth).padStart(2, '0')}`;
+    const monthData = updated[key];
+
+    if (monthData) {
+      const dt = new Date(curYear, curMonth - 1, 1);
+      const days = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
+      const saldo = calcularSaldoFinal(monthData.transactions, lastSaldo, days);
+      updated[key] = { ...monthData, saldoFinal: saldo };
+      lastSaldo = saldo;
+    } else {
+      // Mês sem transações: propaga o saldo do mês anterior como saldoFinal
+      // para que getPreviousBalance encontre um valor correto
+      updated[key] = { transactions: [], saldoFinal: lastSaldo };
+    }
+
+    // Avança para o próximo mês
+    curMonth++;
+    if (curMonth > 12) {
+      curMonth = 1;
+      curYear++;
+    }
+  }
+  return updated;
+};
+
+export const generateMockTransactions = (): Transaction[] => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const makeDate = (monthOffset: number, day: number) => {
+    const d = new Date(currentYear, currentMonth + monthOffset, day);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+
+  const sampleTxs: Omit<Transaction, 'id'>[] = [
+    // Mês atual
+    { data: makeDate(0, 1), descricao: 'Salário Mensal', valor: 5500.00, tipo: 'entrada', categoria: 'Salário', paymentMethod: 'debito' },
+    { data: makeDate(0, 2), descricao: 'Supermercado Carrefour', valor: 489.30, tipo: 'saida', categoria: 'Alimentação', paymentMethod: 'debito' },
+    { data: makeDate(0, 3), descricao: 'Uber Viagem', valor: 28.50, tipo: 'saida', categoria: 'Transporte', paymentMethod: 'credito' },
+    { data: makeDate(0, 5), descricao: 'Academia SmartFit', valor: 119.90, tipo: 'saida', categoria: 'Saúde', paymentMethod: 'credito', isRecurring: true },
+    { data: makeDate(0, 7), descricao: 'Aluguel do Apê', valor: 1800.00, tipo: 'saida', categoria: 'Moradia', paymentMethod: 'debito' },
+    { data: makeDate(0, 10), descricao: 'iFood Jantar', valor: 65.40, tipo: 'saida', categoria: 'Alimentação', paymentMethod: 'credito' },
+    { data: makeDate(0, 12), descricao: 'Posto Shell Combustível', valor: 220.00, tipo: 'saida', categoria: 'Transporte', paymentMethod: 'debito' },
+    { data: makeDate(0, 14), descricao: 'Freelance Web Design', valor: 1200.00, tipo: 'entrada', categoria: 'Outras Receitas', paymentMethod: 'debito' },
+    { data: makeDate(0, 15), descricao: 'Farmácia Drogasil', valor: 87.20, tipo: 'saida', categoria: 'Saúde', paymentMethod: 'debito' },
+    { data: makeDate(0, 18), descricao: 'Assinatura Netflix', valor: 55.90, tipo: 'saida', categoria: 'Lazer', paymentMethod: 'credito', isRecurring: true },
+    { data: makeDate(0, 20), descricao: 'Restaurante OutBack', valor: 195.00, tipo: 'saida', categoria: 'Lazer', paymentMethod: 'credito' },
+    { data: makeDate(0, 22), descricao: 'Conta de Energia Enel', valor: 145.80, tipo: 'saida', categoria: 'Moradia', paymentMethod: 'debito' },
+
+    // Mês anterior
+    { data: makeDate(-1, 1), descricao: 'Salário Mensal', valor: 5500.00, tipo: 'entrada', categoria: 'Salário', paymentMethod: 'debito' },
+    { data: makeDate(-1, 4), descricao: 'Supermercado Pão de Açúcar', valor: 612.40, tipo: 'saida', categoria: 'Alimentação', paymentMethod: 'debito' },
+    { data: makeDate(-1, 8), descricao: 'Aluguel do Apê', valor: 1800.00, tipo: 'saida', categoria: 'Moradia', paymentMethod: 'debito' },
+    { data: makeDate(-1, 11), descricao: 'Cinema + Pipoca', valor: 82.00, tipo: 'saida', categoria: 'Lazer', paymentMethod: 'credito' },
+    { data: makeDate(-1, 15), descricao: 'Posto Ipiranga', valor: 200.00, tipo: 'saida', categoria: 'Transporte', paymentMethod: 'debito' },
+    { data: makeDate(-1, 21), descricao: 'Rendimento de Investimentos', valor: 184.50, tipo: 'entrada', categoria: 'Investimentos', paymentMethod: 'debito' },
+  ];
+
+  return sampleTxs.map((tx, idx) => ({
+    ...tx,
+    id: `mock-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 7)}`
+  }));
+};
+

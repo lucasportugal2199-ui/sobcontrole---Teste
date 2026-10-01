@@ -35,29 +35,29 @@ const NotificationPromptModal: React.FC<NotificationPromptModalProps> = ({ isOpe
     return (
         <Modal isOpen={isOpen} onClose={handleDecline}>
             <div className="flex flex-col items-center text-center py-6 px-4">
-                <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-6 text-indigo-500 animate-pulse">
+                <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-6 text-blue-500 animate-pulse">
                     <BellIcon className="h-10 w-10" />
                 </div>
                 
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-3">
+                <h2 className="text-2xl font-black text-light-text dark:text-dark-text mb-3">
                     Fique no Controle!
                 </h2>
                 
-                <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                <p className="text-light-text-secondary dark:text-dark-text-muted mb-8 leading-relaxed">
                     Deseja ser lembrado sobre o vencimento de faturas, fechamento de faturas do cartão e quando seus orçamentos estiverem perto do limite?
                 </p>
 
                 <div className="w-full space-y-3">
                     <button 
                         onClick={handleAccept}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-indigo-600/20"
+                        className="w-full bg-fin-info hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-blue-600/20"
                     >
                         Sim, me avise
                     </button>
                     
                     <button 
                         onClick={handleDecline}
-                        className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-dark-surface dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold py-4 rounded-xl transition-colors"
+                        className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-dark-card dark:hover:bg-slate-800 text-light-text-secondary dark:text-dark-text-muted font-bold py-4 rounded-xl transition-colors"
                     >
                         Agora não
                     </button>

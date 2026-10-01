@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SobControle — Relatório Anual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B1120;
+      --surface: #141C2E;
+      --surface-elevated: #1A2540;
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --amber: #F59E0B;
+      --emerald: #10B981;
+      --rose: #F43F5E;
+      --teal: #14B8A6;
+      --blue: #3B82F6;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      max-width: 440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      padding: 16px 20px;
+      background: rgba(11, 17, 32, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    .year-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--amber);
+    }
+
+    /* KPI Grid */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+    .kpi-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 16px;
+    }
+    .kpi-box small { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .kpi-box h2 { font-size: 1.2rem; font-weight: 800; margin-top: 4px; }
+    .kpi-box p { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; }
+
+    /* Saving rate highlight */
+    .savings-card {
+      margin: 0 20px 16px 20px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(20,184,166,0.05) 100%);
+      border: 1px solid rgba(16,185,129,0.3);
+      padding: 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .savings-meta h3 { font-size: 0.95rem; font-weight: 700; color: #fff; }
+    .savings-meta p { font-size: 0.74rem; color: var(--text-secondary); margin-top: 2px; }
+    .savings-badge {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--emerald);
+    }
+
+    /* Month by month table */
+    .table-card {
+      margin: 0 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .table-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr 1fr;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.76rem;
+      align-items: center;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .row-month { font-weight: 700; color: #fff; }
+    .row-in { color: var(--emerald); }
+    .row-out { color: var(--rose); }
+    .row-balance { font-weight: 700; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Relatório Anual</h1>
+    <div class="year-pill">Ano 2026 ▾</div>
+  </header>
+
+  <div class="kpi-container">
+    <div class="kpi-box">
+      <small>Total Entradas</small>
+      <h2 style="color: var(--emerald);">R$ 96.400</h2>
+      <p>+12% vs ano anterior</p>
+    </div>
+    <div class="kpi-box">
+      <small>Total Saídas</small>
+      <h2 style="color: var(--rose);">R$ 54.200</h2>
+      <p>-4% vs meta de economia</p>
+    </div>
+  </div>
+
+  <div class="savings-card">
+    <div class="savings-meta">
+      <h3>Taxa Média de Poupança</h3>
+      <p>Você economizou 43,7% de toda a sua renda no ano</p>
+    </div>
+    <div class="savings-badge">43.7%</div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">Balanço Mês a Mês</div>
+    
+    <div class="table-row" style="color: var(--text-muted); font-size: 0.7rem; font-weight: 700;">
+      <div>MÊS</div>
+      <div>ENTRADA</div>
+      <div>SAÍDA</div>
+      <div style="text-align: right;">SALDO</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Jan 2026</div>
+      <div class="row-in">R$ 8.200</div>
+      <div class="row-out">R$ 4.100</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 4.100</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Fev 2026</div>
+      <div class="row-in">R$ 7.500</div>
+      <div class="row-out">R$ 3.800</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 3.700</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Mar 2026</div>
+      <div class="row-in">R$ 8.900</div>
+      <div class="row-out">R$ 5.200</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 3.700</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Abr 2026</div>
+      <div class="row-in">R$ 8.100</div>
+      <div class="row-out">R$ 4.400</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 3.700</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Mai 2026</div>
+      <div class="row-in">R$ 11.200</div>
+      <div class="row-out">R$ 4.900</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 6.300</div>
+    </div>
+
+    <div class="table-row">
+      <div class="row-month">Jun 2026</div>
+      <div class="row-in">R$ 7.900</div>
+      <div class="row-out">R$ 4.150</div>
+      <div class="row-balance" style="color: var(--emerald);">+R$ 3.750</div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SobControle — Assinaturas & Recorrências</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B1120;
+      --surface: #141C2E;
+      --surface-elevated: #1A2540;
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --pink: #EC4899;
+      --teal: #14B8A6;
+      --rose: #F43F5E;
+      --emerald: #10B981;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      max-width: 440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      padding: 16px 20px;
+      background: rgba(11, 17, 32, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    .btn-add {
+      background: var(--pink);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Total Subscriptions Card */
+    .summary-card {
+      margin: 16px 20px;
+      background: linear-gradient(135deg, #831843 0%, #1E1B4B 100%);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .summary-sub { font-size: 0.75rem; color: #FBCFE8; text-transform: uppercase; font-weight: 700; }
+    .summary-val { font-size: 2.1rem; font-weight: 800; color: #fff; margin: 4px 0 6px 0; }
+    .summary-annual { font-size: 0.76rem; color: #F472B6; font-weight: 600; }
+
+    /* Subscriptions List */
+    .sub-list {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sub-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sub-left { display: flex; align-items: center; gap: 12px; }
+    .sub-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .sub-info h4 { font-size: 0.88rem; font-weight: 600; }
+    .sub-info p { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .sub-right { text-align: right; }
+    .sub-price { font-size: 0.95rem; font-weight: 700; color: #fff; }
+    .sub-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Assinaturas & Fixos</h1>
+    <button class="btn-add">＋ Adicionar</button>
+  </header>
+
+  <div class="summary-card">
+    <div class="summary-sub">Gasto Mensal Recorrente</div>
+    <div class="summary-val">R$ 384,90 <span style="font-size: 0.9rem; font-weight: 500;">/mês</span></div>
+    <div class="summary-annual">≈ R$ 4.618,80 por ano em 6 serviços ativos</div>
+  </div>
+
+  <div class="sub-list">
+    <div class="sub-item">
+      <div class="sub-left">
+        <div class="sub-logo" style="background: #E50914; color: #fff;">🎬</div>
+        <div class="sub-info">
+          <h4>Netflix Premium 4K</h4>
+          <p>Cobrança todo dia 12 • Nubank</p>
+        </div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-price">R$ 55,90</div>
+        <span class="sub-badge">Mensal</span>
+      </div>
+    </div>
+
+    <div class="sub-item">
+      <div class="sub-left">
+        <div class="sub-logo" style="background: #1DB954; color: #fff;">🎵</div>
+        <div class="sub-info">
+          <h4>Spotify Família</h4>
+          <p>Cobrança todo dia 20 • Inter</p>
+        </div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-price">R$ 34,90</div>
+        <span class="sub-badge">Mensal</span>
+      </div>
+    </div>
+
+    <div class="sub-item">
+      <div class="sub-left">
+        <div class="sub-logo" style="background: #000; color: #fff; border: 1px solid #333;">🍎</div>
+        <div class="sub-info">
+          <h4>Apple One + iCloud</h4>
+          <p>Cobrança todo dia 04 • Itaú</p>
+        </div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-price">R$ 42,90</div>
+        <span class="sub-badge">Mensal</span>
+      </div>
+    </div>
+
+    <div class="sub-item">
+      <div class="sub-left">
+        <div class="sub-logo" style="background: #006699; color: #fff;">🌐</div>
+        <div class="sub-info">
+          <h4>Internet Fibra 600MB</h4>
+          <p>Vencimento dia 15 • Débito</p>
+        </div>
+      </div>
+      <div class="sub-right">
+        <div class="sub-price">R$ 139,90</div>
+        <span class="sub-badge">Fixo Mensal</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SobControle — Login & Boas-Vindas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B1120;
+      --surface: #141C2E;
+      --surface-elevated: #1A2540;
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --teal: #14B8A6;
+      --indigo: #6366F1;
+      --emerald: #10B981;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      max-width: 440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 40px 24px 30px 24px;
+    }
+    .hero-section {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .logo-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--teal), var(--indigo));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(20, 184, 166, 0.4);
+      margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .hero-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.45;
+    }
+
+    /* Form Fields */
+    .form-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 30px 0;
+    }
+    .input-field {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: var(--teal);
+    }
+    .btn-login {
+      background: linear-gradient(135deg, var(--teal), #0D9488);
+      border: none;
+      color: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(20, 184, 166, 0.35);
+    }
+    .btn-google {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-section">
+    <div class="logo-badge">SC</div>
+    <h1 class="hero-title">SobControle</h1>
+    <p class="hero-subtitle">Sua vida financeira simples, visual e com inteligência artificial.</p>
+  </div>
+
+  <div class="form-box">
+    <input type="email" class="input-field" placeholder="Seu e-mail" value="lucas@exemplo.com" />
+    <input type="password" class="input-field" placeholder="Sua senha secreta" value="••••••••••••" />
+    
+    <button class="btn-login">Entrar na Minha Conta</button>
+    <button class="btn-google">
+      <span style="font-weight: bold; color: #EA4335;">G</span> Continuar com Google
+    </button>
+  </div>
+
+  <div class="footer-note">
+    Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade.
+  </div>
+
+</body>
+</html>

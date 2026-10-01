@@ -4,4 +4,12 @@
     <string name="title_activity_main">SobControle</string>
     <string name="package_name">com.sobcontrole.app</string>
     <string name="custom_url_scheme">com.sobcontrole.app</string>
+    <string name="shortcut_new_tx_short">Novo Lançamento</string>
+    <string name="shortcut_new_tx_long">Registrar uma nova transação</string>
+    <string name="shortcut_metas_short">Metas</string>
+    <string name="shortcut_metas_long">Acessar minhas metas</string>
+    <string name="shortcut_futuro_short">Futuro</string>
+    <string name="shortcut_futuro_long">Ver futuro mensal</string>
+    <string name="shortcut_cfo_short">Calopsita CFO</string>
+    <string name="shortcut_cfo_long">Falar com a Calopsita CFO</string>
 </resources>

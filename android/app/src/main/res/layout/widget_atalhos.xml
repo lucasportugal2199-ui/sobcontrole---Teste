@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="6dp"
+    android:background="@drawable/widget_background"
+    android:gravity="center">
+
+    <!-- Botão + Receita -->
+    <LinearLayout
+        android:id="@+id/widget_btn_receita"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/widget_btn_green"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginRight="3dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ REC"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Botão - Despesa -->
+    <LinearLayout
+        android:id="@+id/widget_btn_despesa"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/widget_btn_red"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="- DESP"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Botão 🔄 Transf -->
+    <LinearLayout
+        android:id="@+id/widget_btn_transf"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/widget_btn_blue"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginLeft="3dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔄 TRANSF"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

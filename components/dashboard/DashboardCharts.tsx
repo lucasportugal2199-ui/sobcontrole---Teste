@@ -1,10 +1,11 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid,
     ComposedChart, Line, Area, ReferenceLine, LabelList, Sector
 } from 'recharts';
-import { formatCurrency, getCorPorCategoria } from '../../utils/helpers';
+import { formatCurrency, getCorPorCategoria, getTranslatedCategoryName } from '../../utils/helpers';
+import { useTranslation } from '../../i18n';
 
 // --- Dot Pulsante para ActiveDot ---
 const PulsatingDot = (props: any) => {
@@ -34,6 +35,9 @@ const renderActiveShape = (props: any) => {
 // --- Componentes Auxiliares ---
 
 const CustomTooltip = ({ active, payload, label, type, totalReceitas, totalDespesas }: any) => {
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
 
     if (active && payload && payload.length) {
         const data = payload[0].payload;
@@ -56,13 +60,13 @@ const CustomTooltip = ({ active, payload, label, type, totalReceitas, totalDespe
                     <p className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{label || data.name}</p>
                     <div className="space-y-1">
                         <p className="text-sm font-bold flex justify-between gap-4" style={{ color: '#10B981' }}>
-                            <span>Receitas:</span> <span>{formatCurrency(data.Receitas || 0)}</span>
+                            <span>{t('dashboard.income')}:</span> <span>{formatCurrency(data.Receitas || 0, appLocale, appCurrency)}</span>
                         </p>
                         <p className="text-sm font-bold flex justify-between gap-4" style={{ color: '#FF6384' }}>
-                            <span>Despesas:</span> <span>{formatCurrency(data.Despesas || 0)}</span>
+                            <span>{t('dashboard.expenses')}:</span> <span>{formatCurrency(data.Despesas || 0, appLocale, appCurrency)}</span>
                         </p>
-                        <p className="text-sm font-bold flex justify-between gap-4 mt-2 pt-1 border-t border-slate-100 dark:border-slate-700" style={{ color: data.SaldoPrevisto !== undefined && data.Saldo === undefined ? '#94A3B8' : '#3B82F6' }}>
-                            <span>Patrimônio:</span> <span>{formatCurrency(data.Saldo !== undefined ? data.Saldo : (data.SaldoPrevisto || 0))}</span>
+                        <p className="text-sm font-bold flex justify-between gap-4 mt-2 pt-1 border-t border-light-border dark:border-dark-elevated" style={{ color: data.SaldoPrevisto !== undefined && data.Saldo === undefined ? '#94A3B8' : '#3B82F6' }}>
+                            <span>{t('dashboard.balance')}:</span> <span>{formatCurrency(data.Saldo !== undefined ? data.Saldo : (data.SaldoPrevisto || 0), appLocale, appCurrency)}</span>
                         </p>
                     </div>
                 </div>
@@ -72,21 +76,21 @@ const CustomTooltip = ({ active, payload, label, type, totalReceitas, totalDespe
         if (isDailyChart) {
             return (
                 <div className="bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
-                    <p className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Dia {label || data.day}</p>
+                    <p className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{t('common.day')} {label || data.day}</p>
                     <div className="space-y-1">
                         {data.value !== undefined && (
                             <p className="text-sm font-bold flex justify-between gap-4" style={{ color: '#FF6384' }}>
-                                <span>Gasto Acumulado:</span> <span>{formatCurrency(data.value)}</span>
+                                <span>{t('dashboard.expenses')}:</span> <span>{formatCurrency(data.value, appLocale, appCurrency)}</span>
                             </p>
                         )}
                         {data.SaldoRealizado !== undefined && (
                             <p className="text-sm font-bold flex justify-between gap-4" style={{ color: '#3B82F6' }}>
-                                <span>Saldo Real:</span> <span>{formatCurrency(data.SaldoRealizado)}</span>
+                                <span>{t('dashboard.balance')}:</span> <span>{formatCurrency(data.SaldoRealizado, appLocale, appCurrency)}</span>
                             </p>
                         )}
                         {data.SaldoPrevisto !== undefined && data.SaldoRealizado === undefined && (
                             <p className="text-sm font-bold flex justify-between gap-4" style={{ color: '#94A3B8' }}>
-                                <span>Proj. Saldo:</span> <span>{formatCurrency(data.SaldoPrevisto)}</span>
+                                <span>{t('horizon.projected')}:</span> <span>{formatCurrency(data.SaldoPrevisto, appLocale, appCurrency)}</span>
                             </p>
                         )}
                     </div>
@@ -97,9 +101,9 @@ const CustomTooltip = ({ active, payload, label, type, totalReceitas, totalDespe
         // Gráficos de Pizza/Barras (Categorias/Métodos de Pagamento)
         return (
             <div className="bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
-                <p className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{label || data.name}</p>
+                <p className="label text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{getTranslatedCategoryName(label || data.name, t)}</p>
                 <p className="text-sm font-black flex items-center gap-2" style={{ color: payload[0]?.fill || '#FF6384' }}>
-                    <span>{formatCurrency(data.value || 0)}</span>
+                    <span>{formatCurrency(data.value || 0, appLocale, appCurrency)}</span>
                     <span className="text-[10px] bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded-md font-black">{percentage}%</span>
                 </p>
             </div>
@@ -114,14 +118,17 @@ export const TrendsWidget: React.FC<{
     data: any[];
     theme: string;
 }> = ({ data, theme }) => {
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
     const tickColor = theme === 'light' ? '#475569' : '#94a3b8';
     const gridColor = theme === 'light' ? '#e2e8f0' : '#374151';
 
     const axisTickFormatter = (value: number) => {
         if (typeof value !== 'number') return value;
-        return new Intl.NumberFormat('pt-BR', {
+        return new Intl.NumberFormat(appLocale, {
             style: 'currency',
-            currency: 'BRL',
+            currency: appCurrency,
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(value);
@@ -144,10 +151,10 @@ export const TrendsWidget: React.FC<{
                     <Legend wrapperStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", paddingTop: "20px" }} iconType="circle" />
 
                     <Area type="monotone" dataKey="Saldo" fill="url(#colorSaldo)" stroke="transparent" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
-                    <Bar dataKey="Receitas" fill="#10B981" name="Receitas" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                    <Bar dataKey="Despesas" fill="#FF6384" name="Despesas" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
-                    <Line type="monotone" dataKey="Saldo" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }} activeDot={<PulsatingDot fill="#3B82F6" />} name="Patrimônio" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
-                    <Line type="monotone" dataKey="SaldoPrevisto" stroke="#94A3B8" strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, fill: '#94A3B8', strokeWidth: 2, stroke: '#fff' }} activeDot={<PulsatingDot fill="#94A3B8" />} name="Previsto" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
+                    <Bar dataKey="Receitas" fill="#10B981" name={t('dashboard.income')} radius={[4, 4, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                    <Bar dataKey="Despesas" fill="#FF6384" name={t('dashboard.expenses')} radius={[4, 4, 0, 0]} barSize={20} isAnimationActive={true} animationDuration={800} animationEasing="ease-out" />
+                    <Line type="monotone" dataKey="Saldo" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }} activeDot={<PulsatingDot fill="#3B82F6" />} name={t('dashboard.balance')} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
+                    <Line type="monotone" dataKey="SaldoPrevisto" stroke="#94A3B8" strokeWidth={3} strokeDasharray="5 5" dot={{ r: 4, fill: '#94A3B8', strokeWidth: 2, stroke: '#fff' }} activeDot={<PulsatingDot fill="#94A3B8" />} name={t('horizon.projected')} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
                 </ComposedChart>
             </ResponsiveContainer>
         </div>
@@ -159,20 +166,33 @@ export const DailySpendingWidget: React.FC<{
     theme: string;
     expectedLimit?: number;
 }> = ({ data, theme, expectedLimit }) => {
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
     const tickColor = theme === 'light' ? '#475569' : '#94a3b8';
     const gridColor = theme === 'light' ? '#e2e8f0' : '#374151';
 
+    const axisTickFormatter = (value: number) => {
+        if (typeof value !== 'number') return value;
+        return new Intl.NumberFormat(appLocale, {
+            style: 'currency',
+            currency: appCurrency,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+    };
+
     return (
-        <div className="h-64 w-full -ml-4">
+        <div className="h-64 md:h-72 -ml-4">
             <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <ComposedChart data={data}>
                     <defs>
-                        <linearGradient id="colorDaily" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#FF6384" stopOpacity={0.1} />
-                            <stop offset="95%" stopColor="#FF6384" stopOpacity={0} />
+                        <linearGradient id="colorSaldoRealizado" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1} />
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
                     <XAxis
                         dataKey="day"
                         tick={{ fill: tickColor, fontSize: 10, fontWeight: 'bold' }}
@@ -181,35 +201,90 @@ export const DailySpendingWidget: React.FC<{
                         interval={4}
                     />
                     <YAxis
-                        hide
-                        domain={['auto', 'auto']}
+                        tickFormatter={axisTickFormatter}
+                        tick={{ fill: tickColor, fontSize: 10 }}
+                        axisLine={false}
+                        tickLine={false}
+                        width={70}
                     />
                     <Tooltip
                         content={<CustomTooltip />}
-                        cursor={{ stroke: 'rgba(156, 163, 175, 0.4)', strokeWidth: 1, strokeDasharray: '3 3' }}
+                        cursor={false}
                         isAnimationActive={false}
                     />
+                    <Legend
+                        wrapperStyle={{ fontSize: "10px", fontWeight: "bold", textTransform: "uppercase", paddingTop: "20px" }}
+                        iconType="circle"
+                    />
+
+                    {/* Área de fundo sob a linha de Saldo Realizado */}
                     <Area
                         type="monotone"
-                        dataKey="value"
-                        stroke="#FF6384"
-                        strokeWidth={3}
-                        fillOpacity={1}
-                        fill="url(#colorDaily)"
+                        dataKey="SaldoRealizado"
+                        fill="url(#colorSaldoRealizado)"
+                        stroke="transparent"
                         isAnimationActive={true}
                         animationDuration={1000}
                         animationEasing="ease-out"
-                        name="Gasto Acumulado"
+                        legendType="none"
+                        name="_area_saldo"
                     />
-                    <Line type="monotone" dataKey="SaldoRealizado" stroke="#3B82F6" strokeWidth={3} dot={false} activeDot={<PulsatingDot fill="#3B82F6" />} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" name="Saldo Realizado" />
-                    <Line type="monotone" dataKey="SaldoPrevisto" stroke="#94A3B8" strokeWidth={3} strokeDasharray="5 5" dot={false} activeDot={<PulsatingDot fill="#94A3B8" />} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" name="Saldo Previsto" />
-                    
+
+                    {/* Barras de entradas e saídas do dia */}
+                    <Bar
+                        dataKey="Entradas"
+                        fill="#10B981"
+                        name={t('dashboard.income')}
+                        radius={[4, 4, 0, 0]}
+                        barSize={8}
+                        isAnimationActive={true}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                    />
+                    <Bar
+                        dataKey="Saidas"
+                        fill="#FF6384"
+                        name={t('dashboard.expenses')}
+                        radius={[4, 4, 0, 0]}
+                        barSize={8}
+                        isAnimationActive={true}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                    />
+
+                    {/* Linhas de saldo */}
+                    <Line
+                        type="monotone"
+                        dataKey="SaldoRealizado"
+                        stroke="#3B82F6"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: '#3B82F6', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={<PulsatingDot fill="#3B82F6" />}
+                        name={t('dashboard.balance')}
+                        isAnimationActive={true}
+                        animationDuration={1200}
+                        animationEasing="ease-out"
+                    />
+                    <Line
+                        type="monotone"
+                        dataKey="SaldoPrevisto"
+                        stroke="#94A3B8"
+                        strokeWidth={3}
+                        strokeDasharray="5 5"
+                        dot={{ r: 4, fill: '#94A3B8', strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={<PulsatingDot fill="#94A3B8" />}
+                        name={t('horizon.projected')}
+                        isAnimationActive={true}
+                        animationDuration={1200}
+                        animationEasing="ease-out"
+                    />
+
                     {expectedLimit && (
                         <ReferenceLine
                             y={expectedLimit}
                             stroke="#94a3b8"
                             strokeDasharray="5 5"
-                            label={{ value: 'Meta de Gastos', position: 'right', fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }}
+                            label={{ value: t('goals.target'), position: 'insideTopRight', fill: '#94a3b8', fontSize: 10, fontWeight: 'bold' }}
                         />
                     )}
                 </ComposedChart>
@@ -222,20 +297,48 @@ export const SavingsRateWidget: React.FC<{
     rate: number;
     theme: string;
 }> = ({ rate, theme }) => {
+    const { t, locale } = useTranslation();
     // Definir cor baseada na taxa
     const getColor = (r: number) => {
-        if (r < 0) return '#EF4444'; // Red (Negative)
-        if (r < 10) return '#F59E0B'; // Amber (Low)
-        if (r < 25) return '#10B981'; // Emerald (Good)
+        if (r < 0) return '#FF3B5C'; // Red (Negative)
+        if (r < 10) return '#FFB800'; // Amber (Low)
+        if (r < 25) return '#EA580C'; // Accent (Good)
         return '#3B82F6'; // Blue (Premium/Ideal)
     };
 
     const color = getColor(rate);
     const safeRate = Math.max(0, Math.min(rate, 100));
 
+    const getFeedbackMessage = () => {
+        if (locale === 'en') {
+            if (rate <= 0) return "You spent more than you earned this month.";
+            if (rate < 20) return "Try to save 20% for your financial reserve.";
+            return "Excellent! You are on the way to financial freedom.";
+        }
+        if (locale === 'es') {
+            if (rate <= 0) return "Gastaste más de lo que ganaste este mes.";
+            if (rate < 20) return "Intenta llegar al 20% para tu reserva financiera.";
+            return "¡Excelente! Camino a la libertad financiera.";
+        }
+        if (locale === 'fr') {
+            if (rate <= 0) return "Vous avez dépensé plus que vous n'avez gagné ce mois-ci.";
+            if (rate < 20) return "Essayez d'atteindre 20% pour votre réserve financière.";
+            return "Excellent! En route vers la liberté financière.";
+        }
+        if (locale === 'de') {
+            if (rate <= 0) return "Sie haben diesen Monat mehr ausgegeben als eingenommen.";
+            if (rate < 20) return "Versuchen Sie, 20% für Ihre Finanzreserve zu sparen.";
+            return "Ausgezeichnet! Auf dem Weg zur finanziellen Freiheit.";
+        }
+        // Fallback pt
+        if (rate <= 0) return "Você gastou mais do que recebeu este mês.";
+        if (rate < 20) return "Tente chegar aos 20% para sua reserva.";
+        return "Excelente! Caminho da liberdade financeira.";
+    };
+
     return (
         <div className="flex flex-col items-center justify-center py-4">
-            <div className="relative h-40 w-40">
+            <div className="relative h-36 w-36">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
@@ -245,7 +348,7 @@ export const SavingsRateWidget: React.FC<{
                             ]}
                             cx="50%"
                             cy="50%"
-                            innerRadius="75%"
+                            innerRadius="70%"
                             outerRadius="95%"
                             startAngle={225}
                             endAngle={-45}
@@ -257,25 +360,21 @@ export const SavingsRateWidget: React.FC<{
                             animationEasing="ease-out"
                         >
                             <Cell key="cell-rate" fill={color} />
-                            <Cell key="cell-bg" fill={theme === 'dark' ? '#1E293B' : '#F1F5F9'} />
+                            <Cell key="cell-bg" fill={theme === 'dark' ? '#1A1A1A' : '#F1F5F9'} />
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
-                    <span className="text-3xl font-black text-slate-800 dark:text-white leading-none">
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-black text-light-text dark:text-dark-text leading-none">
                         {rate.toFixed(0)}%
                     </span>
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Taxa de Poupança</span>
+                    <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('dashboard.savingsRate')}</span>
                 </div>
             </div>
 
-            <div className="text-center mt-2">
-                <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                    {rate <= 0
-                        ? "Você gastou mais do que recebeu este mês."
-                        : rate < 20
-                            ? "Bom! Tente chegar aos 20% para sua reserva."
-                            : "Excelente! Você está no caminho da liberdade."}
+            <div className="text-center mt-3">
+                <p className="text-[10px] font-semibold text-light-text-muted dark:text-dark-text-muted leading-relaxed max-w-[200px]">
+                    {getFeedbackMessage()}
                 </p>
             </div>
         </div>
@@ -292,83 +391,165 @@ export const CategoryPieWidget: React.FC<{
 }> = ({ data, total, categoryColors, theme, type, customColors }) => {
     const [activeIndex, setActiveIndex] = useState(-1);
     const [showAll, setShowAll] = useState(false);
+    const [viewMode, setViewMode] = useState<'categories' | 'groups'>('categories');
+
     const onPieEnter = useCallback((_: any, index: number) => setActiveIndex(index), []);
     const onPieLeave = useCallback(() => setActiveIndex(-1), []);
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
+
+    // Agrupamento dinâmico para Visão Macro (Grupos)
+    const groupedData = useMemo(() => {
+        if (viewMode === 'categories') return data;
+        const groups: Record<string, { name: string; value: number; color: string }> = {
+            'Essenciais': { name: 'Essenciais (Fixos)', value: 0, color: '#3B82F6' },
+            'Estilo de Vida': { name: 'Estilo de Vida (Desejos)', value: 0, color: '#EC4899' },
+            'Reserva & Futuro': { name: 'Reserva & Futuro', value: 0, color: '#10B981' },
+            'Outros': { name: 'Outros', value: 0, color: '#8B5CF6' }
+        };
+
+        const essenciaisKeys = ['moradia', 'saúde', 'saude', 'educação', 'educacao', 'contas', 'transporte', 'salario', 'salário', 'saldo inicial', 'luz', 'água', 'agua', 'aluguel', 'farmácia', 'farmacia'];
+        const futuroKeys = ['investimentos', 'reserva', 'poupança', 'poupanca', 'futuro', 'metas'];
+
+        data.forEach((item) => {
+            const nameLower = (item.name || '').toLowerCase();
+            if (essenciaisKeys.some(k => nameLower.includes(k))) {
+                groups['Essenciais'].value += item.value;
+            } else if (futuroKeys.some(k => nameLower.includes(k))) {
+                groups['Reserva & Futuro'].value += item.value;
+            } else if (nameLower) {
+                groups['Estilo de Vida'].value += item.value;
+            } else {
+                groups['Outros'].value += item.value;
+            }
+        });
+
+        return Object.values(groups).filter(g => g.value > 0);
+    }, [data, viewMode]);
+
+    const activeData = viewMode === 'categories' ? data : groupedData;
+
+    // Abreviação inteligente para o centro do donut
+    const formatAbbrev = (value: number) => {
+        if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)} mi`;
+        if (value >= 1000) return `R$ ${(value / 1000).toFixed(1)} mil`;
+        return formatCurrency(value, appLocale, appCurrency);
+    };
 
     let colors: string[] = [];
-    if (customColors) {
-        colors = data.map((_, index) => customColors[index % customColors.length]);
+    if (viewMode === 'groups') {
+        colors = activeData.map((item: any) => item.color);
+    } else if (customColors) {
+        colors = activeData.map((_, index) => customColors[index % customColors.length]);
     } else {
         const getColor = (name: string) => {
             return getCorPorCategoria(name, categoryColors);
         };
-        colors = data.map(item => getColor(item.name));
-        if (data.length === 1 && (data[0].name === 'Nenhuma despesa' || data[0].name === 'Nenhuma receita')) {
-            colors[0] = theme === 'dark' ? '#334155' : '#cbd5e1';
+        colors = activeData.map(item => getColor(item.name));
+        if (activeData.length === 1 && (activeData[0].name === t('dashboard.noData') || activeData[0].name === 'Nenhuma despesa' || activeData[0].name === 'Nenhuma receita')) {
+            colors[0] = theme === 'dark' ? '#1A1A1A' : '#cbd5e1';
         }
     }
 
-    const displayData = showAll ? data : data.slice(0, 5);
+    const displayData = showAll ? activeData : activeData.slice(0, 5);
 
     return (
         <div>
-            <div className="h-60 w-full relative">
+            {/* Seletor Pill: Categorias vs Grupos Macro */}
+            {type === 'despesas' && (
+                <div className="flex justify-center mb-4">
+                    <div className="inline-flex p-1 bg-slate-100 dark:bg-white/[0.05] rounded-2xl border border-slate-200/60 dark:border-white/[0.06] shadow-inner">
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('categories')}
+                            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all duration-200 ${
+                                viewMode === 'categories'
+                                    ? 'bg-white dark:bg-[#1A1A1A] text-[#EA580C] dark:text-[#F97316] shadow-md border border-slate-200/80 dark:border-[#1F1F1F]'
+                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Categorias
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('groups')}
+                            className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all duration-200 ${
+                                viewMode === 'groups'
+                                    ? 'bg-white dark:bg-[#1A1A1A] text-[#EA580C] dark:text-[#F97316] shadow-md border border-slate-200/80 dark:border-[#1F1F1F]'
+                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Grupos Macro
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="h-56 w-full relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
-                            data={data}
+                            data={activeData}
                             dataKey="value"
                             nameKey="name"
                             cx="50%"
                             cy="50%"
-                            innerRadius="72%"
+                            innerRadius="70%"
                             outerRadius="92%"
-                            paddingAngle={4}
+                            paddingAngle={activeData.length > 1 ? 6 : 0}
                             stroke="none"
+                            cornerRadius={10}
                             isAnimationActive={true}
                             animationDuration={1000}
                             animationEasing="ease-out"
                             {...{activeIndex, activeShape: renderActiveShape, onMouseEnter: onPieEnter, onMouseLeave: onPieLeave} as any}
                         >
-                            {data.map((entry: any, index: number) => (
+                            {activeData.map((entry: any, index: number) => (
                                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} style={{ cursor: 'pointer', transition: 'opacity 0.3s' }} />
                             ))}
                         </Pie>
                     </PieChart>
                 </ResponsiveContainer>
+                {/* Valor abreviado no centro — estilo Pierre */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-[0.2em] mb-0.5">Total</span>
-                    <span className="text-xl font-black text-slate-900 dark:text-white leading-none">
-                        {formatCurrency(total)}
+                    <span className="text-2xl font-black text-light-text dark:text-dark-text leading-none tracking-tight">
+                        {formatAbbrev(total)}
+                    </span>
+                    <span className="text-[9px] font-medium text-light-text-muted dark:text-dark-text-muted mt-1">
+                        {type === 'despesas' ? (t('dashboard.expenseThisMonth') || 'gastos esse mês') : type === 'receitas' ? (t('dashboard.incomeThisMonth') || 'receitas esse mês') : t('common.total')}
                     </span>
                 </div>
             </div>
-            <div className="mt-4 space-y-2.5 px-1">
-                {data.length > 0 && data[0].name !== 'Nenhuma despesa' && data[0].name !== 'Nenhuma receita' ? (
+            {/* Legenda redesenhada */}
+            <div className="mt-4 space-y-3 px-1">
+                {activeData.length > 0 && activeData[0].name !== t('dashboard.noData') && activeData[0].name !== 'Nenhuma despesa' && activeData[0].name !== 'Nenhuma receita' ? (
                     displayData.map((entry: any, index: number) => {
                         const perc = total > 0 ? ((entry.value / total) * 100).toFixed(0) : '0';
                         return (
-                            <div key={`legend-${index}`} className="flex items-center justify-between text-xs font-bold">
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="h-2.5 w-2.5 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: colors[index % colors.length] }} />
-                                    <span className="text-slate-600 dark:text-slate-300 truncate">{entry.name}</span>
+                            <div key={`legend-${index}`} className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="h-8 w-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: colors[index % colors.length] + '18' }}>
+                                        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-xs font-bold text-light-text dark:text-dark-text-secondary truncate">{getTranslatedCategoryName(entry.name, t)}</span>
+                                        <span className="text-[10px] text-light-text-muted dark:text-dark-text-muted">{perc}%</span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[9px] bg-slate-100 dark:bg-dark-surface px-1.5 py-0.5 rounded text-slate-500">{perc}%</span>
-                                    <span className="text-slate-900 dark:text-white tabular-nums">{formatCurrency(entry.value)}</span>
-                                </div>
+                                <span className="text-sm font-black text-light-text dark:text-dark-text tabular-nums">{formatCurrency(entry.value, appLocale, appCurrency)}</span>
                             </div>
                         );
                     })
                 ) : (
-                    <p className="text-center text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-widest py-4">Sem registros no período</p>
+                    <p className="text-center text-light-text-muted dark:text-dark-text-muted text-[10px] font-bold uppercase tracking-widest py-4">{t('common.noResults')}</p>
                 )}
-                {data.length > 5 && (
+                {activeData.length > 5 && (
                     <button 
                         onClick={() => setShowAll(!showAll)} 
-                        className="w-full text-center text-[9px] text-light-accent dark:text-dark-accent font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
+                        className="w-full text-center text-[9px] text-[#EA580C] dark:text-[#F97316] font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
                     >
-                        {showAll ? '− Mostrar menos' : `+ Todas as ${data.length} categorias`}
+                        {showAll ? `− ${t('common.close')}` : `+ ${t('common.all')} (${activeData.length})`}
                     </button>
                 )}
             </div>
@@ -376,19 +557,23 @@ export const CategoryPieWidget: React.FC<{
     );
 };
 
+
 export const PaymentMethodChart: React.FC<{
     data: any[];
     total: number;
     theme: string;
 }> = ({ data, total, theme }) => {
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
     const tickColor = theme === 'light' ? '#475569' : '#94a3b8';
     const gridColor = theme === 'light' ? '#e2e8f0' : '#374151';
 
     const axisTickFormatter = (value: number) => {
         if (typeof value !== 'number') return value;
-        return new Intl.NumberFormat('pt-BR', {
+        return new Intl.NumberFormat(appLocale, {
             style: 'currency',
-            currency: 'BRL',
+            currency: appCurrency,
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(value);
@@ -415,6 +600,9 @@ export const PaymentMethodChart: React.FC<{
 
 const InvoiceCustomLabel = (props: any) => {
     const { x, y, value, isCurrent } = props;
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
     if (value === undefined || value === null) return null;
     
     return (
@@ -437,11 +625,11 @@ const InvoiceCustomLabel = (props: any) => {
                 fontSize="10" 
                 fontWeight={isCurrent ? "900" : "600"}
             >
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
+                {new Intl.NumberFormat(appLocale, { style: 'currency', currency: appCurrency }).format(value)}
             </text>
             {isCurrent && (
                 <text x={x} y={y - 45} fill="#64748b" textAnchor="middle" fontSize="9" fontWeight="bold">
-                    Fatura aberta
+                    {t('dashboard.openInvoice')}
                 </text>
             )}
         </g>

@@ -65,23 +65,23 @@ const InvoicePickerModal: React.FC<InvoicePickerModalProps> = ({
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="flex flex-col max-h-[70vh]">
                 <header className="mb-6">
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter">Mês da Fatura</h3>
+                    <h3 className="text-lg font-black text-light-text dark:text-dark-text uppercase tracking-tighter">Mês da Fatura</h3>
                 </header>
 
                 {/* Cabeçalho do Ano */}
-                <div className="flex items-center justify-between mb-6 bg-slate-50 dark:bg-dark-surface p-2 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between mb-6 bg-light-card-elevated dark:bg-dark-card p-2 rounded-2xl border border-light-border dark:border-dark-elevated">
                     <button
                         onClick={handlePrevYear}
-                        className="p-3 text-slate-500 hover:text-light-accent dark:text-slate-300 dark:hover:text-dark-accent active:scale-90 transition-all rounded-xl"
+                        className="p-3 text-slate-500 hover:text-light-accent dark:text-slate-300 dark:hover:text-[#3B82F6] active:scale-90 transition-all rounded-xl"
                     >
                         <ArrowLeftIcon className="h-5 w-5" />
                     </button>
-                    <span className="text-xl font-black text-slate-800 dark:text-slate-200">
+                    <span className="text-xl font-black text-light-text dark:text-dark-text-secondary">
                         {currentYear}
                     </span>
                     <button
                         onClick={handleNextYear}
-                        className="p-3 text-slate-500 hover:text-light-accent dark:text-slate-300 dark:hover:text-dark-accent active:scale-90 transition-all rounded-xl"
+                        className="p-3 text-slate-500 hover:text-light-accent dark:text-slate-300 dark:hover:text-[#3B82F6] active:scale-90 transition-all rounded-xl"
                     >
                         <ArrowRightIcon className="h-5 w-5" />
                     </button>
@@ -101,7 +101,7 @@ const InvoicePickerModal: React.FC<InvoicePickerModalProps> = ({
                                     py-4 px-2 rounded-2xl text-center transition-all cursor-pointer font-bold text-sm
                                     ${isSelected
                                         ? 'bg-light-accent text-white shadow-lg shadow-light-accent/30 scale-105 border-0'
-                                        : 'bg-white dark:bg-dark-surface text-slate-600 dark:text-slate-200 border border-slate-100 dark:border-slate-700 hover:border-light-accent/50 dark:hover:border-dark-accent/50 active:scale-95'
+                                        : 'bg-white dark:bg-dark-card text-slate-600 dark:text-slate-200 border border-light-border dark:border-dark-elevated hover:border-light-accent/50 dark:hover:border-dark-accent/50 active:scale-95'
                                     }
                                 `}
                             >

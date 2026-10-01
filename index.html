@@ -17,10 +17,15 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <!-- Configurações de cores de tema para preencher áreas de sistema se aparecerem -->
-  <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F1F5F9" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)" />
 
   <title>SobControle Finanças</title>
+
+  <!-- Google Fonts: Inter & Plus Jakarta Sans com suporte total a tnum -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -28,12 +33,49 @@
       darkMode: 'class',
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
           colors: {
-            'light-bg': '#F8F9FA',
-            'light-accent': '#14B8A6',
-            'dark-bg': '#0F172A',
-            'dark-accent': '#0D9488',
-            'dark-surface': '#1E293B',
+            // Light Mode
+            'light-bg': '#F1F5F9',
+            'light-card': '#FFFFFF',
+            'light-card-elevated': '#FFFFFF',
+            'light-border': '#D7E0EB',
+            'light-text': '#172033',
+            'light-text-secondary': '#475569',
+            'light-text-muted': '#64748B',
+            'light-accent': '#EA580C',
+            'light-accent-hover': '#F97316',
+            'light-accent-subtle': '#FFEDD5',
+            'light-selected': '#FFEDD5',
+
+            // Dark Mode — OLED Black
+            'dark-bg': '#050505',
+            'dark-card': '#111111',
+            'dark-elevated': '#1A1A1A',
+            'dark-surface': '#1F1F1F',
+            'dark-border': '#1F1F1F',
+            'dark-text': '#F5F5F5',
+            'dark-text-secondary': '#B0B0B0',
+            'dark-text-muted': '#666666',
+            'dark-accent': '#EA580C',
+            'dark-accent-hover': '#F97316',
+            'dark-accent-subtle': '#431407',
+
+            // Acentos da Marca
+            'brand-accent': '#EA580C',
+            'brand-accent-hover': '#F97316',
+            'brand-accent-dark-subtle': '#431407',
+            'brand-accent-light-subtle': '#FFEDD5',
+
+            // Semantic Finanças
+            'fin-income': '#10B981',
+            'fin-expense': '#EF4444',
+            'fin-info': '#EA580C',
+            'fin-warning': '#F59E0B',
+            'fin-invest': '#8B5CF6',
+            'fin-action': '#EA580C',
           }
         }
       }
@@ -68,10 +110,33 @@
 
   <style>
     :root {
-      --sat: env(safe-area-inset-top);
-      --sar: env(safe-area-inset-right);
-      --sab: env(safe-area-inset-bottom);
-      --sal: env(safe-area-inset-left);
+      --sat: env(safe-area-inset-top, 24px);
+      --sar: env(safe-area-inset-right, 0px);
+      --sab: env(safe-area-inset-bottom, 16px);
+      --sal: env(safe-area-inset-left, 0px);
+    }
+
+    *,
+    *::before,
+    *::after,
+    html,
+    body,
+    #root,
+    input,
+    button,
+    select,
+    textarea,
+    h1, h2, h3, h4, h5, h6,
+    p, span, a, label {
+      font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    /* Numerais Tabulares para alinhamento fintech perfeito */
+    .tabular-nums,
+    [data-tabular-nums] {
+      font-variant-numeric: tabular-nums !important;
+      -webkit-font-feature-settings: "tnum" 1 !important;
+      font-feature-settings: "tnum" 1 !important;
     }
 
     html,
@@ -85,13 +150,15 @@
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior: none;
       user-select: none;
-      background-color: #F8F9FA;
+      background-color: #F1F5F9;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .dark html,
     .dark body,
     .dark #root {
-      background-color: #0F172A;
+      background-color: #050505;
     }
 
     body {
@@ -102,7 +169,7 @@
       bottom: 0;
     }
 
-    /* Glassmorphism & Effects */
+    /* Glassmorphism & Effects — OLED */
     .glass {
       background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(12px);
@@ -111,10 +178,10 @@
     }
 
     .dark .glass {
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: rgba(17, 17, 17, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .glass-header {
@@ -124,9 +191,10 @@
     }
 
     .dark .glass-header {
-      background: rgba(17, 24, 40, 0.8);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(5, 5, 5, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     /* Estilos para inputs focados não puxarem barras de sistema */
@@ -232,6 +300,16 @@
       }
     }
 
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+      20%, 40%, 60%, 80% { transform: translateX(6px); }
+    }
+
+    .animate-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
     .skeleton-pulse {
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
@@ -272,6 +350,39 @@
 
     .stagger-card {
       animation: cardSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Neon Glow Effects */
+    .neon-glow-lime {
+      box-shadow: 0 0 20px rgba(204, 255, 0, 0.15), 0 0 60px rgba(204, 255, 0, 0.05);
+    }
+
+    .neon-glow-red {
+      box-shadow: 0 0 20px rgba(255, 59, 92, 0.15), 0 0 60px rgba(255, 59, 92, 0.05);
+    }
+
+    /* Bento card hover effect */
+    .bento-card {
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+    }
+
+    .bento-card:active {
+      transform: scale(0.97);
+    }
+
+    /* Floating nav glassmorphism */
+    .floating-nav {
+      background: rgba(17, 17, 17, 0.75);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .light .floating-nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     /* Goal Calculator Slider */

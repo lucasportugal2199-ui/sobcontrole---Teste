@@ -7,6 +7,7 @@ interface PickerItem {
     id: string;
     name: string;
     icon?: string | React.ReactNode;
+    color?: string;
 }
 
 interface ListPickerModalProps {
@@ -29,7 +30,7 @@ const ListPickerModal: React.FC<ListPickerModalProps> = ({
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="flex flex-col max-h-[70vh]">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 px-1">{title}</h3>
+                <h3 className="text-lg font-bold text-light-text dark:text-dark-text mb-6 px-1">{title}</h3>
                 
                 <div className="flex-1 overflow-y-auto no-scrollbar -mx-2 px-2">
                     <div className="space-y-1">
@@ -44,13 +45,18 @@ const ListPickerModal: React.FC<ListPickerModalProps> = ({
                                     }}
                                     className="w-full flex items-center justify-between p-4 rounded-xl transition-colors active:bg-slate-100 dark:active:bg-slate-700/50 group"
                                 >
-                                    <span className={`text-base font-semibold text-left flex-1 flex items-center gap-3 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'}`}>
-                                        <span className="w-8 h-8 flex items-center justify-center text-xl leading-none flex-shrink-0 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                                    <span className={`text-base font-semibold text-left flex-1 flex items-center gap-3 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-light-text dark:text-dark-text-secondary'}`}>
+                                        <span 
+                                            className="w-8 h-8 flex items-center justify-center text-xl leading-none flex-shrink-0 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden border border-transparent"
+                                            style={item.color ? { backgroundColor: `${item.color}33`, borderColor: `${item.color}44` } : undefined}
+                                        >
                                             {item.icon ? (
                                                 typeof item.icon === 'string' ? (
-                                                    <CategoryIcon name={item.icon} className="h-6 w-6" />
+                                                    <CategoryIcon name={item.icon} className="h-5 w-5" style={item.color ? { color: item.color } : undefined} />
                                                 ) : (
-                                                    item.icon
+                                                    <span style={item.color ? { color: item.color } : undefined} className="flex items-center justify-center">
+                                                        {item.icon}
+                                                    </span>
                                                 )
                                             ) : '📂'}
                                         </span>

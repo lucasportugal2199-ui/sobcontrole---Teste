@@ -18,16 +18,20 @@ if (!isConfigured) {
 
 // Mesmo se faltar, criamos o client com valores placeholder para não quebrar o build/runtime com erro "supabaseUrl is required";
 // As chamadas falharão graciosamente ou serão tratadas por quem importa.
+import { Capacitor } from '@capacitor/core';
+
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key',
   {
     auth: {
-  persistSession: true,
-  autoRefreshToken: true,
-  detectSessionInUrl: false,
-  storage: window.localStorage
-},
+      persistSession: true,
+      autoRefreshToken: true,
+      // Na web: detecta o token na URL após o redirect OAuth do Google
+      // No Android nativo: o Capacitor lida com deeplinks, então deve ser false
+      detectSessionInUrl: !Capacitor.isNativePlatform(),
+      storage: window.localStorage,
+    },
   }
 );
 

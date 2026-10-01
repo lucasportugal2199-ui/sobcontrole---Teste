@@ -9,6 +9,7 @@
 
 import { UserData, AllData, Categorias, PatrimonioHistory, Transaction } from '../types';
 import { INITIAL_CATEGORIAS } from '../constants';
+import { recalculateBalancesFrom } from './helpers';
 
 // ============================================================
 // SYNC LOGGER — Logs detalhados para debug de sincronização
@@ -165,7 +166,11 @@ export function smartMerge(local: UserData, remote: UserData): UserData {
   log.info(`Fonte mais recente: ${newerSource} (local: ${local.lastUpdatedAt}, remote: ${remote.lastUpdatedAt})`);
 
   // 1. Merge allData (transações por mês)
-  const mergedAllData = mergeAllData(local.allData || {}, remote.allData || {});
+  let mergedAllData = mergeAllData(local.allData || {}, remote.allData || {});
+  const sortedKeys = Object.keys(mergedAllData).sort();
+  if (sortedKeys.length > 0) {
+    mergedAllData = recalculateBalancesFrom(sortedKeys[0], mergedAllData);
+  }
   
   // 2. Merge categorias
   const mergedCategories = mergeCategories(local.categories, remote.categories);

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SobControle — Open Finance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B1120;
+      --surface: #141C2E;
+      --surface-elevated: #1A2540;
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --teal: #14B8A6;
+      --emerald: #10B981;
+      --indigo: #6366F1;
+      --amber: #F59E0B;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      max-width: 440px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    header {
+      padding: 16px 20px;
+      background: rgba(11, 17, 32, 0.95);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    .btn-connect {
+      background: var(--teal);
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Open finance banner */
+    .banner-open {
+      margin: 16px 20px;
+      background: linear-gradient(135deg, rgba(20,184,166,0.15) 0%, rgba(99,102,241,0.1) 100%);
+      border: 1px solid rgba(20,184,166,0.3);
+      padding: 16px;
+      border-radius: 16px;
+    }
+    .banner-open h3 { font-size: 0.95rem; font-weight: 700; color: #fff; }
+    .banner-open p { font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+
+    /* Connected Banks List */
+    .section-title { padding: 0 20px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .bank-list {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bank-conn-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .conn-left { display: flex; align-items: center; gap: 12px; }
+    .conn-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+    }
+    .conn-meta h4 { font-size: 0.88rem; font-weight: 700; }
+    .conn-meta p { font-size: 0.72rem; color: var(--emerald); font-weight: 600; margin-top: 2px; }
+    .btn-sync {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Open Finance</h1>
+    <button class="btn-connect">＋ Conectar Banco</button>
+  </header>
+
+  <div class="banner-open">
+    <h3>🌐 Conexão Bancária Automatizada</h3>
+    <p>Seus extratos e transações são importados com criptografia de ponta a ponta regulamentada pelo Banco Central.</p>
+  </div>
+
+  <div class="section-title">Instituições Conectadas</div>
+
+  <div class="bank-list">
+    <div class="bank-conn-item">
+      <div class="conn-left">
+        <div class="conn-logo" style="background: #820AD1;">Nu</div>
+        <div class="conn-meta">
+          <h4>Nubank S.A.</h4>
+          <p>● Sincronizado há 15 min</p>
+        </div>
+      </div>
+      <button class="btn-sync">↻ Atualizar</button>
+    </div>
+
+    <div class="bank-conn-item">
+      <div class="conn-left">
+        <div class="conn-logo" style="background: #FF7A00;">In</div>
+        <div class="conn-meta">
+          <h4>Banco Inter</h4>
+          <p>● Sincronizado há 2 horas</p>
+        </div>
+      </div>
+      <button class="btn-sync">↻ Atualizar</button>
+    </div>
+
+    <div class="bank-conn-item">
+      <div class="conn-left">
+        <div class="conn-logo" style="background: #0047BB;">It</div>
+        <div class="conn-meta">
+          <h4>Itaú Unibanco</h4>
+          <p style="color: var(--amber);">⚠️ Reautenticar em 3 dias</p>
+        </div>
+      </div>
+      <button class="btn-sync">Renovar</button>
+    </div>
+  </div>
+
+</body>
+</html>

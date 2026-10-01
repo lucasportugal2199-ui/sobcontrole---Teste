@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
     },
 
     plugins: [react()],
+    base: './',
 
     define: {
       // Mapeia as variáveis para process.env (exigido pelo SDK do Gemini e usado pelo Supabase)

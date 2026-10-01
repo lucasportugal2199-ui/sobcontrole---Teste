@@ -7,8 +7,10 @@ import React, {
   useContext,
   Suspense,
   ErrorInfo,
+  useRef,
 } from 'react';
 import OnboardingTutorial from './components/OnboardingTutorial';
+import { I18nProvider, useTranslation } from './i18n';
 import { INITIAL_CATEGORIAS, INITIAL_CATEGORIA_CORES, AVAILABLE_BADGES } from './constants';
 import {
   AllData,
@@ -56,38 +58,45 @@ import {
   getPreviousBalance,
   calculateStatementDate,
   calculateCreditCardDueDate,
-  addMonthsSafely
+  addMonthsSafely,
+  recalculateBalancesFrom,
+  generateMockTransactions
 } from './utils/helpers';
 import { fetchAllDataFromSupabase, saveAllDataToSupabase } from './utils/supabaseSync';
 import { isEmptyState, isValidPayload, smartMerge, dataSummary, createSyncLogger } from './utils/syncEngine';
 import { NotificationService } from './utils/notificationService';
 import { supabase } from './utils/supabaseClient'; // Importação do cliente
+import { BillingService } from './utils/billingService';
+import { syncWidgetData } from './utils/widgetSync';
 import confetti from 'canvas-confetti';
 
 import { StatusBar, Animation } from '@capacitor/status-bar';
 import { App as CapApp } from '@capacitor/app';
+import { BankNotificationService, PendingBankTransaction } from './services/bankNotificationService';
+import { PendingTransactionsModal } from './components/PendingTransactionsModal';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { Capacitor } from '@capacitor/core';
 
-import BottomNav from './components/BottomNav';
+import { BottomNav } from './components/BottomNav';
 import LoginScreen from './components/LoginScreen';
 import LockScreen from './components/LockScreen';
 import SkeletonLoader from './components/SkeletonLoader';
 import MenuScreen from './components/MenuScreen';
 import Modal from './components/Modal';
-import Tutorial from './components/Tutorial';
+import { Tutorial } from './components/Tutorial';
 import ListPickerModal from './components/ListPickerModal';
 import TransactionTypeMenu from './components/TransactionTypeMenu';
 import { AppContext, Tab, Theme, MenuSubView } from './context/AppContext';
 import { loadLocalData, saveLocalData, clearLocalData, clearAllUserData } from './utils/localStorageSync';
 
 interface AppErrorBoundaryProps { children?: ReactNode; }
-interface AppErrorBoundaryState { hasError: boolean; }
+interface AppErrorBoundaryState { hasError: boolean; error: Error | null; }
 
 class AppErrorBoundary extends React.Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
-  state: AppErrorBoundaryState = { hasError: false };
+  state: AppErrorBoundaryState = { hasError: false, error: null };
 
-  static getDerivedStateFromError(_: Error): AppErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -95,15 +104,21 @@ class AppErrorBoundary extends React.Component<AppErrorBoundaryProps, AppErrorBo
   }
 
   handleReload = () => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, error: null });
     window.location.reload();
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="h-full w-full bg-dark-bg flex flex-col items-center justify-center p-4 text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Ops! Algo falhou.</h1>
+        <div className="h-full w-full bg-dark-bg flex flex-col items-center justify-center p-4 text-center overflow-auto">
+          <h1 className="text-2xl font-bold text-white mb-2">Ops! Algo falhou.</h1>
+          {this.state.error && (
+            <div className="bg-red-900/40 border border-red-500/30 rounded-xl p-3 my-4 max-w-md text-left overflow-auto text-xs font-mono text-red-200">
+              <p className="font-bold text-red-400 mb-1">{this.state.error.name}: {this.state.error.message}</p>
+              <pre className="text-[10px] whitespace-pre-wrap text-red-300 opacity-80">{this.state.error.stack?.slice(0, 500)}</pre>
+            </div>
+          )}
           <button onClick={this.handleReload} className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-black uppercase text-xs tracking-widest shadow-xl shadow-blue-500/20">Recarregar App</button>
         </div>
       );
@@ -129,9 +144,9 @@ const Toast: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void }> 
   };
 
   return (
-    <div className={`fixed bottom-28 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-100 dark:border-slate-700 transition-all duration-200 ${isExiting ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
+    <div className={`fixed bottom-28 left-1/2 -translate-x-1/2 z-[100] px-5 py-3.5 bg-white dark:bg-dark-elevated rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-200/80 dark:border-white/10 transition-all duration-200 ${isExiting ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}`}>
       <div className="flex-shrink-0">{iconMap[toast.type] || iconMap.info}</div>
-      <p className="text-sm font-bold text-slate-900 dark:text-white whitespace-nowrap">{toast.message}</p>
+      <p className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">{toast.message}</p>
     </div>
   );
 };
@@ -150,10 +165,10 @@ const NoInternetScreen = () => (
 );
 
 // Lazy Components
-const Dashboard = React.lazy(() => import('./components/Dashboard'));
-const Management = React.lazy(() => import('./components/Management'));
+const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const Management = React.lazy(() => import('./components/Management').then(m => ({ default: m.Management })));
 const Categories = React.lazy(() => import('./components/Categories'));
-const SavingsGoals = React.lazy(() => import('./components/SavingsGoals'));
+const SavingsGoals = React.lazy(() => import('./components/SavingsGoals').then(m => ({ default: m.SavingsGoals })));
 const Lancamento = React.lazy(() => import('./components/Lancamento'));
 const HorizonteSaldos = React.lazy(() => import('./components/HorizonteSaldos'));
 const RelatorioAnual = React.lazy(() => import('./components/RelatorioAnual'));
@@ -161,10 +176,20 @@ const AIChat = React.lazy(() => import('./components/AIChat'));
 const PremiumScreen = React.lazy(() => import('./components/PremiumScreen'));
 const GoalCalculator = React.lazy(() => import('./components/GoalCalculator'));
 const AccountManager = React.lazy(() => import('./components/AccountManager'));
+const InvestmentModule = React.lazy(() => import('./components/InvestmentModule'));
+const NotificationAutomation = React.lazy(() => import('./components/NotificationAutomation'));
 const NewTransactionScreen = React.lazy(() => import('./components/NewTransactionScreen'));
 const NotificationPromptModal = React.lazy(() => import('./components/NotificationPromptModal'));
+const UpdatePromptModal = React.lazy(() => import('./components/UpdatePromptModal'));
+import { checkForAppUpdate, AppUpdateInfo } from './utils/updateChecker';
 
 const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
+  const { locale, setLocale, t } = useTranslation();
+
+  // Apenas no `npm run dev` ativa os recursos PRO para testes.
+  // Não usar o hostname: no Android (Capacitor) o app roda em https://localhost, o que liberaria o PRO para todos.
+  const isDevMode = import.meta.env.DEV;
+
   // Constantes de Estado Inicial (para reuso no reset)
   const INITIAL_USER_PROFILE: UserProfile = {
     name: 'Usuário', email: '', badges: [], hapticsEnabled: true, notificationsEnabled: false, isPremium: false, currentStreak: 0, aiScansCount: 0, hasAnsweredNotificationPrompt: false
@@ -172,14 +197,49 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
   const INITIAL_DASHBOARD_LAYOUT: DashboardLayout = {
     order: [
-      'resumo', 'contas', 'invoices', 'resumoDiario', 'fluxoDiario', 
-      'orcamento', 'insights', 'distribuicao502030', 'tendencias', 
-      'despesasCategoria', 'receitasCategoria', 'metodosPagamentoChart', 'taxaPoupanca'
+      'resumo',
+      'insights',
+      'monthlyComparison',
+      'contas',
+      'patrimonio',
+      'invoices',
+      'installments',
+      'endOfMonthForecast',
+      'dailyCashFlow',
+      'fixedVsVariable',
+      'orcamento',
+      'tendencias',
+      'despesasCategoria',
+      'receitasCategoria',
+      'resumoDiario',
+      'spendingPace',
+      'savingsRateHistory',
+      'taxaPoupanca',
+      'distribuicao502030',
+      'metodosPagamentoChart'
     ],
     visibility: {
-      resumo: true, contas: true, invoices: true, resumoDiario: true, fluxoDiario: true,
-      orcamento: true, insights: true, distribuicao502030: true, tendencias: true,
-      despesasCategoria: true, receitasCategoria: true, metodosPagamentoChart: true, taxaPoupanca: true
+      resumo: true,
+      insights: true,
+      smartAlerts: false,
+      monthlyComparison: true,
+      contas: true,
+      patrimonio: true,
+      invoices: true,
+      installments: true,
+      endOfMonthForecast: true,
+      dailyCashFlow: true,
+      fixedVsVariable: true,
+      orcamento: true,
+      tendencias: true,
+      despesasCategoria: true,
+      receitasCategoria: true,
+      resumoDiario: true,
+      spendingPace: true,
+      savingsRateHistory: true,
+      taxaPoupanca: true,
+      distribuicao502030: true,
+      metodosPagamentoChart: true
     },
   };
 
@@ -219,13 +279,58 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>('dark');
   const [currentTab, setCurrentTab] = useState<Tab>('lancamento');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [currentView, setCurrentView] = useState<View>('main');
+  const [currentView, setCurrentViewRaw] = useState<View>('main');
+  const previousViewRef = useRef<View>('main');
+
+  const setCurrentView = useCallback((view: View) => {
+    setCurrentViewRaw(prev => {
+      if (prev !== view) {
+        previousViewRef.current = prev;
+      }
+      return view;
+    });
+  }, []);
+
+  const goBackView = useCallback(() => {
+    setCurrentViewRaw(previousViewRef.current || 'main');
+  }, []);
   const [activeEmail, setActiveEmail] = useState<string | null>(null);
   const [menuSubView, setMenuSubView] = useState<MenuSubView>('profile');
   const [showTutorial, setShowTutorial] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<AppUpdateInfo | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isLoadingData) return;
+    checkForAppUpdate().then(info => {
+      if (info && info.hasUpdate) {
+        setUpdateInfo(info);
+        setIsUpdateModalOpen(true);
+      }
+    });
+  }, [isLoadingData]);
 
   // Estados de Dados
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
+  const effectiveUserProfile = useMemo<UserProfile>(() => {
+    if (isDevMode) {
+      return {
+        ...userProfile,
+        isPremium: true
+      };
+    }
+    return userProfile;
+  }, [userProfile, isDevMode]);
+
+  const badgesRef = useRef<string[]>(userProfile.badges || []);
+  useEffect(() => { badgesRef.current = userProfile.badges || []; }, [userProfile.badges]);
+
+  // Sincronizar locale do perfil do usuário com o i18n
+  useEffect(() => {
+    if (userProfile.locale && userProfile.locale !== locale) {
+      setLocale(userProfile.locale as any);
+    }
+  }, [userProfile.locale, locale, setLocale]);
   const [allData, setAllData] = useState<AllData>({});
   const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
   const [importHistory, setImportHistory] = useState<ImportHistoryItem[]>([]);
@@ -247,6 +352,12 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   const [isNewTransactionOpen, setIsNewTransactionOpen] = useState(false);
   const [isTransactionMenuOpen, setIsTransactionMenuOpen] = useState(false);
   const [newTransactionInitialType, setNewTransactionInitialType] = useState<'entrada' | 'saida' | 'credito' | 'transferencia' | null>(null);
+  const [newTransactionInitialData, setNewTransactionInitialData] = useState<{
+    valor?: number;
+    descricao?: string;
+    tipo?: 'entrada' | 'saida' | 'transferencia';
+    paymentMethod?: 'debito' | 'credito';
+  } | null>(null);
   const [showTutorialState, setShowTutorialState] = useState(false);
   const [managementFilter, setManagementFilter] = useState<{ method: 'all' | 'credito' | 'debito', cardId: string | 'all', accountId?: string | 'all' } | null>(null);
 
@@ -257,6 +368,20 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, isLoadingData, userProfile.email]);
+
+  // Inicialização do faturamento In-App (Google Play) e sincronização do status PRO
+  useEffect(() => {
+    if (isAuthenticated && !isLoadingData) {
+      BillingService.initialize(
+        (isPremium) => {
+          updateUserProfile({ isPremium });
+        },
+        (msg, type) => {
+          showToast(msg, type);
+        }
+      );
+    }
+  }, [isAuthenticated, isLoadingData]);
 
   // Lógica de Streaks Diários
   useEffect(() => {
@@ -298,9 +423,19 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     return `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 8)}`;
   };
 
+  const backHandlersRef = useRef<Record<string, () => boolean>>({});
+
+  const registerBackHandler = useCallback((id: string, fn: () => boolean) => {
+    backHandlersRef.current[id] = fn;
+  }, []);
+
+  const unregisterBackHandler = useCallback((id: string) => {
+    delete backHandlersRef.current[id];
+  }, []);
+
   // --- HAPTICS HELPER ---
   const triggerHaptic = useCallback(async (style: ImpactStyle = ImpactStyle.Light) => {
-    if (userProfile.hapticsEnabled !== false) { // Default true
+    if (userProfile.hapticsEnabled !== false && Capacitor.isNativePlatform()) { // Default true
       try {
         await Haptics.impact({ style });
       } catch (error) {
@@ -544,7 +679,22 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         setCreditCards(data.creditCards || []);
         setBudgets(data.budgets || {});
         setSavingsGoals(data.savingsGoals || []);
-        setDashboardLayout(data.dashboardLayout || INITIAL_DASHBOARD_LAYOUT);
+        const rawLayout = data.dashboardLayout || INITIAL_DASHBOARD_LAYOUT;
+        let layoutOrder = [...(rawLayout.order || INITIAL_DASHBOARD_LAYOUT.order)];
+        const currentInsightsIdx = layoutOrder.indexOf('insights');
+        if (currentInsightsIdx === -1 || currentInsightsIdx > 3) {
+          layoutOrder = layoutOrder.filter(k => k !== 'insights');
+          const resumoIdx = layoutOrder.indexOf('resumo');
+          layoutOrder.splice(resumoIdx >= 0 ? resumoIdx + 1 : 1, 0, 'insights');
+        }
+        setDashboardLayout({
+          order: layoutOrder,
+          visibility: {
+            ...INITIAL_DASHBOARD_LAYOUT.visibility,
+            ...(rawLayout.visibility || {}),
+            insights: true
+          }
+        });
         setAssets(data.assets || []);
         setPatrimonioHistory(data.patrimonioHistory || []);
         setAccounts(data.accounts || []);
@@ -859,6 +1009,13 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       // Remover todos os listeners de backButton para evitar callbacks fantasmas com closure antigo
       await CapApp.removeAllListeners();
       await CapApp.addListener('backButton', () => {
+        // Executa os handlers registrados dinamicamente do mais recente para o mais antigo
+        const handlers = Object.values(backHandlersRef.current);
+        for (let i = handlers.length - 1; i >= 0; i--) {
+          if (handlers[i]()) {
+            return;
+          }
+        }
         // Prioridade 1: Fechar Modais e Telas de Cadastro abertas
         if (isTransactionMenuOpen) {
           setIsTransactionMenuOpen(false);
@@ -932,15 +1089,47 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     return Object.entries(despesasMap).map(([name, value]) => ({ name, value }));
   }, [transactions]);
 
+  // --- Efeito: Sincronizar dados com os Widgets Nativos do Android ---
+  useEffect(() => {
+    if (isLoadingData) return;
+    const totalSaldo = accounts && accounts.length > 0
+      ? accounts.reduce((acc, a) => acc + (a.balance || 0), 0)
+      : (allTransactions || []).reduce((acc, t) => acc + (t.tipo === 'entrada' ? t.valor : t.tipo === 'saida' ? -t.valor : 0), 0);
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const gastosHoje = (allTransactions || [])
+      .filter(t => t.tipo === 'saida' && t.data === todayStr)
+      .reduce((sum, t) => sum + (t.valor || 0), 0);
+
+    const currentMonthKey = getMonthKey(currentDate);
+    const currentMonthData = allData[currentMonthKey];
+    const prevBalance = getPreviousBalance(currentMonthKey, allData);
+    const monthEntradas = (currentMonthData?.transactions || []).filter(t => t.tipo === 'entrada').reduce((sum, t) => sum + t.valor, 0);
+    const monthSaidas = (currentMonthData?.transactions || []).filter(t => t.tipo === 'saida').reduce((sum, t) => sum + t.valor, 0);
+    const previsaoFimMes = prevBalance + monthEntradas - monthSaidas;
+
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = userProfile.currency || 'BRL';
+
+    const formattedSaldo = formatCurrency(totalSaldo, appLocale, appCurrency);
+    const formattedGastosHoje = formatCurrency(gastosHoje, appLocale, appCurrency);
+    const formattedPrevisao = formatCurrency(previsaoFimMes, appLocale, appCurrency);
+
+    syncWidgetData(formattedSaldo, 'Saldo em Contas', formattedGastosHoje, formattedPrevisao);
+  }, [allTransactions, accounts, allData, currentDate, isLoadingData, locale, userProfile.currency]);
+
   // --- SISTEMA DE CONQUISTAS (BADGES) ---
   useEffect(() => {
-    if (!isAuthenticated || !activeEmail || isLoadingData) return;
+    if (!isAuthenticated || isLoadingData) return;
 
-    const currentBadges = new Set(userProfile.badges || []);
+    const currentBadges = new Set(badgesRef.current);
     let newBadges: string[] = [];
+    
+    // Filtra as transações reais do usuário, desconsiderando "Saldo Inicial" automático
+    const realTransactions = allTransactions.filter(tx => tx.categoria !== 'Saldo Inicial');
 
     // Lógica das Conquistas
-    if (!currentBadges.has('iniciante') && allTransactions.length > 0) {
+    if (!currentBadges.has('iniciante') && realTransactions.length > 0) {
       newBadges.push('iniciante');
     }
     if (!currentBadges.has('metas_1') && savingsGoals.length > 0) {
@@ -950,7 +1139,33 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       newBadges.push('planejador');
     }
 
+    // Conquistas de Streaks Diários
+    const streak = userProfile.currentStreak || 0;
+    if (!currentBadges.has('streak_3') && streak >= 3) {
+      newBadges.push('streak_3');
+    }
+    if (!currentBadges.has('streak_7') && streak >= 7) {
+      newBadges.push('streak_7');
+    }
+    if (!currentBadges.has('streak_30') && streak >= 30) {
+      newBadges.push('streak_30');
+    }
+    if (!currentBadges.has('streak_90') && streak >= 90) {
+      newBadges.push('streak_90');
+    }
+
     // Conquistas de Metas
+    if (!currentBadges.has('goal_completed_1') && savingsGoals.some(g => {
+      const amount = allTransactions.filter(tx => tx.goalId === g.id).reduce((acc, t) => acc + t.valor, 0);
+      return amount >= g.targetAmount && g.targetAmount > 0;
+    })) {
+      newBadges.push('goal_completed_1');
+    }
+
+    if (!currentBadges.has('goal_deposit_5') && allTransactions.filter(tx => tx.goalId).length >= 5) {
+      newBadges.push('goal_deposit_5');
+    }
+
     if (!currentBadges.has('goal_active_3') && savingsGoals.filter(g => {
       const amount = allTransactions.filter(tx => tx.goalId === g.id).reduce((acc, t) => acc + t.valor, 0);
       return amount < g.targetAmount;
@@ -969,9 +1184,238 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       newBadges.push('ai_explorer');
     }
 
+    // --- LOGICA DOS BADGES NOVOS E PENDENTES ATIVOS ---
+
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const todayDateStr = now.toISOString().slice(0, 10);
+
+    // Apenas transações que já aconteceram ou pertencem ao mês corrente (NUNCA lançamentos futuros agendados/recorrentes)
+    const pastAndCurrentTransactions = realTransactions.filter(tx => tx.data.substring(0, 7) <= currentMonthKey);
+
+    const transacoesPorMes: { [mes: string]: Transaction[] } = {};
+    pastAndCurrentTransactions.forEach(tx => {
+      const mes = tx.data.substring(0, 7);
+      if (!transacoesPorMes[mes]) transacoesPorMes[mes] = [];
+      transacoesPorMes[mes].push(tx);
+    });
+
+    // --- LOGICA DOS BADGES NOVOS E PENDENTES ATIVOS ---
+
+    // 1. zero_spend_weekend: Fim de semana (sábado e domingo) sem nenhuma despesa ('saida') que JÁ OCORREU
+    if (!currentBadges.has('zero_spend_weekend') && pastAndCurrentTransactions.filter(tx => tx.tipo === 'saida').length >= 3) {
+      let hasZeroSpendWeekend = false;
+      for (const [mesKey, txs] of Object.entries(transacoesPorMes)) {
+        const [year, month] = mesKey.split('-').map(Number);
+        const date = new Date(year, month, 0);
+        const totalDias = date.getDate();
+
+        for (let dia = 1; dia < totalDias; dia++) {
+          const d1 = new Date(year, month - 1, dia);
+          const d2 = new Date(year, month - 1, dia + 1);
+
+          if (d1.getDay() === 6 && d2.getDay() === 0) {
+            const s1 = `${mesKey}-${String(dia).padStart(2, '0')}`;
+            const s2 = `${mesKey}-${String(dia + 1).padStart(2, '0')}`;
+
+            // Só valida fins de semana que já terminaram no mundo real
+            if (s2 <= todayDateStr) {
+              const temGasto = txs.some(tx => tx.tipo === 'saida' && (tx.data === s1 || tx.data === s2));
+              if (!temGasto) {
+                hasZeroSpendWeekend = true;
+                break;
+              }
+            }
+          }
+        }
+        if (hasZeroSpendWeekend) break;
+      }
+      if (hasZeroSpendWeekend) {
+        newBadges.push('zero_spend_weekend');
+      }
+    }
+
+    // 2. conscious_investor: >= 10% da receita alocada em Investimentos em algum mês
+    if (!currentBadges.has('conscious_investor') && pastAndCurrentTransactions.length > 0) {
+      let isConsciousInvestor = false;
+      for (const txs of Object.values(transacoesPorMes)) {
+        const receitaTotal = txs.filter(tx => tx.tipo === 'entrada').reduce((sum, tx) => sum + tx.valor, 0);
+        const investimentoTotal = txs
+          .filter(tx => tx.tipo === 'saida' && (tx.categoria?.toLowerCase() === 'investimentos' || tx.categoria === 'Investimentos'))
+          .reduce((sum, tx) => sum + tx.valor, 0);
+
+        if (receitaTotal > 0 && (investimentoTotal / receitaTotal) >= 0.10) {
+          isConsciousInvestor = true;
+          break;
+        }
+      }
+      if (isConsciousInvestor) {
+        newBadges.push('conscious_investor');
+      }
+    }
+
+    // 3. emergency_ready: Metas possuem saldo >= média de gastos mensais ou R$ 1.500
+    if (!currentBadges.has('emergency_ready') && pastAndCurrentTransactions.length > 0 && savingsGoals.length > 0) {
+      const totalSaved = savingsGoals.reduce((total, goal) => {
+        return total + allTransactions.filter(tx => tx.goalId === goal.id).reduce((sum, t) => sum + t.valor, 0);
+      }, 0);
+
+      const saidas = pastAndCurrentTransactions.filter(tx => tx.tipo === 'saida');
+      const mesesSet = new Set(pastAndCurrentTransactions.map(tx => tx.data.substring(0, 7)));
+      const qtdMeses = mesesSet.size || 1;
+      const totalSaidas = saidas.reduce((sum, tx) => sum + tx.valor, 0);
+      const mediaGastos = totalSaidas / qtdMeses;
+
+      if (totalSaved >= 1500 || (mediaGastos > 0 && totalSaved >= mediaGastos)) {
+        newBadges.push('emergency_ready');
+      }
+    }
+
+    // 4. budget_master: Terminou um mês completo passado sem estourar nenhum limite de categoria
+    if (!currentBadges.has('budget_master') && Object.keys(budgets).length > 0 && pastAndCurrentTransactions.length > 0) {
+      let budgetMasterDesbloqueado = false;
+      // Só avalia meses que já foram concluídos (anteriores ao mês atual)
+      for (const [mesKey, txs] of Object.entries(transacoesPorMes)) {
+        if (mesKey >= currentMonthKey) continue; // Mês corrente ou futuro ainda não terminou!
+
+        const despesasSaida = txs.filter(tx => tx.tipo === 'saida');
+        if (despesasSaida.length === 0) continue;
+
+        let algumEstouro = false;
+        let peloMenosUmGastoEmBudget = false;
+
+        for (const [catName, limite] of Object.entries(budgets)) {
+          const totalGastoCat = despesasSaida
+            .filter(tx => tx.categoria === catName)
+            .reduce((sum, tx) => sum + tx.valor, 0);
+
+          if (totalGastoCat > 0) {
+            peloMenosUmGastoEmBudget = true;
+          }
+          if (totalGastoCat > limite) {
+            algumEstouro = true;
+            break;
+          }
+        }
+        if (peloMenosUmGastoEmBudget && !algumEstouro) {
+          budgetMasterDesbloqueado = true;
+          break;
+        }
+      }
+      if (budgetMasterDesbloqueado) {
+        newBadges.push('budget_master');
+      }
+    }
+
+    // 5. save_ratio_50: Poupar >= 50% das receitas em um único mês já ocorrido
+    if (!currentBadges.has('save_ratio_50') && pastAndCurrentTransactions.length > 0) {
+      let saveRatio50Desbloqueado = false;
+      for (const txs of Object.values(transacoesPorMes)) {
+        const receitaTotal = txs.filter(tx => tx.tipo === 'entrada').reduce((sum, tx) => sum + tx.valor, 0);
+        const despesaTotal = txs.filter(tx => tx.tipo === 'saida').reduce((sum, tx) => sum + tx.valor, 0);
+
+        if (receitaTotal > 0 && despesaTotal > 0) {
+          const poupado = receitaTotal - despesaTotal;
+          if ((poupado / receitaTotal) >= 0.50) {
+            saveRatio50Desbloqueado = true;
+            break;
+          }
+        }
+      }
+      if (saveRatio50Desbloqueado) {
+        newBadges.push('save_ratio_50');
+      }
+    }
+
+    // 6. no_credit_spend: Passar um mês com >= 5 despesas sem usar o cartão de crédito (débito/dinheiro)
+    if (!currentBadges.has('no_credit_spend') && pastAndCurrentTransactions.length > 0) {
+      let noCreditSpendDesbloqueado = false;
+      for (const txs of Object.values(transacoesPorMes)) {
+        const despesas = txs.filter(tx => tx.tipo === 'saida');
+        const temCredito = despesas.some(tx => tx.paymentMethod === 'credito');
+        if (despesas.length >= 5 && !temCredito) {
+          noCreditSpendDesbloqueado = true;
+          break;
+        }
+      }
+      if (noCreditSpendDesbloqueado) {
+        newBadges.push('no_credit_spend');
+      }
+    }
+
+    // 7. frequent_logger: Alcançar >= 15 lançamentos no app
+    if (!currentBadges.has('frequent_logger') && realTransactions.length >= 15) {
+      newBadges.push('frequent_logger');
+    }
+
+    // 8. cfo_consultant: Interagir pelo menos 5 vezes com o chat de IA
+    if (!currentBadges.has('cfo_consultant') && (userProfile.cfoInteractionsCount || 0) >= 5) {
+      newBadges.push('cfo_consultant');
+    }
+
+    // 9. Longevidade real: quantidade de meses CONSECUTIVOS usando o app sem falhar até o mês atual
+    // Meses no futuro (gerados por compras parceladas ou assinaturas fixas) são expressamente ignorados.
+    const activePastMonths = new Set(Object.keys(transacoesPorMes));
+    let consecutiveMonths = 0;
+    let checkDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const currentMonthStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}`;
+
+    if (!activePastMonths.has(currentMonthStr)) {
+      checkDate.setMonth(checkDate.getMonth() - 1);
+    }
+
+    while (true) {
+      const mStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}`;
+      if (activePastMonths.has(mStr)) {
+        consecutiveMonths++;
+        checkDate.setMonth(checkDate.getMonth() - 1);
+      } else {
+        break;
+      }
+    }
+
+    // 🛡️ Auto-correção: Revoga badges de longevidade que foram concedidos indevidamente por lançamentos futuros
+    const invalidLongevityBadges: string[] = [];
+    if (currentBadges.has('usage_3m') && consecutiveMonths < 3) invalidLongevityBadges.push('usage_3m');
+    if (currentBadges.has('usage_6m') && consecutiveMonths < 6) invalidLongevityBadges.push('usage_6m');
+    if (currentBadges.has('usage_12m') && consecutiveMonths < 12) invalidLongevityBadges.push('usage_12m');
+
+    if (invalidLongevityBadges.length > 0) {
+      setUserProfile(prev => {
+        const cleaned = (prev.badges || []).filter(b => !invalidLongevityBadges.includes(b));
+        const withoutCompletionist = cleaned.filter(b => b !== 'completionist');
+        const finalBadges = withoutCompletionist.length >= 10 ? cleaned : withoutCompletionist;
+        return {
+          ...prev,
+          badges: finalBadges
+        };
+      });
+      return;
+    }
+
+    if (!currentBadges.has('usage_3m') && consecutiveMonths >= 3) {
+      newBadges.push('usage_3m');
+    }
+    if (!currentBadges.has('usage_6m') && consecutiveMonths >= 6) {
+      newBadges.push('usage_6m');
+    }
+    if (!currentBadges.has('usage_12m') && consecutiveMonths >= 12) {
+      newBadges.push('usage_12m');
+    }
+
+    // 10. completionist: Obter >= 10 outras conquistas
+    if (!currentBadges.has('completionist')) {
+      const totalOutrasConquistadas = Array.from(currentBadges).filter(id => id !== 'completionist').length + newBadges.filter(id => id !== 'completionist').length;
+      if (totalOutrasConquistadas >= 10) {
+        newBadges.push('completionist');
+      }
+    }
+
     if (newBadges.length > 0) {
-      const updatedProfile = { ...userProfile, badges: [...Array.from(currentBadges), ...newBadges] };
-      setUserProfile(updatedProfile);
+      setUserProfile(prev => ({
+        ...prev,
+        badges: [...new Set([...(prev.badges || []), ...newBadges])]
+      }));
 
       // Notificar usuário e Confetti
       confetti({
@@ -981,21 +1425,26 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         zIndex: 2000
       });
 
-      // Mapear IDs para Nomes
+      // Mapear IDs para Nomes Traduzidos
       const badgeNames = newBadges
-        .map(id => AVAILABLE_BADGES.find(b => b.id === id)?.name)
+        .map(id => {
+          const b = AVAILABLE_BADGES.find(x => x.id === id);
+          return b ? (t(`badge.${b.id}`) || b.name) : '';
+        })
         .filter(Boolean)
         .join(', ');
 
       showToast(`Conquista desbloqueada: ${badgeNames}!`, "success");
     }
-  }, [allTransactions, savingsGoals, budgets, userProfile.aiScansCount, isAuthenticated, activeEmail, isLoadingData]);
+  }, [allTransactions, savingsGoals, budgets, userProfile.aiScansCount, userProfile.currentStreak, userProfile.cfoInteractionsCount, isAuthenticated, isLoadingData]);
 
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-    StatusBar.setOverlaysWebView({ overlay: true }).catch(() => { });
-    StatusBar.hide().catch(() => { });
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => { });
+      StatusBar.hide().catch(() => { });
+    }
   }, [theme]);
 
   // --- ASSETS HANDLERS ---
@@ -1240,26 +1689,6 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     triggerHaptic(ImpactStyle.Light);
   }, [triggerHaptic]);
 
-  const recalculateBalancesFrom = (startKey: string, data: AllData): AllData => {
-    const updated: AllData = { ...data };
-    const sorted = Object.keys(updated).sort();
-    const idx = sorted.indexOf(startKey);
-    if (idx === -1) return updated;
-    let lastSaldo = getPreviousBalance(startKey, updated);
-    for (let i = idx; i < sorted.length; i++) {
-      const key = sorted[i];
-      const dt = new Date(key + '-01T00:00:00');
-      const days = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
-      const monthData = updated[key] as any;
-      if (monthData) {
-        const saldo = calcularSaldoFinal(monthData.transactions, lastSaldo, days);
-        updated[key] = { ...monthData, saldoFinal: saldo };
-        lastSaldo = saldo;
-      }
-    }
-    return updated;
-  };
-
   const handleLancamentoSubmit = (_: React.FormEvent, form: any) => {
     const card = form.paymentMethod === 'credito' && form.cardId ? creditCards.find(c => c.id === form.cardId) : null;
 
@@ -1334,8 +1763,9 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           data: txEffectiveStr, // Data real onde debita
           compraData: card ? txPurchaseStr : undefined,
           recurrenceId: recId,
-          descricao: qty > 1 ? `${baseTx.descricao} (${i + 1}/${qty})` : baseTx.descricao,
+          descricao: (form.isInstallment && qty > 1) ? `${baseTx.descricao} (${i + 1}/${qty})` : baseTx.descricao,
           installment: form.isInstallment ? { current: i + 1, total: qty } : undefined,
+          isRecurring: !!form.isRecurring,
           statementDate
         } as Transaction);
       }
@@ -1483,7 +1913,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       return recalculateBalancesFrom(monthKey, next);
     });
 
-    showToast(`R$ ${formatCurrency(amount)} adicionado à meta!`, "success");
+    showToast(`${formatCurrency(amount)} adicionado à meta!`, "success");
   };
 
   const handleAddCreditCard = (card: Omit<CreditCard, 'id'>) => {
@@ -1526,6 +1956,24 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     if ((options as any).subscriptions) setSubscriptions([]);
 
     showToast("Dados resetados com sucesso.", "success");
+  };
+
+  const handleGenerateMockData = () => {
+    const mocks = generateMockTransactions();
+    setAllData((prevAllData: AllData) => {
+      let updated = { ...prevAllData };
+      mocks.forEach((tx) => {
+        const key = tx.data.substring(0, 7);
+        const monthData = updated[key] || { transactions: [], saldoFinal: 0 };
+        updated[key] = {
+          ...monthData,
+          transactions: [tx, ...monthData.transactions],
+        };
+      });
+      const firstKey = mocks.map(t => t.data.substring(0, 7)).sort()[0];
+      return recalculateBalancesFrom(firstKey, updated);
+    });
+    showToast("18 transações de teste geradas com sucesso!", "success");
   };
 
   // Funcao de update atualizada para aceitar escopo (single ou future)
@@ -1728,6 +2176,37 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     setConfirmingDeleteId(tx.id);
   }, []);
 
+  const handleDeleteRecurringSeries = useCallback((tx: Transaction) => {
+    const recId = tx.recurrenceId;
+    const cleanDesc = tx.descricao.replace(/\s*\(\d+\/\d+\)\s*$/, '').trim().toLowerCase();
+
+    setAllData((prev: AllData) => {
+      const updated = { ...prev };
+      let affectedKey: string | null = null;
+
+      Object.keys(updated).forEach(monthKey => {
+        const monthData = updated[monthKey];
+        if (!monthData) return;
+
+        const initialCount = monthData.transactions.length;
+        monthData.transactions = monthData.transactions.filter(t => {
+          if (recId && t.recurrenceId === recId) return false;
+          if (t.id === tx.id) return false;
+          const tClean = t.descricao.replace(/\s*\(\d+\/\d+\)\s*$/, '').trim().toLowerCase();
+          if (tClean === cleanDesc && (t.isRecurring || t.recurrenceId)) return false;
+          return true;
+        });
+
+        if (monthData.transactions.length !== initialCount && !affectedKey) {
+          affectedKey = monthKey;
+        }
+      });
+
+      return affectedKey ? recalculateBalancesFrom(affectedKey, updated) : updated;
+    });
+    showToast("Assinatura e todas as suas recorrências foram removidas.", "info");
+  }, [recalculateBalancesFrom, showToast]);
+
   const getSaldoColor = useCallback((s: number, t: string) => {
     if (s <= 0) return '#ef4444'; // Crítico
     if (s <= 1000) return '#f97316'; // Moderado
@@ -1737,10 +2216,90 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
 
 
+  // --- Efeito: Processar cobranças automáticas de Assinaturas ---
+  useEffect(() => {
+    if (isLoadingData || !subscriptions || subscriptions.length === 0) return;
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    let updated = false;
+
+    const updatedSubscriptions = subscriptions.map(sub => {
+      if (sub.nextBillingDate && sub.nextBillingDate <= todayStr) {
+        const txDate = sub.nextBillingDate;
+        const monthKey = getMonthKey(new Date(txDate + 'T00:00:00'));
+
+        setAllData(prevAllData => {
+          const monthObj = prevAllData[monthKey] || { transactions: [], saldoFinal: 0 };
+          const exists = (monthObj.transactions || []).some(t =>
+            t.descricao.toLowerCase().includes(sub.name.toLowerCase()) && t.data === txDate
+          );
+          if (!exists) {
+            const newTx: Transaction = {
+              id: `sub-${sub.id}-${txDate}`,
+              data: txDate,
+              descricao: sub.name,
+              valor: sub.cost,
+              tipo: 'saida',
+              categoria: 'Assinatura',
+              paymentMethod: 'debito',
+              isRecurring: true
+            };
+            const updatedTxs = [...(monthObj.transactions || []), newTx];
+            const updatedAllData = {
+              ...prevAllData,
+              [monthKey]: {
+                transactions: updatedTxs,
+                saldoFinal: prevAllData[monthKey]?.saldoFinal || 0
+              }
+            };
+            return recalculateBalancesFrom(monthKey, updatedAllData);
+          }
+          return prevAllData;
+        });
+
+        // Avançar próxima data de cobrança
+        const [yStr, mStr, dStr] = sub.nextBillingDate.split('-');
+        const nextDate = new Date(parseInt(yStr, 10), parseInt(mStr, 10) - 1, parseInt(dStr, 10));
+        if (sub.billingCycle === 'yearly') {
+          nextDate.setFullYear(nextDate.getFullYear() + 1);
+        } else {
+          nextDate.setMonth(nextDate.getMonth() + 1);
+        }
+        const nextDateFormatted = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+        updated = true;
+        return { ...sub, nextBillingDate: nextDateFormatted };
+      }
+      return sub;
+    });
+
+    if (updated) {
+      setSubscriptions(updatedSubscriptions);
+    }
+  }, [subscriptions, isLoadingData]);
+
   const handleAddSubscription = useCallback((sub: Omit<Subscription, 'id'>) => {
-    setSubscriptions(prev => [...prev, { ...sub, id: generateId() }]);
-    showToast("Assinatura adicionada!", "success");
-  }, []);
+    const newSubId = generateId();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const billingDate = sub.nextBillingDate || todayStr;
+    const newSub = { ...sub, id: newSubId, nextBillingDate: billingDate };
+
+    setSubscriptions(prev => [...prev, newSub]);
+
+    // Gera lançamento de recorrência para a assinatura
+    const mockEvent = { preventDefault: () => {} } as React.FormEvent;
+    handleLancamentoSubmit(mockEvent, {
+      descricao: sub.name,
+      valor: sub.cost,
+      tipo: 'saida',
+      categoria: 'Assinatura',
+      data: billingDate,
+      paymentMethod: 'debito',
+      isRecurring: true,
+      recurrenceQuantity: sub.billingCycle === 'yearly' ? 1 : 12
+    });
+
+    showToast("Assinatura adicionada e cobrança agendada!", "success");
+  }, [handleLancamentoSubmit, showToast]);
 
   const handleEditSubscription = useCallback((id: string, sub: Partial<Subscription>) => {
     setSubscriptions(prev => prev.map(s => s.id === id ? { ...s, ...sub } : s));
@@ -1756,11 +2315,27 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     setUserProfile(prev => ({ ...prev, aiScansCount: (prev.aiScansCount || 0) + 1 }));
   }, []);
 
+  const incrementCfoInteractions = useCallback(() => {
+    setUserProfile(prev => ({ ...prev, cfoInteractionsCount: (prev.cfoInteractionsCount || 0) + 1 }));
+  }, []);
+
+  const dismissTip = useCallback((tipId: string) => {
+    setUserProfile(prev => {
+      const dismissedTips = prev.dismissedTips || [];
+      if (dismissedTips.includes(tipId)) return prev;
+      return {
+        ...prev,
+        dismissedTips: [...dismissedTips, tipId]
+      };
+    });
+  }, []);
+
   const noopClearDirection = useCallback(() => { }, []);
   const noopImportStatement = useCallback(async () => { }, []);
   const noopPayInvoice = useCallback(() => { }, []);
 
   const contextValue = useMemo(() => ({
+    locale, setLocale,
     isAuthenticated, isInitializingSession, currentDate, theme, allData, categorias,
     categoryColors, currentTab, editingTxId, isEditModalOpen, confirmingDeleteId,
     transactions, allTransactions, budgets, savingsGoals, despesasPorCategoria,
@@ -1768,6 +2343,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     isNewTransactionOpen, setIsNewTransactionOpen,
     isTransactionMenuOpen, setIsTransactionMenuOpen,
     newTransactionInitialType, setNewTransactionInitialType,
+    newTransactionInitialData, setNewTransactionInitialData,
     handleLoginSuccess, handleLogout, handleDeleteAccount, setCurrentDate,
     changeMonth, toggleTheme, setCurrentTab,
     handleLancamentoSubmit,
@@ -1775,6 +2351,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     handleUpdateTransaction,
     setIsEditModalOpen, setEditingTxId,
     handleDeleteTransaction: memoizedHandleDeleteTx,
+    handleDeleteRecurringSeries,
     handleConfirmDelete,
     setConfirmingDeleteId,
     handleAddCategory, handleEditCategory, handleDeleteCategory, handleUpdateCategoryColor,
@@ -1785,15 +2362,19 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     handleUpdateLayout,
     monthChangeDirection: null as any,
     clearMonthChangeDirection: noopClearDirection,
-    currentView, setCurrentView,
+    currentView, setCurrentView, previousView: previousViewRef.current, goBackView,
     handleImportStatement: noopImportStatement,
-    userProfile, updateUserProfile, importHistory,
+    userProfile: effectiveUserProfile, updateUserProfile, importHistory, setImportHistory,
     handleResetData,
+    handleGenerateMockData,
     creditCards, menuSubView, setMenuSubView,
     handleAddCreditCard, handleEditCreditCard, handleDeleteCreditCard,
     handlePayInvoice: noopPayInvoice,
     incrementAiScans: memoizedIncrementAiScans,
+    incrementCfoInteractions: incrementCfoInteractions,
     triggerHaptic,
+    registerBackHandler,
+    unregisterBackHandler,
     isLoadingData,
     isOnline,
     assets,
@@ -1811,30 +2392,38 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     handleDeleteSubscription,
     showTutorial: showTutorialState,
     setShowTutorial: setShowTutorialState,
-    managementFilter, setManagementFilter
+    managementFilter, setManagementFilter,
+    dismissTip
   }), [
     isAuthenticated, isInitializingSession, currentDate, theme, allData, categorias,
     categoryColors, currentTab, editingTxId, isEditModalOpen, confirmingDeleteId,
     transactions, allTransactions, budgets, savingsGoals, despesasPorCategoria,
     confirmingDeleteFutureTx, dashboardLayout, isNewTransactionOpen, isTransactionMenuOpen,
-    newTransactionInitialType, handleLoginSuccess, handleLogout, handleDeleteAccount,
+    newTransactionInitialType, newTransactionInitialData, handleLoginSuccess, handleLogout, handleDeleteAccount,
     changeMonth, toggleTheme, handleLancamentoSubmit, memoizedHandleStartEdit,
     handleUpdateTransaction, handleConfirmDelete, handleAddCategory, handleEditCategory,
     handleDeleteCategory, handleUpdateCategoryColor, showToast, getSaldoColor,
     handleSetBudget, handleStartDeleteFuture, handleConfirmDeleteFuture,
     handleAddGoal, handleEditGoal, handleDeleteGoal, handleAddFundsToGoal,
-    handleUpdateLayout, currentView, userProfile, updateUserProfile, importHistory,
+    handleUpdateLayout, currentView, goBackView, effectiveUserProfile, updateUserProfile, importHistory, setImportHistory,
     handleResetData, creditCards, menuSubView, handleAddCreditCard, handleEditCreditCard,
-    handleDeleteCreditCard, memoizedIncrementAiScans, triggerHaptic, isLoadingData,
+    handleDeleteCreditCard, memoizedIncrementAiScans, incrementCfoInteractions, triggerHaptic, isLoadingData,
     isOnline, assets, patrimonioHistory, accounts, handleAddAsset, handleUpdateAsset,
     handleDeleteAsset, handleCreateBankAccount, handleUpdateBankAccount,
     handleDeleteBankAccount, subscriptions, handleAddSubscription, handleEditSubscription,
-    handleDeleteSubscription, showTutorialState, managementFilter
+    handleDeleteSubscription, showTutorialState, managementFilter, registerBackHandler, unregisterBackHandler, dismissTip, locale, setLocale
   ]);
 
   return (
     <AppContext.Provider value={contextValue as any}>
       {children}
+      <Suspense fallback={null}>
+        <UpdatePromptModal
+          isOpen={isUpdateModalOpen}
+          onClose={() => setIsUpdateModalOpen(false)}
+          updateInfo={updateInfo}
+        />
+      </Suspense>
       <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col items-center gap-3 w-full max-sm px-4">
         {toasts.map(t => (
           <div key={t.id} className="pointer-events-auto">
@@ -1851,11 +2440,95 @@ const AppContent: React.FC = () => {
 
   if (!context) return null;
 
-  const { isAuthenticated, isInitializingSession, currentView, currentTab, isNewTransactionOpen, isLoadingData, isOnline, isTransactionMenuOpen, setIsTransactionMenuOpen, setNewTransactionInitialType, setIsNewTransactionOpen: setGlobalNewTxOpen, showTutorial, setShowTutorial, userProfile, updateUserProfile } = context;
+  const { isAuthenticated, isInitializingSession, currentView, currentTab, isNewTransactionOpen, isLoadingData, isOnline, isTransactionMenuOpen, setIsTransactionMenuOpen, setNewTransactionInitialType, setNewTransactionInitialData, setIsNewTransactionOpen: setGlobalNewTxOpen, showTutorial, setShowTutorial, userProfile, updateUserProfile, setCurrentView, setCurrentTab, handleLancamentoSubmit, showToast, categorias } = context;
+
+  // Fila de transações bancárias pendentes (captura automática Android)
+  const [pendingBankList, setPendingBankList] = useState<PendingBankTransaction[]>([]);
+  const [isPendingBankModalOpen, setIsPendingBankModalOpen] = useState(false);
 
   // Biometric lock — cold start + app resume (volta do background)
   const [isLocked, setIsLocked] = useState<boolean | null>(null); // null = ainda não checou
   const biometricEnabledRef = React.useRef(false);
+
+  // Atalhos do Android (Deep Links e Notificações Bancárias)
+  useEffect(() => {
+    if (!isAuthenticated || isLoadingData) return;
+
+    const handleDeepLink = (url: string) => {
+      if (!url) return;
+      try {
+        const parsedUrl = new URL(url);
+        const path = parsedUrl.hostname || parsedUrl.pathname.replace(/^\/+/, '');
+        
+        if (path === 'novo-lancamento') {
+          const valorParam = parsedUrl.searchParams.get('valor');
+          const descParam = parsedUrl.searchParams.get('desc');
+          const tipoParam = parsedUrl.searchParams.get('tipo') as 'entrada' | 'saida' | 'transferencia' | null;
+          const pagParam = parsedUrl.searchParams.get('pagamento') as 'debito' | 'credito' | null;
+
+          if (valorParam || descParam) {
+            setNewTransactionInitialData?.({
+              valor: valorParam ? parseFloat(valorParam) : undefined,
+              descricao: descParam ? decodeURIComponent(descParam) : undefined,
+              tipo: tipoParam || 'saida',
+              paymentMethod: pagParam || 'debito',
+            });
+            setNewTransactionInitialType(pagParam === 'credito' ? 'credito' : (tipoParam || 'saida'));
+            setGlobalNewTxOpen(true);
+            setIsTransactionMenuOpen(false);
+          } else {
+            setCurrentView('main');
+            setCurrentTab('lancamento');
+            setIsTransactionMenuOpen(true);
+          }
+        } else if (path === 'metas') {
+          setCurrentView('main');
+          setCurrentTab('metas');
+          setIsTransactionMenuOpen(false);
+        } else if (path === 'futuro') {
+          setCurrentView('main');
+          setCurrentTab('horizonte');
+          setIsTransactionMenuOpen(false);
+        } else if (path === 'cfo') {
+          setCurrentView('chat');
+          setIsTransactionMenuOpen(false);
+        }
+      } catch (e) {
+        if (url.includes('novo-lancamento')) {
+          setCurrentView('main');
+          setCurrentTab('lancamento');
+          setIsTransactionMenuOpen(true);
+        } else if (url.includes('metas')) {
+          setCurrentView('main');
+          setCurrentTab('metas');
+          setIsTransactionMenuOpen(false);
+        } else if (url.includes('futuro')) {
+          setCurrentView('main');
+          setCurrentTab('horizonte');
+          setIsTransactionMenuOpen(false);
+        } else if (url.includes('cfo')) {
+          setCurrentView('chat');
+          setIsTransactionMenuOpen(false);
+        }
+      }
+    };
+
+    // 1. Escuta eventos quando o app está aberto/segundo plano
+    const listener = CapApp.addListener('appUrlOpen', (event: any) => {
+      handleDeepLink(event.url);
+    });
+
+    // 2. Trata cold start (app fechado e aberto pelo link)
+    CapApp.getLaunchUrl().then((launchUrl) => {
+      if (launchUrl && launchUrl.url) {
+        handleDeepLink(launchUrl.url);
+      }
+    });
+
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [isAuthenticated, isLoadingData, setCurrentView, setCurrentTab, setIsTransactionMenuOpen, setNewTransactionInitialData, setNewTransactionInitialType, setGlobalNewTxOpen]);
 
   // Checa preferência no cold start (com timeout de segurança)
   useEffect(() => {
@@ -1894,17 +2567,101 @@ const AppContent: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [isAuthenticated, isLoadingData]);
 
-  // Re-lock quando o app volta do background e re-agendar lembretes
+  // Re-lock quando o app volta do background, re-agendar lembretes e checar notificações bancárias pendentes
   useEffect(() => {
     if (!isAuthenticated) return;
+
+    const checkPendingBankTransactions = async () => {
+      if (!BankNotificationService.isSupported()) return;
+      try {
+        const pending = await BankNotificationService.getPendingTransactions();
+        if (pending && pending.length > 0) {
+          if (pending.length === 1) {
+            const latest = pending[0];
+            setNewTransactionInitialData?.({
+              valor: latest.valor,
+              descricao: latest.descricao,
+              tipo: latest.tipo,
+              paymentMethod: latest.paymentMethod,
+            });
+            setNewTransactionInitialType(latest.paymentMethod === 'credito' ? 'credito' : latest.tipo);
+            setGlobalNewTxOpen(true);
+            setIsTransactionMenuOpen(false);
+            await BankNotificationService.clearPendingTransactions();
+          } else {
+            setPendingBankList(pending);
+            setIsPendingBankModalOpen(true);
+          }
+        }
+      } catch (e) {
+        console.warn('Erro ao verificar transações bancárias pendentes:', e);
+      }
+    };
+
+    // Checagem inicial
+    checkPendingBankTransactions();
+
     const listener = CapApp.addListener('appStateChange', ({ isActive }) => {
       if (isActive) {
         if (biometricEnabledRef.current) setIsLocked(true);
         if (userProfile?.notificationsEnabled) NotificationService.scheduleInactivityReminders();
+        checkPendingBankTransactions();
       }
     });
     return () => { listener.then(l => l.remove()); };
-  }, [isAuthenticated, userProfile?.notificationsEnabled]);
+  }, [isAuthenticated, userProfile?.notificationsEnabled, setNewTransactionInitialData, setNewTransactionInitialType, setGlobalNewTxOpen, setIsTransactionMenuOpen]);
+
+  const handleConfirmSingleBankTx = async (tx: PendingBankTransaction) => {
+    setNewTransactionInitialData?.({
+      valor: tx.valor,
+      descricao: tx.descricao,
+      tipo: tx.tipo,
+      paymentMethod: tx.paymentMethod,
+    });
+    setNewTransactionInitialType(tx.paymentMethod === 'credito' ? 'credito' : tx.tipo);
+    setGlobalNewTxOpen(true);
+    setIsTransactionMenuOpen(false);
+    
+    const nextList = pendingBankList.filter(item => item.id !== tx.id);
+    setPendingBankList(nextList);
+    if (nextList.length === 0) {
+      setIsPendingBankModalOpen(false);
+      await BankNotificationService.clearPendingTransactions();
+    }
+  };
+
+  const handleConfirmAllBankTx = async (transactions: PendingBankTransaction[]) => {
+    for (const tx of transactions) {
+      handleLancamentoSubmit({ preventDefault: () => {} } as any, {
+        valor: tx.valor,
+        descricao: tx.descricao,
+        tipo: tx.tipo,
+        paymentMethod: tx.paymentMethod,
+        data: formatDateToInput(new Date(tx.timestamp || Date.now())),
+        categoria: tx.tipo === 'entrada' ? (categorias.entrada[0]?.name || 'Outros') : (categorias.saida[0]?.name || 'Outros')
+      });
+    }
+    showToast(`${transactions.length} transações registradas com sucesso!`, 'success');
+    setPendingBankList([]);
+    setIsPendingBankModalOpen(false);
+    await BankNotificationService.clearPendingTransactions();
+  };
+
+  const handleDiscardSingleBankTx = async (id: string) => {
+    const nextList = pendingBankList.filter(item => item.id !== id);
+    setPendingBankList(nextList);
+    if (nextList.length === 0) {
+      setIsPendingBankModalOpen(false);
+      await BankNotificationService.clearPendingTransactions();
+    }
+  };
+
+  const handleDiscardAllBankTx = async () => {
+    setPendingBankList([]);
+    setIsPendingBankModalOpen(false);
+    await BankNotificationService.clearPendingTransactions();
+    showToast('Fila de transações descartada', 'info');
+  };
 
   // Agendar no cold start se estiver ativado
   useEffect(() => {
@@ -1916,16 +2673,16 @@ const AppContent: React.FC = () => {
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
   useEffect(() => {
-    // Só mostra o prompt de notificação DEPOIS do tutorial ter sido concluído
+    // Só mostra o prompt de notificação DEPOIS do tutorial interativo ter sido concluído
     const tutorialDone = localStorage.getItem('tutorial_completed');
-    if (isAuthenticated && !isLoadingData && isLocked === false && userProfile && !showTutorial) {
+    if (isAuthenticated && !isLoadingData && isLocked === false && userProfile && !showTutorial && userProfile.hasSeenTutorial) {
         if (!userProfile.hasAnsweredNotificationPrompt && tutorialDone) {
             // Pequeno delay para não aparecer abruptamente após o tutorial fechar
             const timer = setTimeout(() => setShowNotificationPrompt(true), 800);
             return () => clearTimeout(timer);
         }
     }
-  }, [isAuthenticated, isLoadingData, isLocked, userProfile?.hasAnsweredNotificationPrompt, showTutorial]);
+  }, [isAuthenticated, isLoadingData, isLocked, userProfile?.hasAnsweredNotificationPrompt, userProfile?.hasSeenTutorial, showTutorial]);
 
   const handleNotificationPromptAccept = () => {
       updateUserProfile({ notificationsEnabled: true, hasAnsweredNotificationPrompt: true });
@@ -1992,7 +2749,21 @@ const AppContent: React.FC = () => {
       case 'openfinance':
         content = (
           <Suspense fallback={<SkeletonLoader />}>
-            <AccountManager title="Minhas Contas" />
+            <AccountManager />
+          </Suspense>
+        );
+        break;
+      case 'investimentos':
+        content = (
+          <Suspense fallback={<SkeletonLoader />}>
+            <InvestmentModule />
+          </Suspense>
+        );
+        break;
+      case 'automacao':
+        content = (
+          <Suspense fallback={<SkeletonLoader />}>
+            <NotificationAutomation />
           </Suspense>
         );
         break;
@@ -2008,6 +2779,7 @@ const AppContent: React.FC = () => {
                   {currentTab === 'metas' && <SavingsGoals />}
                   {currentTab === 'financas' && <Dashboard />}
                   {currentTab === 'categorias' && <Categories />}
+                  {currentTab === 'horizonte' && <HorizonteSaldos />}
                 </div>
               </Suspense>
             </main>
@@ -2025,6 +2797,29 @@ const AppContent: React.FC = () => {
         </div>
       )}
       {content}
+
+      {pendingBankList.length > 0 && !isPendingBankModalOpen && (
+        <div 
+          onClick={() => setIsPendingBankModalOpen(true)}
+          className="fixed top-12 left-4 right-4 z-[90] p-3 rounded-2xl bg-amber-500 text-white font-bold shadow-xl flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base">🔔</span>
+            <span className="text-xs">{pendingBankList.length} compras bancárias detectadas</span>
+          </div>
+          <span className="text-[11px] uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-xl font-black">Revisar ›</span>
+        </div>
+      )}
+
+      <PendingTransactionsModal
+        isOpen={isPendingBankModalOpen}
+        pendingTransactions={pendingBankList}
+        onClose={() => setIsPendingBankModalOpen(false)}
+        onConfirmAll={handleConfirmAllBankTx}
+        onConfirmSingle={handleConfirmSingleBankTx}
+        onDiscardSingle={handleDiscardSingleBankTx}
+        onDiscardAll={handleDiscardAllBankTx}
+      />
       
       {showNotificationPrompt && (
         <Suspense fallback={null}>
@@ -2049,15 +2844,18 @@ const AppContent: React.FC = () => {
         isOpen={showTutorial} 
         onClose={() => setShowTutorial(false)} 
       />
+      <Tutorial />
     </>
   );
 };
 
 const App: React.FC = () => (
   <AppErrorBoundary>
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <I18nProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </I18nProvider>
   </AppErrorBoundary>
 );
 

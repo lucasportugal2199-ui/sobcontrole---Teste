@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="novo_lancamento"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_new_tx_short"
+        android:shortcutLongLabel="@string/shortcut_new_tx_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sobcontrole.app"
+            android:targetClass="com.sobcontrole.app.MainActivity"
+            android:data="sobcontrole://novo-lancamento" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="metas"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_metas_short"
+        android:shortcutLongLabel="@string/shortcut_metas_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sobcontrole.app"
+            android:targetClass="com.sobcontrole.app.MainActivity"
+            android:data="sobcontrole://metas" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="futuro"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_futuro_short"
+        android:shortcutLongLabel="@string/shortcut_futuro_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sobcontrole.app"
+            android:targetClass="com.sobcontrole.app.MainActivity"
+            android:data="sobcontrole://futuro" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="cfo"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_cfo_short"
+        android:shortcutLongLabel="@string/shortcut_cfo_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sobcontrole.app"
+            android:targetClass="com.sobcontrole.app.MainActivity"
+            android:data="sobcontrole://cfo" />
+    </shortcut>
+</shortcuts>

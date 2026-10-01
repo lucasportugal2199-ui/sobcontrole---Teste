@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useContext, useCallback } from 'react';
 import { AppContext } from '../context/AppContext';
+import { useTranslation } from '../i18n';
 import { ArrowLeftIcon, ArrowRightIcon, ArrowUpIcon, ArrowDownIcon, PiggyBankIcon, InformationCircleIcon, ChartBarIcon, SparklesIcon, InvoiceDollarIcon, ClipboardListIcon, ArrowDownTrayIcon, LockIcon } from './icons';
 import { ComposedChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Sector } from 'recharts';
 import { MESES_NOMES } from '../constants';
@@ -31,17 +32,40 @@ const renderActiveShape = (props: any) => {
     );
 };
 
+const getMonthName = (index: number, locale: string) => {
+    const months: Record<string, string[]> = {
+        pt: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+        en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        es: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+        fr: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+        de: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
+    };
+    return months[locale]?.[index] || months.pt[index];
+};
+
 // --- Tooltip Glassmorphism ---
 const AnnualTooltip = ({ active, payload, label }: any) => {
+    const { locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
+
     if (!active || !payload?.length) return null;
+
+    const translateEntryName = (name: string) => {
+        if (name === 'Receitas') return locale === 'en' ? 'Income' : locale === 'es' ? 'Ingresos' : locale === 'fr' ? 'Revenus' : locale === 'de' ? 'Einnahmen' : 'Receitas';
+        if (name === 'Despesas') return locale === 'en' ? 'Expenses' : locale === 'es' ? 'Gastos' : locale === 'fr' ? 'Dépenses' : locale === 'de' ? 'Ausgaben' : 'Despesas';
+        if (name === 'Saldo Acumulado') return locale === 'en' ? 'Cumulative Balance' : locale === 'es' ? 'Saldo Acumulado' : locale === 'fr' ? 'Solde Cumulé' : locale === 'de' ? 'Kumuliertes Saldo' : 'Saldo Acumulado';
+        return name;
+    };
+
     return (
         <div className="bg-white/95 dark:bg-dark-surface/95 backdrop-blur-md p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{label}</p>
             <div className="space-y-1">
                 {payload.map((entry: any, i: number) => (
                     <p key={i} className="text-sm font-bold flex justify-between gap-4" style={{ color: entry.color || entry.stroke }}>
-                        <span>{entry.name}:</span>
-                        <span>{formatCurrency(entry.value)}</span>
+                        <span>{translateEntryName(entry.name)}:</span>
+                        <span>{formatCurrency(entry.value, appLocale, appCurrency)}</span>
                     </p>
                 ))}
             </div>
@@ -55,6 +79,10 @@ const SavingsRateItem: React.FC<{
     saved: number;
     isTotal?: boolean;
 }> = ({ label, income, saved, isTotal = false }) => {
+    const { locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
+
     const safeSaved = Math.max(0, saved);
     const percentage = income > 0 ? (safeSaved / income) * 100 : 0;
     const displayPercentage = income > 0 ? ((saved / income) * 100).toFixed(0) : '0';
@@ -65,9 +93,9 @@ const SavingsRateItem: React.FC<{
     const trackBorderColor = isPositive ? 'border-emerald-500/30' : 'border-red-500/30';
 
     return (
-        <div className={`py-4 ${!isTotal ? 'border-b border-slate-100 dark:border-slate-700/50 last:border-0' : ''}`}>
+        <div className={`py-4 ${!isTotal ? 'border-b border-light-border dark:border-dark-elevated/50 last:border-0' : ''}`}>
             <div className="flex justify-between items-end mb-2">
-                <span className={`font-semibold ${isTotal ? 'text-lg text-slate-900 dark:text-white' : 'text-base text-slate-700 dark:text-slate-200'}`}>
+                <span className={`font-semibold ${isTotal ? 'text-lg text-light-text dark:text-dark-text' : 'text-base text-light-text dark:text-dark-text-secondary'}`}>
                     {label}
                 </span>
                 <span className={`font-bold ${isTotal ? 'text-3xl' : 'text-xl'} ${textColor}`}>
@@ -84,12 +112,16 @@ const SavingsRateItem: React.FC<{
 
             <div className="flex justify-between text-xs">
                 <div>
-                    <span className="text-slate-400 block mb-0.5">Economias</span>
-                    <span className={`font-medium ${textColor}`}>{formatCurrency(saved)}</span>
+                    <span className="text-slate-400 block mb-0.5">
+                        {locale === 'en' ? 'Savings' : locale === 'es' ? 'Economías' : locale === 'fr' ? 'Épargne' : locale === 'de' ? 'Ersparnisse' : 'Economias'}
+                    </span>
+                    <span className={`font-medium ${textColor}`}>{formatCurrency(saved, appLocale, appCurrency)}</span>
                 </div>
                 <div className="text-right">
-                    <span className="text-slate-400 block mb-0.5">Entradas</span>
-                    <span className="font-medium text-slate-600 dark:text-slate-200">{formatCurrency(income)}</span>
+                    <span className="text-slate-400 block mb-0.5">
+                        {locale === 'en' ? 'Income' : locale === 'es' ? 'Entradas' : locale === 'fr' ? 'Entrées' : locale === 'de' ? 'Einnahmen' : 'Entradas'}
+                    </span>
+                    <span className="font-medium text-slate-600 dark:text-slate-200">{formatCurrency(income, appLocale, appCurrency)}</span>
                 </div>
             </div>
         </div>
@@ -99,6 +131,10 @@ const SavingsRateItem: React.FC<{
 const RelatorioAnual: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("RelatorioAnual must be used within an AppProvider");
+
+    const { t, locale, currency } = useTranslation();
+    const appLocale = locale === 'pt' ? 'pt-BR' : locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : 'de-DE';
+    const appCurrency = currency || 'BRL';
 
     const { setCurrentView, allTransactions, categoryColors, theme, userProfile, categorias, savingsGoals } = context;
     const isPremium = userProfile.isPremium;
@@ -146,25 +182,52 @@ const RelatorioAnual: React.FC = () => {
         const saldo = receitas - despesas;
         let text = "";
         if (saldo > 0) {
-            text = `Você poupou ${formatCurrency(saldo)} em ${selectedYear}. Parabéns pelo controle!`;
+            text = locale === 'en'
+                ? `You saved ${formatCurrency(saldo, appLocale, appCurrency)} in ${selectedYear}. Congratulations on your control!`
+                : locale === 'es'
+                ? `Ahorró ${formatCurrency(saldo, appLocale, appCurrency)} en ${selectedYear}. ¡Felicitaciones por el control!`
+                : locale === 'fr'
+                ? `Vous avez épargné ${formatCurrency(saldo, appLocale, appCurrency)} en ${selectedYear}. Félicitations pour votre gestion !`
+                : locale === 'de'
+                ? `Sie haben im Jahr ${selectedYear} ${formatCurrency(saldo, appLocale, appCurrency)} gespart. Herzlichen Glückwunsch zur Kontrolle!`
+                : `Você poupou ${formatCurrency(saldo, appLocale, appCurrency)} em ${selectedYear}. Parabéns pelo controle!`;
         } else if (saldo < 0) {
-            text = `Você gastou ${formatCurrency(Math.abs(saldo))} a mais do que ganhou em ${selectedYear}.`;
+            text = locale === 'en'
+                ? `You spent ${formatCurrency(Math.abs(saldo), appLocale, appCurrency)} more than you earned in ${selectedYear}.`
+                : locale === 'es'
+                ? `Gastó ${formatCurrency(Math.abs(saldo), appLocale, appCurrency)} más de lo que ganó en ${selectedYear}.`
+                : locale === 'fr'
+                ? `Vous avez dépensé ${formatCurrency(Math.abs(saldo), appLocale, appCurrency)} de plus que vous n'avez gagné en ${selectedYear}.`
+                : locale === 'de'
+                ? `Sie haben im Jahr ${selectedYear} ${formatCurrency(Math.abs(saldo), appLocale, appCurrency)} mehr ausgegeben als eingenommen.`
+                : `Você gastou ${formatCurrency(Math.abs(saldo), appLocale, appCurrency)} a mais do que ganhou em ${selectedYear}.`;
         } else {
-            text = `Suas contas fecharam exatamente no zero em ${selectedYear}.`;
+            text = locale === 'en'
+                ? `Your accounts broke even in ${selectedYear}.`
+                : locale === 'es'
+                ? `Sus cuentas cerraron exactamente en cero en ${selectedYear}.`
+                : locale === 'fr'
+                ? `Vos comptes se sont équilibrés en ${selectedYear}.`
+                : locale === 'de'
+                ? `Ihre Konten waren im Jahr ${selectedYear} ausgeglichen.`
+                : `Suas contas fecharam exatamente no zero em ${selectedYear}.`;
         }
 
         return { totalReceitas: receitas, totalDespesas: despesas, saldoAnual: saldo, interpretationText: text };
     }, [annualTransactions, selectedYear]);
 
     const monthlyData = useMemo(() => {
-        const data = MESES_NOMES.map((nome, index) => ({
-            name: nome,
-            shortName: nome.substring(0, 3),
-            Receitas: 0,
-            Despesas: 0,
-            Saldo: 0,
-            index
-        }));
+        const data = Array.from({ length: 12 }).map((_, index) => {
+            const nome = getMonthName(index, locale);
+            return {
+                name: nome,
+                shortName: nome.substring(0, 3),
+                Receitas: 0,
+                Despesas: 0,
+                Saldo: 0,
+                index
+            };
+        });
 
         annualTransactions.forEach(tx => {
             const month = new Date(tx.data + 'T00:00:00').getMonth();
@@ -184,7 +247,7 @@ const RelatorioAnual: React.FC = () => {
         });
 
         return data;
-    }, [annualTransactions]);
+    }, [annualTransactions, locale]);
 
     const activeMonthsCount = useMemo(() => {
         const active = monthlyData.filter(m => m.Receitas > 0 || m.Despesas > 0).length;
@@ -207,13 +270,18 @@ const RelatorioAnual: React.FC = () => {
             }, {} as Record<string, number>);
 
         const formatted = Object.entries(methods).map(([name, value]) => ({
-            name: name === 'credito' ? 'Crédito' : name === 'debito' ? 'Débito' : name === 'pix' ? 'PIX' : 'Dinheiro',
+            name: name === 'credito' 
+                ? (locale === 'en' ? 'Credit' : locale === 'es' ? 'Crédito' : locale === 'fr' ? 'Crédit' : locale === 'de' ? 'Kredit' : 'Crédito') 
+                : name === 'debito' 
+                ? (locale === 'en' ? 'Debit' : locale === 'es' ? 'Débito' : locale === 'fr' ? 'Débit' : locale === 'de' ? 'Debit' : 'Débito') 
+                : name === 'pix' ? 'PIX' 
+                : (locale === 'en' ? 'Cash' : locale === 'es' ? 'Dinero' : locale === 'fr' ? 'Espèces' : locale === 'de' ? 'Bargeld' : 'Dinheiro'),
             value: Number(value),
             id: name
         })).sort((a, b) => b.value - a.value);
 
-        return formatted.length > 0 ? formatted : [{ name: 'Sem dados', value: 1, id: 'none' }];
-    }, [annualTransactions]);
+        return formatted.length > 0 ? formatted : [{ name: locale === 'en' ? 'No data' : locale === 'es' ? 'Sin datos' : locale === 'fr' ? 'Pas de données' : locale === 'de' ? 'Keine Daten' : 'Sem dados', value: 1, id: 'none' }];
+    }, [annualTransactions, locale]);
 
     const annual503020 = useMemo(() => {
         return calculate502030(annualTransactions, categorias);
@@ -233,7 +301,7 @@ const RelatorioAnual: React.FC = () => {
             totalAllocated += amount;
             return {
                 id: goalId,
-                name: goal ? goal.name : 'Meta Excluída',
+                name: goal ? goal.name : (locale === 'en' ? 'Deleted Goal' : locale === 'es' ? 'Meta Eliminada' : locale === 'fr' ? 'Objectif Supprimé' : locale === 'de' ? 'Gelöschtes Ziel' : 'Meta Excluída'),
                 amount
             };
         }).sort((a, b) => b.amount - a.amount);
@@ -243,7 +311,7 @@ const RelatorioAnual: React.FC = () => {
             totalAllocated,
             freeSavings: Math.max(0, saldoAnual - totalAllocated)
         };
-    }, [annualTransactions, savingsGoals, saldoAnual]);
+    }, [annualTransactions, savingsGoals, saldoAnual, locale]);
 
     const insights = useMemo(() => {
         if (annualTransactions.length === 0) return null;
@@ -273,14 +341,14 @@ const RelatorioAnual: React.FC = () => {
         if (sorted.length > 6) {
             const top6 = sorted.slice(0, 6);
             const othersValue = sorted.slice(6).reduce((sum, item) => sum + Number(item.value), 0);
-            return [...top6, { name: 'Outros', value: othersValue }];
+            return [...top6, { name: locale === 'en' ? 'Others' : locale === 'es' ? 'Otros' : locale === 'fr' ? 'Autres' : locale === 'de' ? 'Andere' : 'Outros', value: othersValue }];
         }
 
-        return sorted.length > 0 ? sorted : [{ name: 'Nenhuma despesa', value: 1 }];
-    }, [annualTransactions]);
+        return sorted.length > 0 ? sorted : [{ name: locale === 'en' ? 'No expenses' : locale === 'es' ? 'Sin gastos' : locale === 'fr' ? 'Aucune dépense' : locale === 'de' ? 'Keine Ausgaben' : 'Nenhuma despesa', value: 1 }];
+    }, [annualTransactions, locale]);
 
     const COLORS = annualCategoryData.map(item => getCorPorCategoria(item.name, categoryColors));
-    if (annualCategoryData.length === 1 && annualCategoryData[0].name === 'Nenhuma despesa') {
+    if (annualCategoryData.length === 1 && (annualCategoryData[0].name === 'Nenhuma despesa' || annualCategoryData[0].name === 'No expenses' || annualCategoryData[0].name === 'Sin gastos' || annualCategoryData[0].name === 'Aucune dépense' || annualCategoryData[0].name === 'Keine Ausgaben')) {
         COLORS[0] = theme === 'dark' ? '#334155' : '#cbd5e1';
     }
 
@@ -294,48 +362,56 @@ const RelatorioAnual: React.FC = () => {
 
     const formatBalance = (value: number) => {
         const isNegative = value < 0;
-        const formatted = formatCurrency(Math.abs(value));
+        const formatted = formatCurrency(Math.abs(value), appLocale, appCurrency);
         return isNegative ? `-${formatted}` : formatted;
     };
 
     return (
-        <div className="bg-slate-50 dark:bg-dark-bg h-full flex flex-col text-slate-800 dark:text-slate-200">
-            <header className="sticky top-0 bg-slate-50/80 dark:bg-dark-bg/80 backdrop-blur-sm z-30 p-4 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex justify-between items-center pt-[env(safe-area-inset-top)]">
+        <div className="bg-light-card-elevated dark:bg-dark-bg h-full flex flex-col text-light-text dark:text-dark-text-secondary">
+            <header className="sticky top-0 bg-slate-50/80 dark:bg-dark-bg/80 backdrop-blur-sm z-30 p-4 border-b border-light-border dark:border-dark-elevated">
+                <div className="flex justify-between items-center pt-[var(--sat)]">
                     <button onClick={() => setCurrentView('main')} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-surface transition">
-                        <ArrowLeftIcon className="h-6 w-6 text-slate-800 dark:text-white" />
+                        <ArrowLeftIcon className="h-6 w-6 text-light-text dark:text-dark-text" />
                     </button>
-                    <h1 className="text-xl font-bold text-slate-900 dark:text-white">Relatório Anual</h1>
+                    <h1 className="text-xl font-bold text-light-text dark:text-dark-text">
+                        {locale === 'en' ? 'Annual Report' : locale === 'es' ? 'Reporte Anual' : locale === 'fr' ? 'Rapport Annuel' : locale === 'de' ? 'Jahresbericht' : 'Relatório Anual'}
+                    </h1>
                     <div className="w-10"></div>
                 </div>
 
-                <div className="flex items-center justify-between mt-4 bg-white dark:bg-dark-surface rounded-xl p-2 w-full shadow-sm border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between mt-4 bg-white dark:bg-dark-card rounded-xl p-2 w-full shadow-sm border border-light-border dark:border-dark-elevated">
                     <button onClick={() => setSelectedYear(y => y - 1)} disabled={!availableYears.includes(selectedYear - 1)} className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-bg transition-colors disabled:opacity-30">
                         <ArrowLeftIcon className="h-6 w-6" />
                     </button>
-                    <div className="flex-grow text-center font-black text-lg text-slate-900 dark:text-white">{selectedYear}</div>
+                    <div className="flex-grow text-center font-black text-lg text-light-text dark:text-dark-text">{selectedYear}</div>
                     <button onClick={() => setSelectedYear(y => y + 1)} disabled={!availableYears.includes(selectedYear + 1)} className="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-full text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-bg transition-colors disabled:opacity-30">
                         <ArrowRightIcon className="h-6 w-6" />
                     </button>
                 </div>
 
-                <div className="flex mt-4 bg-white dark:bg-dark-surface p-1 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-                    <button onClick={() => setActiveTab('geral')} className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'geral' ? 'bg-slate-100 dark:bg-dark-bg text-slate-900 dark:text-white shadow-sm' : 'text-slate-400'}`}>Geral</button>
-                    <button onClick={() => setActiveTab('economia')} className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'economia' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-400'}`}>Economia</button>
+                <div className="flex mt-4 bg-white dark:bg-dark-card p-1 rounded-xl shadow-sm border border-light-border dark:border-dark-elevated">
+                    <button onClick={() => setActiveTab('geral')} className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'geral' ? 'bg-slate-100 dark:bg-dark-bg text-light-text dark:text-dark-text shadow-sm' : 'text-slate-400'}`}>
+                        {locale === 'en' ? 'General' : locale === 'es' ? 'General' : locale === 'fr' ? 'Général' : locale === 'de' ? 'Allgemein' : 'Geral'}
+                    </button>
+                    <button onClick={() => setActiveTab('economia')} className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${activeTab === 'economia' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 shadow-sm' : 'text-slate-400'}`}>
+                        {locale === 'en' ? 'Savings' : locale === 'es' ? 'Economías' : locale === 'fr' ? 'Épargne' : locale === 'de' ? 'Ersparnisse' : 'Economia'}
+                    </button>
                 </div>
             </header>
 
-            <main className="p-4 overflow-y-auto overflow-x-hidden no-scrollbar pb-24 flex-1">
+            <main className="p-4 overflow-y-auto overflow-x-hidden no-scrollbar flex-1" style={{ paddingBottom: 'calc(4rem + var(--sab))' }}>
                 {activeTab === 'geral' ? (
                     <div className="grid grid-cols-1 gap-6 animate-in fade-in duration-500">
                         {/* Resumo Anual */}
-                        <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 stagger-card" style={{ animationDelay: '0ms' }}>
+                        <div className="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated stagger-card" style={{ animationDelay: '0ms' }}>
                             <div className="flex flex-col items-center text-center">
-                                <span className="text-[10px] text-slate-400 dark:text-slate-400 font-black uppercase tracking-[0.2em] mb-1">Saldo Final do Ano</span>
-                                <span className={`text-4xl font-black mb-3 ${saldoAnual < 0 ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-400 font-black uppercase tracking-[0.2em] mb-1">
+                                    {locale === 'en' ? 'Year-End Balance' : locale === 'es' ? 'Saldo Final del Año' : locale === 'fr' ? 'Solde de Fin d\'Année' : locale === 'de' ? 'Jahresendsaldo' : 'Saldo Final do Ano'}
+                                </span>
+                                <span className={`text-4xl font-black mb-3 ${saldoAnual < 0 ? 'text-red-500' : 'text-light-text dark:text-dark-text'}`}>
                                     {formatBalance(saldoAnual)}
                                 </span>
-                                <div className="flex items-start gap-2 bg-slate-50 dark:bg-dark-bg/50 p-3 rounded-xl border border-slate-100 dark:border-dark-bg">
+                                <div className="flex items-start gap-2 bg-light-card-elevated dark:bg-dark-bg/50 p-3 rounded-xl border border-slate-100 dark:border-dark-bg">
                                     <InformationCircleIcon className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                                     <p className="text-xs font-bold text-slate-600 dark:text-slate-200 leading-relaxed text-left">
                                         {interpretationText}
@@ -347,12 +423,14 @@ const RelatorioAnual: React.FC = () => {
                                 <div className="flex flex-col items-center">
                                     <div className="flex items-center gap-1.5 mb-1">
                                         <div className="p-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"><ArrowUpIcon className="h-3 w-3" /></div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Receitas</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            {locale === 'en' ? 'Income' : locale === 'es' ? 'Ingresos' : locale === 'fr' ? 'Revenus' : locale === 'de' ? 'Einnahmen' : 'Receitas'}
+                                        </span>
                                     </div>
-                                    <span className="text-base font-bold text-slate-800 dark:text-slate-100">{formatCurrency(totalReceitas)}</span>
+                                    <span className="text-base font-bold text-light-text dark:text-dark-text">{formatCurrency(totalReceitas, appLocale, appCurrency)}</span>
                                     {previousYearTotals.receitas > 0 && (
                                         <span className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYReceitas.isPositive ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30' : 'bg-red-50 text-red-500 dark:bg-red-900/30'}`}>
-                                            {yoYReceitas.value} vs Ano Ant.
+                                            {yoYReceitas.value} {locale === 'en' ? 'vs Prev. Year' : locale === 'es' ? 'vs Año Ant.' : locale === 'fr' ? 'vs Année Préc.' : locale === 'de' ? 'vs Vorjahr' : 'vs Ano Ant.'}
                                         </span>
                                     )}
                                 </div>
@@ -360,25 +438,31 @@ const RelatorioAnual: React.FC = () => {
                                     <div className="absolute left-0 top-1 bottom-1 w-px bg-slate-100 dark:bg-dark-bg"></div>
                                     <div className="flex items-center gap-1.5 mb-1">
                                         <div className="p-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"><ArrowDownIcon className="h-3 w-3" /></div>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Despesas</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            {locale === 'en' ? 'Expenses' : locale === 'es' ? 'Gastos' : locale === 'fr' ? 'Dépenses' : locale === 'de' ? 'Ausgaben' : 'Despesas'}
+                                        </span>
                                     </div>
-                                    <span className="text-base font-bold text-slate-800 dark:text-slate-100">{formatCurrency(totalDespesas)}</span>
+                                    <span className="text-base font-bold text-light-text dark:text-dark-text">{formatCurrency(totalDespesas, appLocale, appCurrency)}</span>
                                     {previousYearTotals.despesas > 0 && (
                                         <span className={`text-[9px] font-bold mt-1 px-1.5 py-0.5 rounded ${yoYDespesas.isPositive ? 'bg-red-50 text-red-500 dark:bg-red-900/30' : 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30'}`}>
-                                            {yoYDespesas.value} vs Ano Ant.
+                                            {yoYDespesas.value} {locale === 'en' ? 'vs Prev. Year' : locale === 'es' ? 'vs Año Ant.' : locale === 'fr' ? 'vs Année Préc.' : locale === 'de' ? 'vs Vorjahr' : 'vs Ano Ant.'}
                                         </span>
                                     )}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Média / Mês</span>
-                                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(mediaMensalReceitas)}</span>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+                                        {locale === 'en' ? 'Avg / Month' : locale === 'es' ? 'Promedio / Mes' : locale === 'fr' ? 'Moy. / Mois' : locale === 'de' ? 'Durchschn. / Monat' : 'Média / Mês'}
+                                    </span>
+                                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(mediaMensalReceitas, appLocale, appCurrency)}</span>
                                 </div>
                                 <div className="flex flex-col items-center relative">
                                     <div className="absolute left-0 top-1 bottom-1 w-px bg-slate-100 dark:bg-dark-bg"></div>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Média / Mês</span>
-                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">{formatCurrency(mediaMensalDespesas)}</span>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+                                        {locale === 'en' ? 'Avg / Month' : locale === 'es' ? 'Promedio / Mes' : locale === 'fr' ? 'Moy. / Mois' : locale === 'de' ? 'Durchschn. / Monat' : 'Média / Mês'}
+                                    </span>
+                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">{formatCurrency(mediaMensalDespesas, appLocale, appCurrency)}</span>
                                 </div>
                             </div>
                         </div>
@@ -386,35 +470,67 @@ const RelatorioAnual: React.FC = () => {
                         {/* Insights */}
                         {insights && (
                             <div className="grid grid-cols-1 gap-3 stagger-card" style={{ animationDelay: '100ms' }}>
-                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Fatos de {selectedYear}</h3>
-                                <div className="bg-white dark:bg-dark-surface p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">
+                                    {locale === 'en' ? `Facts of ${selectedYear}` : locale === 'es' ? `Datos de ${selectedYear}` : locale === 'fr' ? `Faits de ${selectedYear}` : locale === 'de' ? `Fakten von ${selectedYear}` : `Fatos de ${selectedYear}`}
+                                </h3>
+                                <div className="bg-white dark:bg-dark-card p-4 rounded-2xl border border-light-border dark:border-dark-elevated shadow-sm flex items-center gap-4">
                                     <div className="h-12 w-12 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                                         <ArrowDownIcon className="h-7 w-7" />
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">Mês com maior gasto</h4>
-                                        <p className="text-xs text-slate-500 font-medium">Em <b>{insights.worstMonth?.name}</b> você gastou {formatCurrency(insights.worstMonth?.Despesas || 0)}</p>
+                                        <h4 className="text-sm font-bold text-light-text dark:text-dark-text">
+                                            {locale === 'en' ? 'Highest Spending Month' : locale === 'es' ? 'Mes con mayor gasto' : locale === 'fr' ? 'Mois de dépenses maximales' : locale === 'de' ? 'Ausgabenstärkster Monat' : 'Mês com maior gasto'}
+                                        </h4>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            {locale === 'en'
+                                                ? `In ${insights.worstMonth?.name} you spent ${formatCurrency(insights.worstMonth?.Despesas || 0, appLocale, appCurrency)}`
+                                                : locale === 'es'
+                                                ? `En ${insights.worstMonth?.name} gastó ${formatCurrency(insights.worstMonth?.Despesas || 0, appLocale, appCurrency)}`
+                                                : locale === 'fr'
+                                                ? `En ${insights.worstMonth?.name} vous avez dépensé ${formatCurrency(insights.worstMonth?.Despesas || 0, appLocale, appCurrency)}`
+                                                : locale === 'de'
+                                                ? `Im ${insights.worstMonth?.name} haben Sie ${formatCurrency(insights.worstMonth?.Despesas || 0, appLocale, appCurrency)} ausgegeben`
+                                                : `Em ${insights.worstMonth?.name} você gastou ${formatCurrency(insights.worstMonth?.Despesas || 0, appLocale, appCurrency)}`}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="bg-white dark:bg-dark-surface p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                                <div className="bg-white dark:bg-dark-card p-4 rounded-2xl border border-light-border dark:border-dark-elevated shadow-sm flex items-center gap-4">
                                     <div className="h-12 w-12 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                                         <SparklesIcon className="h-7 w-7" />
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">Mês mais econômico</h4>
-                                        <p className="text-xs text-slate-500 font-medium"><b>{insights.bestMonth?.name}</b> teve o melhor saldo: {formatCurrency(insights.bestMonth?.Saldo || 0)}</p>
+                                        <h4 className="text-sm font-bold text-light-text dark:text-dark-text">
+                                            {locale === 'en' ? 'Most Economical Month' : locale === 'es' ? 'Mes más económico' : locale === 'fr' ? 'Mois le plus économique' : locale === 'de' ? 'Sparsamster Monat' : 'Mês mais econômico'}
+                                        </h4>
+                                        <p className="text-xs text-slate-500 font-medium">
+                                            {locale === 'en'
+                                                ? `${insights.bestMonth?.name} had the best balance: ${formatCurrency(insights.bestMonth?.Saldo || 0, appLocale, appCurrency)}`
+                                                : locale === 'es'
+                                                ? `${insights.bestMonth?.name} tuvo el mejor saldo: ${formatCurrency(insights.bestMonth?.Saldo || 0, appLocale, appCurrency)}`
+                                                : locale === 'fr'
+                                                ? `${insights.bestMonth?.name} a eu le meilleur solde : ${formatCurrency(insights.bestMonth?.Saldo || 0, appLocale, appCurrency)}`
+                                                : locale === 'de'
+                                                ? `${insights.bestMonth?.name} hatte das beste Saldo: ${formatCurrency(insights.bestMonth?.Saldo || 0, appLocale, appCurrency)}`
+                                                : `${insights.bestMonth?.name} teve o melhor saldo: ${formatCurrency(insights.bestMonth?.Saldo || 0, appLocale, appCurrency)}`}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Evolução */}
-                        <div className="bg-white dark:bg-dark-surface p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 stagger-card" style={{ animationDelay: '200ms' }}>
+                        <div className="bg-white dark:bg-dark-card p-5 rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated stagger-card" style={{ animationDelay: '200ms' }}>
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Evolução</h2>
+                                <h2 className="text-lg font-bold text-light-text dark:text-dark-text">
+                                    {locale === 'en' ? 'Trend' : locale === 'es' ? 'Evolución' : locale === 'fr' ? 'Évolution' : locale === 'de' ? 'Entwicklung' : 'Evolução'}
+                                </h2>
                                 <div className="flex bg-slate-100 dark:bg-dark-bg p-1 rounded-lg">
-                                    <button onClick={() => setChartMode('absolute')} className={`px-3 py-1 text-[10px] font-black uppercase rounded-md transition-all ${chartMode === 'absolute' ? 'bg-white dark:bg-dark-surface text-dark-accent shadow-sm' : 'text-slate-400'}`}>Mensal</button>
-                                    <button onClick={() => setChartMode('cumulative')} className={`px-3 py-1 text-[10px] font-black uppercase rounded-md transition-all ${chartMode === 'cumulative' ? 'bg-white dark:bg-dark-surface text-dark-accent shadow-sm' : 'text-slate-400'}`}>Acumulado</button>
+                                    <button onClick={() => setChartMode('absolute')} className={`px-3 py-1 text-[10px] font-black uppercase rounded-md transition-all ${chartMode === 'absolute' ? 'bg-white dark:bg-dark-card text-[#3B82F6] shadow-sm' : 'text-slate-400'}`}>
+                                        {locale === 'en' ? 'Monthly' : locale === 'es' ? 'Mensual' : locale === 'fr' ? 'Mensuel' : locale === 'de' ? 'Monatlich' : 'Mensal'}
+                                    </button>
+                                    <button onClick={() => setChartMode('cumulative')} className={`px-3 py-1 text-[10px] font-black uppercase rounded-md transition-all ${chartMode === 'cumulative' ? 'bg-white dark:bg-dark-card text-[#3B82F6] shadow-sm' : 'text-slate-400'}`}>
+                                        {locale === 'en' ? 'Cumulative' : locale === 'es' ? 'Acumulado' : locale === 'fr' ? 'Cumulé' : locale === 'de' ? 'Kumuliert' : 'Acumulado'}
+                                    </button>
                                 </div>
                             </div>
                             <div className="h-64 w-full -ml-4">
@@ -461,8 +577,8 @@ const RelatorioAnual: React.FC = () => {
                         </div>
 
                         {/* Categorias (Pizza Refinada) */}
-                        <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 stagger-card" style={{ animationDelay: '300ms' }}>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Gastos por Categoria</h2>
+                        <div className="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated stagger-card" style={{ animationDelay: '300ms' }}>
+                            <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-6">{t('report.expensesByCategory') || 'Gastos por Categoria'}</h2>
                             <div className="grid grid-cols-1 gap-6 items-center">
                                 <div className="h-64 relative">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -491,8 +607,8 @@ const RelatorioAnual: React.FC = () => {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Top Gasto</span>
-                                        <span className="text-xs font-black text-slate-800 dark:text-white truncate max-w-full">{annualCategoryData[0]?.name}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.topSpending') || 'Top Gasto'}</span>
+                                        <span className="text-xs font-black text-light-text dark:text-dark-text truncate max-w-full">{annualCategoryData[0]?.name}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2.5">
@@ -505,8 +621,8 @@ const RelatorioAnual: React.FC = () => {
                                                     <span className="text-slate-600 dark:text-slate-200 truncate">{entry.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[9px] font-black bg-slate-50 dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
-                                                    <span className="text-slate-900 dark:text-white tabular-nums">{formatCurrency(entry.value)}</span>
+                                                    <span className="text-[9px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
+                                                    <span className="text-light-text dark:text-dark-text tabular-nums">{formatCurrency(entry.value)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -516,8 +632,8 @@ const RelatorioAnual: React.FC = () => {
                         </div>
 
                         {/* Meios de Pagamento */}
-                        <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 stagger-card" style={{ animationDelay: '400ms' }}>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Meios de Pagamento</h2>
+                        <div className="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated stagger-card" style={{ animationDelay: '400ms' }}>
+                            <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-6">{t('report.paymentMethods') || 'Meios de Pagamento'}</h2>
                             <div className="grid grid-cols-1 gap-6 items-center">
                                 <div className="h-64 relative">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -551,8 +667,8 @@ const RelatorioAnual: React.FC = () => {
                                         </PieChart>
                                     </ResponsiveContainer>
                                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
-                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Principal</span>
-                                        <span className="text-xs font-black text-slate-800 dark:text-white truncate max-w-full">{paymentMethodsData[0]?.name}</span>
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{t('report.primaryPaymentMethod') || 'Principal'}</span>
+                                        <span className="text-xs font-black text-light-text dark:text-dark-text truncate max-w-full">{paymentMethodsData[0]?.name}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-2.5">
@@ -570,8 +686,8 @@ const RelatorioAnual: React.FC = () => {
                                                     <span className="text-slate-600 dark:text-slate-200 truncate">{entry.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[9px] font-black bg-slate-50 dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
-                                                    <span className="text-slate-900 dark:text-white tabular-nums">{formatCurrency(entry.value)}</span>
+                                                    <span className="text-[9px] font-black bg-light-card-elevated dark:bg-dark-bg px-2 py-0.5 rounded text-slate-500">{perc}%</span>
+                                                    <span className="text-light-text dark:text-dark-text tabular-nums">{formatCurrency(entry.value)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -581,13 +697,13 @@ const RelatorioAnual: React.FC = () => {
                         </div>
 
                         {/* 50/30/20 Anual */}
-                        <div className="bg-white dark:bg-dark-surface p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 mb-6 stagger-card" style={{ animationDelay: '500ms' }}>
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Regra 50/30/20 Anual</h2>
+                        <div className="bg-white dark:bg-dark-card p-6 rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated mb-6 stagger-card" style={{ animationDelay: '500ms' }}>
+                            <h2 className="text-lg font-bold text-light-text dark:text-dark-text mb-6">{t('report.rule503020') || 'Regra 50/30/20 Anual'}</h2>
                             <div className="space-y-5">
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-xs font-bold">
-                                        <span className="text-slate-600 dark:text-slate-300">Gastos Fixos (Necessidades)</span>
-                                        <span className="text-slate-900 dark:text-white">{annual503020.percentuais['Gastos Fixos'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 50%</span></span>
+                                        <span className="text-light-text-secondary dark:text-dark-text-secondary">{t('report.fixedExpenses') || 'Gastos Fixos (Necessidades)'}</span>
+                                        <span className="text-light-text dark:text-dark-text">{annual503020.percentuais['Gastos Fixos'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 50%</span></span>
                                     </div>
                                     <div className="h-2.5 w-full bg-slate-100 dark:bg-dark-bg rounded-full overflow-hidden">
                                         <div className={`h-full rounded-full ${annual503020.percentuais['Gastos Fixos'] > 50 ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${Math.min(100, annual503020.percentuais['Gastos Fixos'])}%` }} />
@@ -595,8 +711,8 @@ const RelatorioAnual: React.FC = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-xs font-bold">
-                                        <span className="text-slate-600 dark:text-slate-300">Gastos Variáveis (Desejos)</span>
-                                        <span className="text-slate-900 dark:text-white">{annual503020.percentuais['Gastos Variáveis'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 30%</span></span>
+                                        <span className="text-light-text-secondary dark:text-dark-text-secondary">{t('report.variableExpenses') || 'Gastos Variáveis (Desejos)'}</span>
+                                        <span className="text-light-text dark:text-dark-text">{annual503020.percentuais['Gastos Variáveis'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 30%</span></span>
                                     </div>
                                     <div className="h-2.5 w-full bg-slate-100 dark:bg-dark-bg rounded-full overflow-hidden">
                                         <div className={`h-full rounded-full ${annual503020.percentuais['Gastos Variáveis'] > 30 ? 'bg-red-500' : 'bg-purple-500'}`} style={{ width: `${Math.min(100, annual503020.percentuais['Gastos Variáveis'])}%` }} />
@@ -604,8 +720,8 @@ const RelatorioAnual: React.FC = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-xs font-bold">
-                                        <span className="text-slate-600 dark:text-slate-300">Reserva (Economias)</span>
-                                        <span className="text-slate-900 dark:text-white">{annual503020.percentuais['Reserva Financeira'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 20%</span></span>
+                                        <span className="text-light-text-secondary dark:text-dark-text-secondary">{t('report.savingsReserve') || 'Reserva (Economias)'}</span>
+                                        <span className="text-light-text dark:text-dark-text">{annual503020.percentuais['Reserva Financeira'].toFixed(0)}% <span className="text-slate-400 font-medium ml-1">/ 20%</span></span>
                                     </div>
                                     <div className="h-2.5 w-full bg-slate-100 dark:bg-dark-bg rounded-full overflow-hidden">
                                         <div className={`h-full rounded-full ${annual503020.percentuais['Reserva Financeira'] < 20 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, annual503020.percentuais['Reserva Financeira'])}%` }} />
@@ -615,35 +731,35 @@ const RelatorioAnual: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-dark-surface rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in duration-500">
-                        <div className="p-6 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-dark-surface">
+                    <div className="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-light-border dark:border-dark-elevated overflow-hidden animate-in fade-in duration-500">
+                        <div className="p-6 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-dark-card">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl shadow-sm">
                                     <PiggyBankIcon className="h-8 w-8" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Taxa de Poupança</h2>
-                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Percentual da renda que sobrou</p>
+                                    <h2 className="text-xl font-black text-light-text dark:text-dark-text uppercase tracking-tighter">{t('report.savingsRate') || 'Taxa de Poupança'}</h2>
+                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{t('report.savingsRateSubtitle') || 'Percentual da renda que sobrou'}</p>
                                 </div>
                             </div>
 
-                            <SavingsRateItem label="Consolidado do Ano" income={totalReceitas} saved={saldoAnual} isTotal />
+                            <SavingsRateItem label={t('report.annualConsolidated') || 'Consolidado do Ano'} income={totalReceitas} saved={saldoAnual} isTotal />
                         </div>
 
                         <div className="p-6">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Detalhamento por Mês</h3>
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">{t('report.monthlyDetail') || 'Detalhamento por Mês'}</h3>
                             <div className="space-y-2">
                                 {monthlyData.map((month, idx) => (
                                     <SavingsRateItem key={idx} label={month.name} income={month.Receitas} saved={month.Saldo} />
                                 ))}
                             </div>
                         </div>
-                        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-dark-surface/50">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Destino da Economia</h3>
+                        <div className="p-6 border-t border-light-border dark:border-dark-elevated bg-slate-50/50 dark:bg-dark-surface/50">
+                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('report.savingsDestination') || 'Destino da Economia'}</h3>
                             
-                            <div className="bg-white dark:bg-dark-bg rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 space-y-4">
-                                <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Alocado em Metas</span>
+                            <div className="bg-white dark:bg-dark-bg rounded-xl p-4 shadow-sm border border-light-border dark:border-dark-elevated space-y-4">
+                                <div className="flex justify-between items-center pb-3 border-b border-light-border dark:border-dark-elevated">
+                                    <span className="text-sm font-bold text-light-text-secondary dark:text-dark-text-secondary">{t('report.allocatedInGoals') || 'Alocado em Metas'}</span>
                                     <span className="text-sm font-black text-emerald-500">{formatCurrency(metasAllocations.totalAllocated)}</span>
                                 </div>
                                 
@@ -651,18 +767,18 @@ const RelatorioAnual: React.FC = () => {
                                     <div key={idx} className="flex justify-between items-center text-xs">
                                         <div className="flex items-center gap-2">
                                             <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
-                                            <span className="text-slate-600 dark:text-slate-400">{meta.name}</span>
+                                            <span className="text-light-text-secondary dark:text-dark-text-muted">{meta.name}</span>
                                         </div>
-                                        <span className="font-bold text-slate-700 dark:text-slate-300">{formatCurrency(meta.amount)}</span>
+                                        <span className="font-bold text-light-text-secondary dark:text-dark-text-secondary">{formatCurrency(meta.amount)}</span>
                                     </div>
                                 ))}
 
                                 {metasAllocations.details.length === 0 && (
-                                    <p className="text-xs text-slate-400 text-center py-2 italic">Nenhum aporte em metas este ano.</p>
+                                    <p className="text-xs text-slate-400 text-center py-2 italic">{t('report.noGoalsContributions') || 'Nenhum aporte em metas este ano.'}</p>
                                 )}
 
-                                <div className="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-800">
-                                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Sobra Livre em Caixa</span>
+                                <div className="flex justify-between items-center pt-3 border-t border-light-border dark:border-dark-elevated">
+                                    <span className="text-sm font-bold text-light-text-secondary dark:text-dark-text-secondary">{t('report.freeCash') || 'Sobra Livre em Caixa'}</span>
                                     <span className="text-sm font-black text-blue-500">{formatCurrency(metasAllocations.freeSavings)}</span>
                                 </div>
                             </div>

@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Ignorar dependências opcionais de redes sociais desativadas (evita falha do R8 por missing classes)
+-dontwarn com.facebook.**
+-dontwarn com.twitter.**
+-dontwarn com.twitter.sdk.android.**

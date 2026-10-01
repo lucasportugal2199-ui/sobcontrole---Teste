@@ -1,56 +1,61 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import { useTranslation } from '../i18n';
 import { SparklesIcon, ChevronRightIcon, XCircleIcon } from './icons';
 
 interface TutorialStep {
     targetId: string;
     title: string;
     description: string;
-    tab?: 'metas' | 'transacoes' | 'lancamento' | 'financas' | 'categorias';
+    tab?: 'metas' | 'transacoes' | 'lancamento' | 'financas' | 'horizonte';
     view?: 'main' | 'horizonte' | 'chat' | 'menu';
     position?: 'top' | 'bottom' | 'center';
 }
 
 const Tutorial: React.FC = () => {
-    const { userProfile, updateUserProfile, currentTab, setCurrentTab, currentView, setCurrentView } = useContext(AppContext)!;
+    const { userProfile, updateUserProfile, currentTab, setCurrentTab, currentView, setCurrentView, showTutorial } = useContext(AppContext)!;
+    const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
     useEffect(() => {
-        // Só mostra se o usuário ainda não viu
-        if (!userProfile.hasSeenTutorial) {
+        // Só mostra se o usuário ainda não viu E se o onboarding de slides não estiver aberto
+        // E se o OnboardingTutorial já foi concluído (tutorial_completed no localStorage)
+        const onboardingDone = !!localStorage.getItem('tutorial_completed');
+        if (!userProfile.hasSeenTutorial && !showTutorial && onboardingDone) {
             setIsVisible(true);
+        } else {
+            setIsVisible(false);
         }
-    }, [userProfile.hasSeenTutorial]);
+    }, [userProfile.hasSeenTutorial, showTutorial]);
 
     const steps: TutorialStep[] = [
         {
             targetId: 'tour-home',
-            title: "Crie Transações",
-            description: "Para criar uma nova transação (receita ou despesa), basta dar um CLIQUE DUPLO neste ícone no centro!",
+            title: t('tutorial.step1.title'),
+            description: t('tutorial.step1.description'),
             tab: 'lancamento',
             position: 'top'
         },
         {
             targetId: 'tour-horizonte-btn',
-            title: "Futuro Mensal",
-            description: "Clique no ícone de documento (fatura) para ver a Futuro Mensal. Lá você projeta seu saldo para os próximos meses!",
+            title: t('tutorial.step2.title'),
+            description: t('tutorial.step2.description'),
             tab: 'lancamento',
-            position: 'bottom'
+            position: 'top'
         },
         {
             targetId: 'tour-metas',
-            title: "Planeje seus Sonhos",
-            description: "Aqui em Metas você pode criar cofrinhos para seus objetivos e acompanhar quanto falta para realizá-los.",
+            title: t('tutorial.step3.title'),
+            description: t('tutorial.step3.description'),
             tab: 'lancamento',
             position: 'top'
         },
         {
             targetId: 'tour-home',
-            title: "Tudo Pronto!",
-            description: "Agora você já conhece o básico para dominar suas finanças. Explore à vontade!",
+            title: t('tutorial.step4.title'),
+            description: t('tutorial.step4.description'),
             tab: 'lancamento',
             position: 'top'
         }
@@ -159,17 +164,24 @@ const Tutorial: React.FC = () => {
             {isFallback && <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px] pointer-events-auto" />}
 
             <div style={balloonStyle} className="pointer-events-auto">
-                <div className="bg-white dark:bg-dark-surface p-6 rounded-[32px] shadow-2xl border border-white/20 animate-in fade-in zoom-in-95 duration-500">
+                <div className="bg-white dark:bg-dark-card p-6 rounded-[32px] shadow-2xl border border-white/20 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-2.5 bg-teal-100 dark:bg-teal-900/40 rounded-2xl shadow-inner">
-                            <SparklesIcon className="h-5 w-5 text-light-accent dark:text-dark-accent" />
+                            <SparklesIcon className="h-5 w-5 text-light-accent dark:text-[#3B82F6]" />
                         </div>
+                        <button 
+                            onClick={handleComplete}
+                            className="text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 transition-colors p-1"
+                            aria-label={t('tutorial.skipLabel') || 'Pular tutorial'}
+                        >
+                            <XCircleIcon className="h-5 w-5" />
+                        </button>
                     </div>
 
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white mb-2 leading-tight uppercase tracking-tighter">
+                    <h3 className="text-lg font-black text-light-text dark:text-dark-text mb-2 leading-tight uppercase tracking-tighter">
                         {currentStep.title}
                     </h3>
-                    <p className="text-[13px] text-slate-600 dark:text-slate-300 mb-6 leading-relaxed font-semibold">
+                    <p className="text-[13px] text-light-text-secondary dark:text-dark-text-secondary mb-6 leading-relaxed font-semibold">
                         {currentStep.description}
                     </p>
 
@@ -182,9 +194,9 @@ const Tutorial: React.FC = () => {
 
                         <button
                             onClick={handleNext}
-                            className="flex items-center gap-2 bg-light-accent hover:bg-dark-accent text-white pl-6 pr-4 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-light-accent/30 active:scale-95 transition-all"
+                            className="flex items-center gap-2 bg-light-accent hover:bg-[#3B82F6] text-white pl-6 pr-4 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-light-accent/30 active:scale-95 transition-all"
                         >
-                            {currentStepIndex === steps.length - 1 ? 'Começar' : 'Entendi'}
+                            {currentStepIndex === steps.length - 1 ? (t('tutorial.start') || 'Começar') : (t('tutorial.gotIt') || 'Entendi')}
                             <ChevronRightIcon className="h-4 w-4" />
                         </button>
                     </div>
@@ -194,4 +206,5 @@ const Tutorial: React.FC = () => {
     );
 };
 
+export { Tutorial };
 export default Tutorial;

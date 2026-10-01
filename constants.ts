@@ -10,12 +10,13 @@ export const INITIAL_CATEGORIAS: Categorias = {
     { id: 'saldo-inicial', name: 'Saldo Inicial', icon: 'bank' }
   ],
   saida: [
-    { id: 'moradia', name: 'Moradia', icon: 'home' },
-    { id: 'alimentacao', name: 'Alimentação', icon: 'shopping-basket' },
+    { id: 'moradia', name: 'Moradia', icon: 'home', bucket: 'necessidades', group: 'Gastos Fixos' },
+    { id: 'alimentacao', name: 'Alimentação', icon: 'shopping-basket', bucket: 'necessidades', group: 'Gastos Variáveis' },
     { id: 'transporte', name: 'Transporte', icon: 'car', bucket: 'necessidades', group: 'Gastos Variáveis' },
     { id: 'lazer', name: 'Lazer', icon: 'sun', bucket: 'desejos', group: 'Gastos Variáveis' },
     { id: 'saude', name: 'Saúde', icon: 'medkit', bucket: 'necessidades', group: 'Gastos Fixos' },
     { id: 'educacao', name: 'Educação', icon: 'flask', bucket: 'necessidades', group: 'Gastos Fixos' },
+    { id: 'assinatura', name: 'Assinatura', icon: 'clapperboard', bucket: 'desejos', group: 'Gastos Fixos' },
     { id: 'investimentos-out', name: 'Investimentos', icon: 'chart-pie', bucket: 'futuro', group: 'Reserva Financeira' },
     { id: 'outras-despesas', name: 'Outras Despesas', icon: 'box', bucket: 'desejos', group: 'Gastos Variáveis' },
   ],
@@ -88,6 +89,29 @@ export const CATEGORY_ICONS: { iconId: string; label: string; group: string }[] 
   { iconId: 'crown', label: 'Premium', group: 'Outros' },
   { iconId: 'tag', label: 'Etiqueta', group: 'Outros' },
   { iconId: 'box', label: 'Outros', group: 'Outros' },
+
+  // Novos Ícones Adicionados
+  { iconId: 'cigarette', label: 'Cigarro', group: 'Outros' },
+  { iconId: 'shopping-cart', label: 'Carrinho', group: 'Alimentação' },
+  { iconId: 'burger', label: 'Hambúrguer', group: 'Alimentação' },
+  { iconId: 'beer', label: 'Bar / Bebidas', group: 'Alimentação' },
+  { iconId: 'cookie', label: 'Lanches / Doces', group: 'Alimentação' },
+  { iconId: 'parking', label: 'Estacionamento', group: 'Transporte' },
+  { iconId: 'route', label: 'Pedágio / Rota', group: 'Transporte' },
+  { iconId: 'bike', label: 'Bicicleta', group: 'Transporte' },
+  { iconId: 'building', label: 'Aluguel / Prédio', group: 'Casa' },
+  { iconId: 'hammer', label: 'Ferramenta / Reforma', group: 'Casa' },
+  { iconId: 'plug', label: 'Energia / Tomada', group: 'Casa' },
+  { iconId: 'key', label: 'Chave / Aluguel', group: 'Casa' },
+  { iconId: 'clapperboard', label: 'Streaming', group: 'Lazer' },
+  { iconId: 'dices', label: 'Jogos / Cassino', group: 'Lazer' },
+  { iconId: 'pencil', label: 'Cursos / Escola', group: 'Educação' },
+  { iconId: 'glasses', label: 'Óptica / Óculos', group: 'Saúde' },
+  { iconId: 'pill', label: 'Remédios / Farmácia', group: 'Saúde' },
+  { iconId: 'cpu', label: 'Eletrônicos', group: 'Pessoal' },
+  { iconId: 'bone', label: 'Pet / Ração', group: 'Outros' },
+  { iconId: 'heart-handshake', label: 'Doação / Ajuda', group: 'Outros' },
+  { iconId: 'umbrella', label: 'Imprevistos / Seguro', group: 'Outros' },
 ];
 
 export const INITIAL_CATEGORIA_CORES: { [key: string]: string } = {
@@ -99,6 +123,7 @@ export const INITIAL_CATEGORIA_CORES: { [key: string]: string } = {
   Educação: '#FFCE56', 
   Investimentos: '#C9CBCF',
   'Outras Despesas': '#E7E9ED',
+  Assinatura: '#7C3AED',
   Salário: '#10B981',
   Vendas: '#06B6D4',
   'Outras Receitas': '#6C757D',
@@ -161,4 +186,8 @@ export const AVAILABLE_BADGES = [
 
   // Poupança
   { id: 'saldo_1000', name: 'Poupador Focado', icon: '🏦', description: 'Guardou seus primeiros R$ 1.000,00 em metas.' },
+  { id: 'save_ratio_50', name: 'Mestre da Poupança', icon: '💰', description: 'Poupar 50% ou mais das receitas em um único mês.' },
+  { id: 'no_credit_spend', name: 'Livre de Dívidas', icon: '🛡️', description: 'Passar um mês inteiro sem usar o cartão de crédito (mínimo de 5 lançamentos).' },
+  { id: 'frequent_logger', name: 'Registrador Assíduo', icon: '📝', description: 'Alcançou 15 ou mais lançamentos no aplicativo.' },
+  { id: 'cfo_consultant', name: 'Parceiro do CFO', icon: '🤖', description: 'Interagir pelo menos 5 vezes com o chat de IA.' },
 ];
