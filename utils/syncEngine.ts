@@ -141,6 +141,140 @@ export function dataSummary(data: UserData | null | undefined): string {
 
 
 // ============================================================
+// EXCLUSÕES (tombstones) — impedem que itens apagados voltem no merge
+// ============================================================
+//
+// O merge junta tudo que existe em qualquer um dos lados. Sem registrar o que
+// foi apagado, um item excluído no celular "ressuscitava" ao juntar com a nuvem
+// (ou com outro aparelho) que ainda o tinha.
+
+/** Por quanto tempo lembramos de uma exclusão. Depois disso ela é esquecida. */
+const DELETED_IDS_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+/**
+ * Chaves de todos os itens que podem ser excluídos pelo usuário.
+ * O prefixo evita colisão entre tipos diferentes com o mesmo id.
+ */
+export function collectIds(data: Partial<UserData> | null | undefined): Set<string> {
+  const ids = new Set<string>();
+  if (!data) return ids;
+
+  for (const month of Object.values(data.allData || {})) {
+    for (const tx of month?.transactions || []) ids.add(`tx:${tx.id}`);
+  }
+  for (const g of data.savingsGoals || []) ids.add(`goal:${g.id}`);
+  for (const c of data.creditCards || []) ids.add(`card:${c.id}`);
+  for (const a of data.assets || []) ids.add(`asset:${a.id}`);
+  for (const a of data.accounts || []) ids.add(`account:${a.id}`);
+  for (const s of data.subscriptions || []) ids.add(`sub:${s.id}`);
+  for (const i of data.importHistory || []) ids.add(`import:${i.id}`);
+  for (const c of data.categories?.entrada || []) ids.add(`cat:entrada:${c.name}`);
+  for (const c of data.categories?.saida || []) ids.add(`cat:saida:${c.name}`);
+  return ids;
+}
+
+/**
+ * Atualiza a lista de excluídos comparando os ids de antes e de agora:
+ * - o que existia e sumiu foi excluído agora;
+ * - o que estava na lista e voltou a existir foi recriado pelo usuário.
+ * Devolve `null` se nada mudou.
+ */
+export function updateDeletedIds(
+  previousIds: Set<string>,
+  currentIds: Set<string>,
+  deletedIds: Record<string, string>
+): Record<string, string> | null {
+  const now = new Date().toISOString();
+  let next: Record<string, string> | null = null;
+
+  for (const id of previousIds) {
+    if (!currentIds.has(id) && !deletedIds[id]) {
+      next = next || { ...deletedIds };
+      next[id] = now;
+    }
+  }
+  for (const id of currentIds) {
+    if ((next || deletedIds)[id]) {
+      next = next || { ...deletedIds };
+      delete next[id];
+    }
+  }
+  return next;
+}
+
+/** Junta as listas de excluídos dos dois lados e esquece as muito antigas. */
+function mergeDeletedIds(
+  a: Record<string, string> = {},
+  b: Record<string, string> = {}
+): Record<string, string> {
+  const cutoff = Date.now() - DELETED_IDS_TTL_MS;
+  const merged: Record<string, string> = {};
+  for (const [id, date] of [...Object.entries(a), ...Object.entries(b)]) {
+    if (new Date(date).getTime() < cutoff) continue;
+    if (!merged[id] || date > merged[id]) merged[id] = date;
+  }
+  return merged;
+}
+
+/** Remove de `data` todos os itens que estão na lista de excluídos. */
+function removeDeleted(data: UserData, deletedIds: Record<string, string>): UserData {
+  if (Object.keys(deletedIds).length === 0) return data;
+  const keep = (key: string) => !deletedIds[key];
+
+  const allData: AllData = {};
+  for (const [monthKey, month] of Object.entries(data.allData || {})) {
+    allData[monthKey] = {
+      ...month,
+      transactions: (month?.transactions || []).filter(tx => keep(`tx:${tx.id}`)),
+    };
+  }
+
+  return {
+    ...data,
+    allData,
+    savingsGoals: (data.savingsGoals || []).filter(g => keep(`goal:${g.id}`)),
+    creditCards: (data.creditCards || []).filter(c => keep(`card:${c.id}`)),
+    assets: (data.assets || []).filter(a => keep(`asset:${a.id}`)),
+    accounts: (data.accounts || []).filter(a => keep(`account:${a.id}`)),
+    subscriptions: (data.subscriptions || []).filter(s => keep(`sub:${s.id}`)),
+    importHistory: (data.importHistory || []).filter(i => keep(`import:${i.id}`)),
+    categories: data.categories && {
+      entrada: (data.categories.entrada || []).filter(c => keep(`cat:entrada:${c.name}`)),
+      saida: (data.categories.saida || []).filter(c => keep(`cat:saida:${c.name}`)),
+    },
+  };
+}
+
+/** Tem exclusões registradas? (estado vazio por exclusão ≠ estado vazio por perda de dados) */
+export function hasDeletedIds(data: UserData | null | undefined): boolean {
+  return Object.keys(data?.deletedIds || {}).length > 0;
+}
+
+/**
+ * Compara o conteúdo sincronizável de dois UserData (ignora timestamps e
+ * campos de controle). Usado para evitar uploads e atualizações de tela inúteis.
+ */
+export function sameSyncedContent(a: UserData, b: UserData): boolean {
+  const pick = (d: UserData) => stableStringify([
+    d.allData, d.categories, d.categoryColors, d.creditCards, d.budgets,
+    d.savingsGoals, d.assets || [], d.patrimonioHistory || [], d.accounts || [],
+    d.subscriptions || [], d.importHistory, d.deletedIds || {},
+    d.userProfile, d.dashboardLayout, d.theme,
+  ]);
+  return pick(a) === pick(b);
+}
+
+/** JSON.stringify com as chaves ordenadas (o JSONB do Supabase não preserva a ordem). */
+function stableStringify(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.keys(v).sort().map(k => [k, v[k]]))
+      : v
+  );
+}
+
+
+// ============================================================
 // SMART MERGE — Merge inteligente entre dados local e remoto
 // ============================================================
 
@@ -166,6 +300,11 @@ export function smartMerge(local: UserData, remote: UserData): UserData {
   const newerSource = localTime >= remoteTime ? 'local' : 'remote';
   
   log.info(`Fonte mais recente: ${newerSource} (local: ${local.lastUpdatedAt}, remote: ${remote.lastUpdatedAt})`);
+
+  // 0. Exclusões: junta as dos dois lados e remove esses itens antes do merge
+  const mergedDeletedIds = mergeDeletedIds(local.deletedIds, remote.deletedIds);
+  local = removeDeleted(local, mergedDeletedIds);
+  remote = removeDeleted(remote, mergedDeletedIds);
 
   // 1. Merge allData (transações por mês)
   let mergedAllData = mergeAllData(local.allData || {}, remote.allData || {});
@@ -243,6 +382,7 @@ export function smartMerge(local: UserData, remote: UserData): UserData {
     patrimonioHistory: mergedPatrimonio,
     accounts: mergedAccounts,
     subscriptions: mergedSubscriptions,
+    deletedIds: mergedDeletedIds,
     lastUpdatedAt: new Date().toISOString(),
   };
 
@@ -272,20 +412,14 @@ function mergeAllData(local: AllData, remote: AllData): AllData {
     } else if (localMonth && !remoteMonth) {
       merged[monthKey] = localMonth;
     } else if (localMonth && remoteMonth) {
-      // Ambos existem — merge transações por ID
-      const txMap = new Map<string, Transaction>();
-      
-      // Adiciona remotos primeiro (serão sobrescritos pelo local se ID coincidir)
-      for (const tx of (remoteMonth.transactions || [])) {
-        txMap.set(tx.id, tx);
-      }
-      // Locais sobrescrevem (mais recente)
-      for (const tx of (localMonth.transactions || [])) {
-        txMap.set(tx.id, tx);
-      }
-      
+      // Ambos existem — merge transações por ID (local vence)
       merged[monthKey] = {
-        transactions: Array.from(txMap.values()),
+        ...localMonth,
+        transactions: unionLocalFirst<Transaction>(
+          localMonth.transactions || [],
+          remoteMonth.transactions || [],
+          tx => tx.id
+        ),
         saldoFinal: 0, // será recalculado
       };
     }
@@ -302,16 +436,7 @@ function mergeCategories(local: Categorias | undefined, remote: Categorias | und
   if (!local) return remote!;
   if (!remote) return local;
   
-  const mergeList = (a: any[], b: any[]): any[] => {
-    const map = new Map<string, any>();
-    for (const item of b) {
-      map.set(item.name || item.id, item);
-    }
-    for (const item of a) {
-      map.set(item.name || item.id, item);
-    }
-    return Array.from(map.values());
-  };
+  const mergeList = (a: any[], b: any[]): any[] => unionLocalFirst(a, b, item => item.name || item.id);
   
   return {
     entrada: mergeList(local.entrada || [], remote.entrada || []),
@@ -323,14 +448,16 @@ function mergeCategories(local: Categorias | undefined, remote: Categorias | und
  * Merge genérico de arrays de objetos com campo `id`
  */
 function mergeById<T extends { id: string }>(local: T[], remote: T[]): T[] {
-  const map = new Map<string, T>();
-  for (const item of remote) {
-    map.set(item.id, item);
-  }
-  for (const item of local) {
-    map.set(item.id, item);  // Local sobrescreve remoto se mesmo ID
-  }
-  return Array.from(map.values());
+  return unionLocalFirst(local, remote, item => item.id);
+}
+
+/**
+ * União de duas listas pela chave. Mantém a ordem local e acrescenta no fim
+ * só o que existe apenas no remoto. Com a mesma chave, o item local vence.
+ */
+function unionLocalFirst<T>(local: T[], remote: T[], key: (item: T) => string): T[] {
+  const seen = new Set(local.map(key));
+  return [...local, ...remote.filter(item => !seen.has(key(item)))];
 }
 
 /**

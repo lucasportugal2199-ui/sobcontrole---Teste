@@ -217,5 +217,7 @@ export interface UserData {
   patrimonioHistory?: PatrimonioHistory[];
   accounts?: Account[];
   subscriptions?: Subscription[];
+  /** Itens excluídos (chave de collectIds → data ISO da exclusão), para não voltarem no merge */
+  deletedIds?: Record<string, string>;
   lastUpdatedAt?: string
 }

@@ -33,6 +33,7 @@ import {
   Asset,
   PatrimonioHistory,
   Subscription,
+  UserData,
 } from './types';
 import {
   CloseIcon,
@@ -63,7 +64,7 @@ import {
   generateMockTransactions
 } from './utils/helpers';
 import { fetchAllDataFromSupabase, saveAllDataToSupabase } from './utils/supabaseSync';
-import { isEmptyState, isValidPayload, smartMerge, dataSummary, createSyncLogger } from './utils/syncEngine';
+import { isEmptyState, isValidPayload, smartMerge, dataSummary, createSyncLogger, collectIds, updateDeletedIds, hasDeletedIds, sameSyncedContent } from './utils/syncEngine';
 import { NotificationService } from './utils/notificationService';
 import { supabase } from './utils/supabaseClient'; // Importação do cliente
 import { BillingService } from './utils/billingService';
@@ -256,6 +257,10 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   // Computed: SÓ permite save/sync quando TODAS as 3 flags são true
   const isSyncReady = () => isSessionValidatedRef.current && isRemoteLoadedRef.current && isHydratedRef.current;
 
+  // Ids de todos os itens na última persistência local. Comparando com o estado atual
+  // descobrimos o que foi excluído (ver updateDeletedIds). null = ainda não inicializado.
+  const knownIdsRef = React.useRef<Set<string> | null>(null);
+
   const [hasLocalSession, setHasLocalSession] = useState<boolean>(false);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -339,6 +344,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   const [budgets, setBudgets] = useState<Budgets>({});
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([]);
   const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>(INITIAL_DASHBOARD_LAYOUT);
+  const [deletedIds, setDeletedIds] = useState<Record<string, string>>({});
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [patrimonioHistory, setPatrimonioHistory] = useState<PatrimonioHistory[]>([]);
@@ -463,6 +469,8 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     setSavingsGoals([]);
     setDashboardLayout(INITIAL_DASHBOARD_LAYOUT);
     setSubscriptions([]);
+    setDeletedIds({});
+    knownIdsRef.current = null;
 
     // UI / Preferências
     setTheme('dark');
@@ -605,6 +613,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       isSessionValidatedRef.current = false;
       isRemoteLoadedRef.current = false;
       isHydratedRef.current = false;
+      knownIdsRef.current = null;
       setIsLoadingData(true);
 
       hydrationLog.group('Iniciando hidratação');
@@ -657,6 +666,8 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       }
 
       const localIsEmpty = isEmptyState(localData);
+      // Vazio por exclusão do usuário (tem deletedIds) não é o mesmo que vazio por perda de dados
+      const localHasContent = !localIsEmpty || hasDeletedIds(localData);
       hydrationLog.info(`Local: ${localIsEmpty ? '⚠️ VAZIO/DEFAULT' : '✅ tem dados'}`, dataSummary(localData));
 
       // Migração: aplica ícones padrão nas categorias salvas que ainda não têm ícone
@@ -699,6 +710,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         setPatrimonioHistory(data.patrimonioHistory || []);
         setAccounts(data.accounts || []);
         setSubscriptions(data.subscriptions || []);
+        setDeletedIds(data.deletedIds || {});
         setUserProfile({
           ...INITIAL_USER_PROFILE,
           ...(data.userProfile || {})
@@ -708,7 +720,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
       };
 
       // --- ETAPA 2: Se tem dados locais válidos, popula estado imediatamente (fast-path) ---
-      if (localData && localData.__userId === userIdAtStart && !localIsEmpty) {
+      if (localData && localData.__userId === userIdAtStart && localHasContent) {
         applyDataToState(localData, 'LOCAL (cache rápido)');
       }
 
@@ -734,6 +746,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         isRemoteLoadedRef.current = true;
 
         const remoteIsEmpty = isEmptyState(remote);
+        const remoteHasContent = !!remote && (!remoteIsEmpty || hasDeletedIds(remote));
         hydrationLog.info(`Remoto: ${!remote ? '(inexistente)' : remoteIsEmpty ? '⚠️ VAZIO' : '✅ tem dados'}`, dataSummary(remote));
 
         // 🔒 Verifica troca de conta novamente após fetch assíncrono
@@ -747,7 +760,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         // --- DECISÃO DE MERGE ---
         
         // Caso 1: Ambos têm dados válidos → Smart Merge
-        if (!localIsEmpty && remote && !remoteIsEmpty) {
+        if (localHasContent && remoteHasContent) {
           hydrationLog.info('🔀 Ambos têm dados — executando Smart Merge');
           const merged = smartMerge(localData!, remote);
           applyDataToState(merged, 'SMART MERGE');
@@ -759,7 +772,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         }
         // Caso 2: Só remoto tem dados (fresh install / cache limpo) → Usa remoto
         // Após reinstalação, dados locais são apagados — remoto é a fonte de verdade
-        else if ((localIsEmpty || !localData) && remote && !remoteIsEmpty) {
+        else if (!localHasContent && remoteHasContent) {
           hydrationLog.info('📥 Usando dados REMOTOS (local vazio/inexistente)');
           applyDataToState(remote, 'REMOTO');
           
@@ -768,7 +781,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           }
         }
         // Caso 3: Só local tem dados (remoto vazio/inexistente) → Usa local e faz upload
-        else if (!localIsEmpty && localData && (!remote || remoteIsEmpty)) {
+        else if (localHasContent && localData && !remoteHasContent) {
           hydrationLog.info('📤 Usando dados LOCAIS e fazendo upload para nuvem');
           await saveAllDataToSupabase({
             allData: localData.allData || {},
@@ -785,6 +798,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
             patrimonioHistory: localData.patrimonioHistory || [],
             accounts: localData.accounts || [],
             subscriptions: localData.subscriptions || [],
+            deletedIds: localData.deletedIds || {},
             lastUpdatedAt: localData.lastUpdatedAt || new Date().toISOString()
           });
         }
@@ -856,9 +870,21 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           patrimonioHistory,
           accounts,
           subscriptions,
+          deletedIds,
           lastUpdatedAt: new Date().toISOString(),
           __userId: effectiveUserId
         };
+
+        // Detecta exclusões: o que existia na última persistência e sumiu agora
+        const currentIds = collectIds(payload);
+        if (knownIdsRef.current) {
+          const nextDeletedIds = updateDeletedIds(knownIdsRef.current, currentIds, deletedIds);
+          if (nextDeletedIds) {
+            payload.deletedIds = nextDeletedIds;
+            setDeletedIds(nextDeletedIds);
+          }
+        }
+        knownIdsRef.current = currentIds;
 
         // O guard de isEmptyState/isValidPayload é feito dentro do saveLocalData
         await saveLocalData(payload, effectiveUserId);
@@ -882,12 +908,16 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     patrimonioHistory,
     accounts,
     subscriptions,
+    deletedIds,
     isAuthenticated,
     isLoadingData
   ]);
 
 
   // --- SINCRONIZAÇÃO AUTOMÁTICA SEGURA ---
+  // Sempre junta (smartMerge) o estado local com o da nuvem antes de enviar:
+  // assim mudanças feitas em outro aparelho não são sobrescritas, e as
+  // exclusões (deletedIds) dos dois lados são respeitadas.
   useEffect(() => {
     const syncLog = createSyncLogger('AutoSync');
 
@@ -895,6 +925,10 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     if (!isAuthenticated || !isOnline || isLoadingData || !isSyncReady()) {
       return;
     }
+
+    // Se o estado mudar durante a sincronização, esta rodada é descartada
+    // (a mudança dispara outra rodada) para não sobrescrever o que o usuário acabou de fazer.
+    let cancelled = false;
 
     const timer = setTimeout(async () => {
       try {
@@ -907,8 +941,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
         const effectiveUserId = currentUserIdRef.current || localStorage.getItem("lastUserId");
         if (!effectiveUserId) return;
 
-        // 🛑 Empty State Guard: verifica se o estado atual é vazio
-        const currentData = {
+        const currentData: UserData = {
           allData,
           categories: categorias,
           categoryColors,
@@ -923,65 +956,62 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
           patrimonioHistory,
           accounts,
           subscriptions,
-        } as any;
+          deletedIds,
+          // Agora: o estado local é a versão mais recente (vale para layout/tema no merge)
+          lastUpdatedAt: new Date().toISOString(),
+        };
 
-        // ℹ️ Log se estado local é considerado "vazio" (sem transações/metas)
-        if (isEmptyState(currentData)) {
-          syncLog.info('ℹ️ Estado local sem transações/metas — continuando sync mesmo assim');
-        }
-
-        // Compara timestamps local vs remoto para não sobrescrever à toa
-        const localData = await loadLocalData(effectiveUserId);
-        let remote: any = null;
+        let remote: UserData | null = null;
         try {
           remote = await fetchAllDataFromSupabase();
         } catch (fetchErr) {
           syncLog.warn('Erro ao buscar remoto no auto-sync — abortando upload', fetchErr);
           return;
         }
+        if (cancelled) return;
 
-        const remoteUpdated = new Date(remote?.lastUpdatedAt || 0).getTime();
-        const localUpdated = new Date(localData?.lastUpdatedAt || 0).getTime();
+        // Junta com a nuvem. Nada que só exista lá se perde: só some o que foi excluído.
+        const merged = remote && isValidPayload(remote) ? smartMerge(currentData, remote) : currentData;
 
-        // 🛡️ Proteção: se remoto tem TRANSAÇÕES reais e local NÃO tem, NÃO sobrescrever
-        if (remote && !isEmptyState(remote) && isEmptyState(currentData)) {
-          syncLog.warn('🛡️ Remoto tem transações mas local não — NÃO sobrescrevendo remoto');
-          return;
+        if (remote && sameSyncedContent(merged, remote)) {
+          syncLog.info('☁️ Nuvem já está atualizada — nenhum upload necessário');
+        } else {
+          syncLog.info('📤 Enviando dados para a nuvem', {
+            userId: effectiveUserId.slice(0, 8),
+            summary: dataSummary(merged)
+          });
+          const saved = await saveAllDataToSupabase({ ...merged, lastUpdatedAt: new Date().toISOString() });
+          if (!saved || cancelled) return;
         }
 
-        // Se o local for mais novo que o remoto (ou remoto não existir), sincroniza
-        if (!remote || localUpdated > remoteUpdated) {
-          syncLog.info('📤 Local mais recente — sincronizando para nuvem', {
-            userId: effectiveUserId.slice(0, 8),
-            summary: dataSummary(currentData)
-          });
-          await saveAllDataToSupabase({
-            allData,
-            categories: categorias,
-            categoryColors,
-            creditCards,
-            budgets,
-            savingsGoals,
-            dashboardLayout,
-            userProfile,
-            importHistory,
-            theme,
-            assets,
-            patrimonioHistory,
-            accounts,
-            subscriptions,
-            lastUpdatedAt: localData?.lastUpdatedAt || new Date().toISOString()
-          });
-        } else {
-          syncLog.info('☁️ Remoto mais recente ou igual — nenhum upload necessário');
+        // Traz para a tela o que veio da nuvem (ex.: lançamentos de outro aparelho)
+        if (!sameSyncedContent(merged, currentData)) {
+          syncLog.info('📥 Aplicando mudanças vindas da nuvem');
+          setAllData(merged.allData);
+          setCategorias(merged.categories);
+          setCategoryColors(merged.categoryColors);
+          setCreditCards(merged.creditCards);
+          setBudgets(merged.budgets);
+          setSavingsGoals(merged.savingsGoals);
+          setImportHistory(merged.importHistory);
+          setAssets(merged.assets || []);
+          setPatrimonioHistory(merged.patrimonioHistory || []);
+          setAccounts(merged.accounts || []);
+          setSubscriptions(merged.subscriptions || []);
+          setDeletedIds(merged.deletedIds || {});
+          setUserProfile(merged.userProfile);
+          setDashboardLayout(merged.dashboardLayout);
+          setTheme(merged.theme);
         }
       } catch (err) {
-        const syncLog2 = createSyncLogger('AutoSync');
-        syncLog2.error('Erro inesperado no auto-sync:', err);
+        syncLog.error('Erro inesperado no auto-sync:', err);
       }
     }, 5000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
 
   }, [
     allData,
@@ -998,6 +1028,7 @@ const AppProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     patrimonioHistory,
     accounts,
     subscriptions,
+    deletedIds,
     isAuthenticated,
     isOnline,
     isLoadingData
