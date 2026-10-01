@@ -78,6 +78,9 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+# Qualquer variação de .env (ex.: .env-1.local) — contém chaves
+.env*
+!.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
