@@ -1,6 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, MenuSubView } from '../../context/AppContext';
 import { useTranslation } from '../../i18n';
+import { Capacitor } from '@capacitor/core';
+import { useAppVersion } from '../../utils/useAppVersion';
 import { isBiometricAvailable, verifyBiometric, getBiometricPreference, setBiometricPreference } from '../../utils/biometric';
 import { ChevronRightIcon } from '../icons';
 import Modal from '../Modal';
@@ -124,6 +126,7 @@ const SettingsMainMenu: React.FC<SettingsMainMenuProps> = ({
     
     const { userProfile, showToast, updateUserProfile } = context;
     const { t } = useTranslation();
+    const appVersion = useAppVersion();
 
     const [biometricAvailable, setBiometricAvailable] = useState(false);
     const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -143,8 +146,8 @@ const SettingsMainMenu: React.FC<SettingsMainMenuProps> = ({
         
         const deviceDetails = `
 --- Informações do Dispositivo ---
-Plataforma: Web / Browser (Capacitor)
-Versão do App: SobControle V1.0.0
+Plataforma: ${Capacitor.getPlatform()}
+Versão do App: SobControle ${appVersion || 'desconhecida'}
 User Agent: ${navigator.userAgent}
 Usuário: ${userProfile.name} (${userProfile.email})
 ---------------------------------
@@ -432,7 +435,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
 
             <div className="text-center pt-1 pb-2">
                 <p className="text-xs font-normal text-slate-400 dark:text-neutral-600">
-                    SobControle v1.0.0
+                    SobControle{appVersion && ` v${appVersion}`}
                 </p>
             </div>
 
