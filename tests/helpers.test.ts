@@ -210,6 +210,22 @@ describe('calculate502030', () => {
     expect(d.percentuais['Gastos Variáveis']).toBe(30);
     expect(d.percentuais['Reserva Financeira']).toBe(20);
   });
+  it('a reserva é o que sobra da receita (coerente com a taxa de poupança)', () => {
+    const d = calculate502030([
+      tx({ tipo: 'entrada', valor: 6700 }),
+      tx({ categoria: 'Moradia', valor: 2152.9 }),
+      tx({ categoria: 'Lazer', valor: 1054.1 }),
+    ], categorias);
+    expect(d['Reserva Financeira']).toBeCloseTo(3493, 2);
+    expect(d.percentuais['Reserva Financeira']).toBeCloseTo(52.13, 1);
+  });
+
+  it('categoria sem grupo conta como gasto variável', () => {
+    const d = calculate502030([tx({ tipo: 'entrada', valor: 1000 }), tx({ categoria: 'Sem grupo', valor: 100 })], categorias);
+    expect(d['Gastos Variáveis']).toBe(100);
+    expect(d['Reserva Financeira']).toBe(900);
+  });
+
   it('sem receita, percentuais ficam em zero', () => {
     const d = calculate502030([tx({ categoria: 'Moradia', valor: 500 })], categorias);
     expect(d.percentuais['Gastos Fixos']).toBe(0);

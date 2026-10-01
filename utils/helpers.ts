@@ -775,10 +775,17 @@ export const calculate502030 = (transactions: Transaction[], categorias: Categor
     } else if (tx.tipo === 'saida') {
       const group = categoryGroupMap[tx.categoria] || 'Sem Grupo';
       if (group === 'Gastos Fixos') gastosFixos += val;
-      else if (group === 'Gastos Variáveis') gastosVariaveis += val;
-      else if (group === 'Reserva Financeira') reservaFinanceira += val;
+      // Aportes lançados como despesa na reserva não são consumo: já fazem parte da sobra abaixo
+      else if (group === 'Reserva Financeira') { /* faz parte da reserva */ }
+      // Categoria sem grupo é consumo: conta como variável
+      else gastosVariaveis += val;
     }
   });
+
+  // Regra 50/30/20: a reserva (20%) é o que sobra da receita depois das
+  // necessidades e dos desejos. Antes só contava o que foi lançado na categoria
+  // de reserva, e o app dizia "reserva 0%" ao lado de "taxa de poupança 52%".
+  reservaFinanceira = Math.max(0, receitas - gastosFixos - gastosVariaveis);
 
   const percentuais = {
     "Gastos Fixos": receitas > 0 ? (gastosFixos / receitas) * 100 : 0,
