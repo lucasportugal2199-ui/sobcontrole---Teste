@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useSyncExternalStore } from 'react';
 import { AppContext } from '../context/AppContext';
 import { InformationCircleIcon } from './icons';
 import { useTranslation } from '../i18n';
@@ -12,17 +12,41 @@ interface ContextualTipProps {
     onAction?: () => void;
 }
 
+// Só uma dica aparece por vez: as dicas visíveis se registram aqui, na ordem em
+// que aparecem, e apenas a primeira da fila é mostrada. Ao dispensar, a próxima surge.
+let tipQueue: string[] = [];
+const listeners = new Set<() => void>();
+const tipStore = {
+    subscribe(listener: () => void) {
+        listeners.add(listener);
+        return () => { listeners.delete(listener); };
+    },
+    getSnapshot: () => tipQueue,
+    add(id: string) {
+        if (!tipQueue.includes(id)) { tipQueue = [...tipQueue, id]; listeners.forEach(l => l()); }
+    },
+    remove(id: string) {
+        if (tipQueue.includes(id)) { tipQueue = tipQueue.filter(x => x !== id); listeners.forEach(l => l()); }
+    },
+};
+
 const ContextualTip: React.FC<ContextualTipProps> = ({ id, title, description, className = '', actionLabel, onAction }) => {
     const context = useContext(AppContext);
-    if (!context) return null;
-
-    const { userProfile, dismissTip } = context;
     const { t } = useTranslation();
+    const isDismissed = !!context?.userProfile?.dismissedTips?.includes(id);
+    const queue = useSyncExternalStore(tipStore.subscribe, tipStore.getSnapshot);
 
-    // Se a dica já foi descartada, não renderiza
-    if (userProfile?.dismissedTips?.includes(id)) {
-        return null;
-    }
+    useEffect(() => {
+        if (isDismissed) return;
+        tipStore.add(id);
+        return () => tipStore.remove(id);
+    }, [id, isDismissed]);
+
+    if (!context || isDismissed) return null;
+    // Outra dica está na frente: espera a vez
+    if (queue[0] !== id) return null;
+
+    const { dismissTip } = context;
 
     return (
         <div className={`bg-gradient-to-r from-teal-500/10 to-blue-500/10 dark:from-teal-500/5 dark:to-blue-500/5 border border-teal-500/20 dark:border-teal-500/10 p-3 rounded-2xl flex items-start gap-2.5 relative overflow-hidden h-fit min-h-fit max-w-full flex-shrink-0 animate-in fade-in slide-in-from-top-2 duration-300 box-border ${className}`}>
