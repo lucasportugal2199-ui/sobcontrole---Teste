@@ -119,7 +119,13 @@ export const BillingService = {
         console.log(`[Billing] Iniciando fluxo de compra para: ${productId}`);
 
         if (!Capacitor.isNativePlatform()) {
-            // No ambiente web (dev local), exibimos um confirm para simular o comportamento de forma segura
+            // Fora do Android a compra só pode ser simulada no `npm run dev`.
+            // Em qualquer outro build, recusa: senão qualquer um liberaria o PRO de graça.
+            if (!import.meta.env.DEV) {
+                return { success: false, error: "Assinaturas disponíveis apenas no app Android." };
+            }
+
+            // No ambiente de desenvolvimento, exibimos um confirm para simular a compra
             return new Promise((resolve) => {
                 const confirmPurchase = window.confirm(
                     `[SIMULAÇÃO WEB - DESENVOLVIMENTO]\n\nDeseja simular a aprovação da assinatura do produto:\n${productId}?\n\n` +
