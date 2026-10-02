@@ -30,7 +30,7 @@ export const PendingTransactionsModal: React.FC<PendingTransactionsModalProps> =
 
     return (
         <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-lg bg-white dark:bg-[#111111] rounded-t-[32px] sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            <div className="w-full max-w-lg bg-white dark:bg-dark-card rounded-t-[32px] sm:rounded-3xl border border-slate-200/80 dark:border-white/[0.08] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
                 {/* Header */}
                 <div className="p-5 pb-3 border-b border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export const PendingTransactionsModal: React.FC<PendingTransactionsModalProps> =
                 <div className="p-4 border-t border-slate-100 dark:border-white/[0.06] bg-slate-50/50 dark:bg-white/[0.01] flex flex-col sm:flex-row items-center gap-2.5">
                     <button
                         onClick={() => onConfirmAll(pendingTransactions)}
-                        className="w-full py-3.5 px-4 rounded-xl bg-[#EA580C] text-white hover:bg-[#F97316] font-black text-xs uppercase tracking-wider shadow-lg shadow-[#EA580C]/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                        className="w-full py-3.5 px-4 rounded-xl bg-brand-accent text-white hover:bg-brand-accent-hover font-black text-xs uppercase tracking-wider shadow-lg shadow-brand-accent/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                     >
                         <CheckCircleIcon className="h-4 w-4" />
                         <span>Aprovar Todas ({pendingTransactions.length})</span>

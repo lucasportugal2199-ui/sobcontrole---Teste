@@ -24,7 +24,7 @@ const ToggleSwitch: React.FC<{ checked: boolean; onChange: () => void; label?: s
         aria-label={label || 'Alternar'}
         onClick={onChange}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            checked ? 'bg-[#EA580C]' : 'bg-slate-300 dark:bg-[#1F1F1F]'
+            checked ? 'bg-brand-accent' : 'bg-slate-300 dark:bg-dark-surface'
         }`}
     >
         <span
@@ -80,19 +80,19 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ handleNot
         <div className="space-y-6 max-w-lg mx-auto pb-8">
             {/* Seção 1: Lembretes da Calopsita CFO */}
             <div className="space-y-2">
-                <div className="px-1 text-xs font-black text-slate-400 dark:text-[#64748B] uppercase tracking-wider">
+                <div className="px-1 text-xs font-black text-slate-400 dark:text-light-text-muted uppercase tracking-wider">
                     Alertas do Aplicativo
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-[#1F1F1F] rounded-3xl p-5 shadow-xl space-y-4">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-dark-border rounded-3xl p-5 shadow-xl space-y-4">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3.5">
-                            <div className="w-11 h-11 rounded-2xl bg-[#FFEDD5] dark:bg-[#431407] border border-[#EA580C]/20 p-1 flex items-center justify-center shrink-0">
+                            <div className="w-11 h-11 rounded-2xl bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle border border-brand-accent/20 p-1 flex items-center justify-center shrink-0">
                                 <CalopsitaIcon className="w-full h-full object-cover" />
                             </div>
                             <div>
                                 <h4 className="font-bold text-light-text dark:text-dark-text text-sm flex items-center gap-1.5">
                                     Lembretes da Calopsita CFO
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] font-extrabold">
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover font-extrabold">
                                         CFO 🦜
                                     </span>
                                 </h4>
@@ -109,11 +109,11 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ handleNot
                     </div>
 
                     {/* Régua de Prazos e Mensagens da Calopsita CFO */}
-                    <div className="pt-2 border-t border-slate-100 dark:border-[#1F1F1F]">
+                    <div className="pt-2 border-t border-slate-100 dark:border-dark-border">
                         <button
                             type="button"
                             onClick={() => setShowCalopsitaTimeline(!showCalopsitaTimeline)}
-                            className="w-full flex items-center justify-between text-xs font-bold text-[#EA580C] dark:text-[#F97316] py-1.5 hover:opacity-80 transition-opacity"
+                            className="w-full flex items-center justify-between text-xs font-bold text-brand-accent dark:text-brand-accent-hover py-1.5 hover:opacity-80 transition-opacity"
                         >
                             <span className="flex items-center gap-1.5">
                                 <span>Ver cronograma de avisos da Calopsita ({CALOPSITA_REMINDERS.length} prazos)</span>
@@ -122,21 +122,21 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ handleNot
                         </button>
 
                         {showCalopsitaTimeline && (
-                            <div className="mt-3 space-y-2.5 pt-2 border-t border-slate-100 dark:border-[#1F1F1F]">
+                            <div className="mt-3 space-y-2.5 pt-2 border-t border-slate-100 dark:border-dark-border">
                                 {CALOPSITA_REMINDERS.map(reminder => (
                                     <div
                                         key={reminder.id}
-                                        className="p-3 bg-slate-50 dark:bg-[#1A1A1A] rounded-2xl border border-slate-200/70 dark:border-[#1F1F1F] space-y-1 transition-all"
+                                        className="p-3 bg-slate-50 dark:bg-dark-elevated rounded-2xl border border-slate-200/70 dark:border-dark-border space-y-1 transition-all"
                                     >
                                         <div className="flex items-center justify-between gap-2">
                                             <span className="text-xs font-bold text-light-text dark:text-dark-text truncate">
                                                 {reminder.title}
                                             </span>
-                                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] shrink-0 tabular-nums">
+                                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover shrink-0 tabular-nums">
                                                 {reminder.days === 1 ? '1 dia' : `${reminder.days} dias`}
                                             </span>
                                         </div>
-                                        <p className="text-[11px] text-slate-500 dark:text-[#B0B0B0] leading-relaxed">
+                                        <p className="text-[11px] text-slate-500 dark:text-dark-text-secondary leading-relaxed">
                                             {reminder.body}
                                         </p>
                                     </div>
@@ -149,17 +149,17 @@ const NotificationsSettings: React.FC<NotificationsSettingsProps> = ({ handleNot
 
             {/* Seção 2: Importação de Notificações de Bancos (Em segundo plano) */}
             <div className="space-y-2">
-                <div className="px-1 flex items-center justify-between text-xs font-black text-slate-400 dark:text-[#64748B] uppercase tracking-wider">
+                <div className="px-1 flex items-center justify-between text-xs font-black text-slate-400 dark:text-light-text-muted uppercase tracking-wider">
                     <span>Notificações de Bancos</span>
                     <span className="text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
                         100% Offline
                     </span>
                 </div>
 
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-[#1F1F1F] rounded-3xl p-4 shadow-xl space-y-4">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-dark-border rounded-3xl p-4 shadow-xl space-y-4">
                     <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
-                            <h4 className="text-sm font-bold text-slate-800 dark:text-[#F1F5F9]">
+                            <h4 className="text-sm font-bold text-slate-800 dark:text-light-bg">
                                 Leitura Automática de Compras
                             </h4>
                             <p className="text-xs text-slate-500 dark:text-[#94A3B8] leading-relaxed">

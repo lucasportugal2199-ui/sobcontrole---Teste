@@ -34,7 +34,7 @@ const EmptyGraphState = ({ message, onAction }: { message: string, onAction: () 
             <p className="text-sm font-medium text-light-text-muted dark:text-dark-text-muted mb-5 max-w-[220px] leading-relaxed">{message}</p>
             <button
                 onClick={onAction}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#EA580C] hover:bg-[#F97316] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-lg shadow-[#EA580C]/20"
+                className="flex items-center gap-2 px-5 py-2.5 bg-brand-accent hover:bg-brand-accent-hover text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all active:scale-95 shadow-lg shadow-brand-accent/20"
             >
                 <PlusIcon className="h-4 w-4" />
                 {t('dashboard.launchNow')}
@@ -421,7 +421,7 @@ const Dashboard: React.FC = () => {
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile.avatar
                                 ? 'shadow-md'
-                                : 'bg-gradient-to-br from-[#EA580C] to-[#F97316] text-white shadow-lg shadow-[#EA580C]/20'
+                                : 'bg-gradient-to-br from-brand-accent to-brand-accent-hover text-white shadow-lg shadow-brand-accent/20'
                         }`}
                         title="Configurações & Perfil"
                     >
@@ -437,7 +437,7 @@ const Dashboard: React.FC = () => {
                         <button onClick={() => changeMonth(-1)} aria-label={t('a11y.previousMonth')} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
                             <ArrowLeftIcon className="h-4 w-4" />
                         </button>
-                        <button onClick={() => setIsMonthYearPickerOpen(true)} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full text-sm font-bold text-slate-900 dark:text-white border border-[#D7E0EB] dark:border-[#1F1F1F] active:scale-95 transition-transform shadow-sm">
+                        <button onClick={() => setIsMonthYearPickerOpen(true)} className="flex items-center gap-1.5 px-5 py-1.5 bg-slate-100 dark:bg-white/[0.06] rounded-full text-sm font-bold text-slate-900 dark:text-white border border-light-border dark:border-dark-border active:scale-95 transition-transform shadow-sm">
                             {formatarMesAno(currentDate, locale, monthNames)}
                         </button>
                         <button onClick={() => changeMonth(1)} aria-label={t('a11y.nextMonth')} className="h-9 w-9 flex items-center justify-center rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white active:scale-90 transition-transform">
@@ -449,8 +449,8 @@ const Dashboard: React.FC = () => {
                     <div
                         className={`h-10 w-10 flex items-center justify-center rounded-full text-xs font-black flex-shrink-0 border shadow-sm ${
                             (userProfile.currentStreak || 0) > 0
-                                ? 'bg-[#FFEDD5] dark:bg-[#431407] border-[#EA580C]/20 text-[#EA580C] dark:text-[#F97316]'
-                                : 'bg-slate-100 dark:bg-white/[0.06] border-[#D7E0EB] dark:border-[#1F1F1F] text-slate-400'
+                                ? 'bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle border-brand-accent/20 text-brand-accent dark:text-brand-accent-hover'
+                                : 'bg-slate-100 dark:bg-white/[0.06] border-light-border dark:border-dark-border text-slate-400'
                         }`}
                         title={`${userProfile.currentStreak || 0} dias seguidos!`}
                     >

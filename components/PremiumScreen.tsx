@@ -113,8 +113,8 @@ const PremiumScreen: React.FC = () => {
 
     if (isProcessing) {
         return (
-            <div className="bg-[#050505] text-white h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
-                <div className="bg-[#111111] p-8 sm:p-10 rounded-3xl border border-white/[0.08] w-full max-w-xs shadow-2xl">
+            <div className="bg-dark-bg text-white h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
+                <div className="bg-dark-card p-8 sm:p-10 rounded-3xl border border-white/[0.08] w-full max-w-xs shadow-2xl">
                     {step !== 'success' ? (
                         <LoaderIcon className="h-14 w-14 text-amber-400 animate-spin mx-auto mb-6" />
                     ) : (
@@ -139,12 +139,12 @@ const PremiumScreen: React.FC = () => {
     }
 
     return (
-        <div className="bg-[#050505] text-slate-100 h-full flex flex-col justify-between overflow-y-auto no-scrollbar selection:bg-amber-500 selection:text-black">
+        <div className="bg-dark-bg text-slate-100 h-full flex flex-col justify-between overflow-y-auto no-scrollbar selection:bg-amber-500 selection:text-black">
             {/* Header com botão fechar */}
             <header className="px-5 pt-[calc(1rem+var(--sat))] pb-2 flex items-center justify-end sticky top-0 z-20">
                 <button
                     onClick={goBackView}
-                    className="h-9 w-9 rounded-full bg-[#111111] border border-white/[0.08] text-slate-300 hover:text-white flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all shadow-md"
+                    className="h-9 w-9 rounded-full bg-dark-card border border-white/[0.08] text-slate-300 hover:text-white flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all shadow-md"
                     aria-label="Fechar"
                 >
                     <CloseIcon className="h-4 w-4" />
@@ -161,7 +161,7 @@ const PremiumScreen: React.FC = () => {
                         <h1 className="text-2xl font-black mb-2 text-white tracking-tight">Você é Assinante PRO</h1>
                         <p className="text-slate-400 text-xs px-4 mb-8">Todos os recursos avançados, inteligência artificial e sincronização em tempo real estão ativos.</p>
 
-                        <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 space-y-3 mb-8 text-left">
+                        <div className="bg-dark-card border border-white/[0.08] rounded-2xl p-4 space-y-3 mb-8 text-left">
                             {featureList.map((feature, idx) => (
                                 <div key={idx} className="flex items-center gap-3">
                                     <div className="h-6 w-6 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center flex-shrink-0">
@@ -216,7 +216,7 @@ const PremiumScreen: React.FC = () => {
                                 className={`relative rounded-2xl p-4 sm:p-5 flex items-center justify-between cursor-pointer transition-all duration-200 border-2 ${
                                     selectedPlan === 'Anual'
                                         ? 'bg-gradient-to-r from-[#181818] to-[#121212] border-amber-500 shadow-xl shadow-amber-500/10 ring-1 ring-amber-500/40'
-                                        : 'bg-[#111111] border-white/[0.08] hover:border-white/20'
+                                        : 'bg-dark-card border-white/[0.08] hover:border-white/20'
                                 }`}
                             >
                                 {/* Badge de Desconto */}
@@ -245,7 +245,7 @@ const PremiumScreen: React.FC = () => {
                                 className={`relative rounded-2xl p-4 sm:p-5 flex items-center justify-between cursor-pointer transition-all duration-200 border-2 ${
                                     selectedPlan === 'Mensal'
                                         ? 'bg-gradient-to-r from-[#181818] to-[#121212] border-amber-500 shadow-xl shadow-amber-500/10 ring-1 ring-amber-500/40'
-                                        : 'bg-[#111111] border-white/[0.08] hover:border-white/20'
+                                        : 'bg-dark-card border-white/[0.08] hover:border-white/20'
                                 }`}
                             >
                                 <div>

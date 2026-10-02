@@ -952,7 +952,7 @@ const NewTransactionScreen: React.FC = () => {
                                         isCategorizing
                                             ? 'bg-blue-500/15 border-blue-500/30 text-blue-500 animate-pulse'
                                             : formDescricao.trim()
-                                            ? 'bg-[#FFEDD5] dark:bg-[#431407] hover:bg-[#FFEDD5]/80 border-[#EA580C]/40 text-[#EA580C] dark:text-[#F97316] shadow-sm shadow-[#EA580C]/10 hover:scale-105'
+                                            ? 'bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle hover:bg-brand-accent-light-subtle/80 border-brand-accent/40 text-brand-accent dark:text-brand-accent-hover shadow-sm shadow-brand-accent/10 hover:scale-105'
                                             : 'bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border-slate-200 dark:border-white/10 text-slate-400 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-white'
                                     }`}
                                 >
@@ -963,7 +963,7 @@ const NewTransactionScreen: React.FC = () => {
                                             <AiAgentIcon className="h-3.5 w-3.5" active={!!formDescricao.trim()} />
                                             <span className="text-[10px] font-semibold tracking-wide">IA</span>
                                             {formDescricao.trim() && (
-                                                <span className="w-1.5 h-1.5 rounded-full bg-[#EA580C] dark:bg-[#F97316] animate-pulse" />
+                                                <span className="w-1.5 h-1.5 rounded-full bg-brand-accent dark:bg-brand-accent-hover animate-pulse" />
                                             )}
                                         </>
                                     )}
@@ -1170,7 +1170,7 @@ const NewTransactionScreen: React.FC = () => {
                     onClick={() => setIsCalculatorOpen(false)}
                 >
                     <div
-                        className="w-full max-w-[340px] bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 rounded-[32px] p-5 shadow-2xl animate-in zoom-in-95 duration-200"
+                        className="w-full max-w-[340px] bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/10 rounded-[32px] p-5 shadow-2xl animate-in zoom-in-95 duration-200"
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Topo / Header da Calculadora */}
@@ -1215,7 +1215,7 @@ const NewTransactionScreen: React.FC = () => {
                                 </p>
                             </div>
                             {calcResult === null && livePreview !== null && (
-                                <p className="text-[#EA580C] dark:text-[#F97316] text-xs font-bold font-mono mt-1 tabular-nums">
+                                <p className="text-brand-accent dark:text-brand-accent-hover text-xs font-bold font-mono mt-1 tabular-nums">
                                     ≈ {formatCurrency(livePreview, appLocale, appCurrency)}
                                 </p>
                             )}
@@ -1359,7 +1359,7 @@ const NewTransactionScreen: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleCalcApply}
-                                className="col-span-3 h-13 py-3 rounded-2xl font-bold uppercase tracking-wider text-xs bg-[#EA580C] text-white hover:bg-[#F97316] dark:bg-[#EA580C] dark:text-white dark:hover:bg-[#F97316] active:scale-95 transition-all shadow-lg shadow-[#EA580C]/20 flex items-center justify-center gap-2"
+                                className="col-span-3 h-13 py-3 rounded-2xl font-bold uppercase tracking-wider text-xs bg-brand-accent text-white hover:bg-brand-accent-hover dark:bg-brand-accent dark:text-white dark:hover:bg-brand-accent-hover active:scale-95 transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

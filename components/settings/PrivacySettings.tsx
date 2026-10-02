@@ -44,11 +44,11 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ handleOpenLink }) => 
                         className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.04] active:scale-[0.99] transition-all cursor-pointer group"
                     >
                         <div className="flex items-center gap-3.5 min-w-0">
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] shrink-0">
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover shrink-0">
                                 <ClipboardListIcon className="h-5 w-5" />
                             </div>
                             <div className="min-w-0">
-                                <h4 className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-[#EA580C] dark:group-hover:text-[#F97316] transition-colors truncate">
+                                <h4 className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-brand-accent dark:group-hover:text-brand-accent-hover transition-colors truncate">
                                     {t('privacy.terms') || (locale === 'en' ? 'Terms of Use' : 'Termos de Uso')}
                                 </h4>
                                 <p className="text-xs text-slate-500 dark:text-neutral-400 truncate mt-0.5 font-normal">
@@ -62,9 +62,9 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ handleOpenLink }) => 
             </div>
 
             {/* Card Informativo de Segurança e Privacidade no padrão Dark OLED */}
-            <div className="bg-slate-100/80 dark:bg-dark-card border border-light-border dark:border-[#1F1F1F] rounded-2xl p-4 shadow-sm space-y-2.5">
+            <div className="bg-slate-100/80 dark:bg-dark-card border border-light-border dark:border-dark-border rounded-2xl p-4 shadow-sm space-y-2.5">
                 <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover flex items-center justify-center shrink-0">
                         <LockIcon className="h-4 w-4" />
                     </div>
                     <div>

@@ -133,7 +133,7 @@ const AchievementsViewer: React.FC = () => {
                                             {translatedName}
                                         </h4>
                                         {isUnlocked ? (
-                                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#EA580C] dark:text-[#F97316] bg-[#FFEDD5] dark:bg-[#431407] border border-[#EA580C]/30 px-2 py-0.5 rounded-full shrink-0">
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-accent dark:text-brand-accent-hover bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle border border-brand-accent/30 px-2 py-0.5 rounded-full shrink-0">
                                                 <CheckCircleIcon className="h-3 w-3" />
                                                 <span>{locale === 'en' ? 'Unlocked' : 'Conquistada'}</span>
                                             </span>

@@ -147,7 +147,7 @@ const Lancamento: React.FC = () => {
                         className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0 cursor-pointer active:scale-95 transition-transform overflow-hidden ${
                             userProfile?.avatar
                                 ? 'shadow-md'
-                                : 'bg-gradient-to-br from-[#EA580C] to-[#F97316] text-white shadow-lg shadow-[#EA580C]/20'
+                                : 'bg-gradient-to-br from-brand-accent to-brand-accent-hover text-white shadow-lg shadow-brand-accent/20'
                         }`}
                         title="Configurações & Perfil"
                     >

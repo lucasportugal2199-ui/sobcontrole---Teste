@@ -134,7 +134,7 @@ const GoalCard: React.FC<{
                         className={`h-2 rounded-full transition-all duration-1000 ease-out ${
                             goal.isCompleted 
                                 ? 'bg-emerald-500 shadow-sm shadow-emerald-500/30' 
-                                : 'bg-gradient-to-r from-amber-500 to-[#EA580C] dark:from-[#EA580C] dark:to-[#F97316] shadow-sm shadow-[#EA580C]/25'
+                                : 'bg-gradient-to-r from-amber-500 to-brand-accent dark:from-brand-accent dark:to-brand-accent-hover shadow-sm shadow-brand-accent/25'
                         }`}
                         style={{ width: `${Math.min(percentage, 100)}%` }}
                     />
@@ -149,7 +149,7 @@ const GoalCard: React.FC<{
             {/* Aporte Sugerido (PRO) */}
             {isPremium && !goal.isCompleted && goal.targetDate && remaining > 0 && (
                 <div className="p-2.5 bg-slate-50 dark:bg-white/[0.03] rounded-xl border border-slate-200/80 dark:border-white/[0.06]">
-                    <p className="text-[10px] font-semibold text-[#EA580C] dark:text-[#F97316] uppercase tracking-[0.5px] flex items-center gap-1.5">
+                    <p className="text-[10px] font-semibold text-brand-accent dark:text-brand-accent-hover uppercase tracking-[0.5px] flex items-center gap-1.5">
                         <ChartBarIcon className="h-3 w-3" />
                         {locale === 'en' ? 'Suggested Contribution' : locale === 'es' ? 'Aporte Sugerido' : locale === 'fr' ? 'Contribution Suggérée' : locale === 'de' ? 'Vorgeschlagener Beitrag' : 'Aporte Sugerido'}
                     </p>
@@ -186,7 +186,7 @@ const GoalCard: React.FC<{
                     onClick={() => onAddFunds(goal)}
                     className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-200/80 dark:border-white/10 font-semibold py-2.5 rounded-xl text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                    <PlusIcon className="h-3.5 w-3.5 text-[#EA580C] dark:text-[#F97316]" />
+                    <PlusIcon className="h-3.5 w-3.5 text-brand-accent dark:text-brand-accent-hover" />
                     <span>{locale === 'en' ? 'Contribute funds' : locale === 'es' ? 'Aportar fondos' : locale === 'fr' ? 'Contribuer' : locale === 'de' ? 'Beitrag leisten' : 'Aportar valor'}</span>
                 </button>
             )}
@@ -323,7 +323,7 @@ const SavingsGoals: React.FC = () => {
                     onClick={handleCalculatorClick}
                     className="flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-medium rounded-full bg-white dark:bg-dark-card text-light-text dark:text-dark-text border border-light-border dark:border-white/[0.08] transition-all active:scale-95 shadow-sm hover:bg-slate-50 dark:hover:bg-dark-elevated"
                 >
-                    <ChartBarIcon className="h-3.5 w-3.5 text-[#EA580C] dark:text-[#F97316]" />
+                    <ChartBarIcon className="h-3.5 w-3.5 text-brand-accent dark:text-brand-accent-hover" />
                     <span>{locale === 'en' ? 'Calculator' : locale === 'es' ? 'Calculadora' : locale === 'fr' ? 'Calculatrice' : locale === 'de' ? 'Taschenrechner' : 'Calculadora'}</span>
                     {!userProfile.isPremium && <LockIcon className="h-3 w-3 text-amber-500 ml-0.5" />}
                 </button>
@@ -403,13 +403,13 @@ const SavingsGoals: React.FC = () => {
                             <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase mb-1 ml-1 tracking-tight">
                                 {locale === 'en' ? 'Goal Name' : locale === 'es' ? 'Nombre de la Meta' : locale === 'fr' ? "Nom de l'Objectif" : locale === 'de' ? 'Zielname' : 'Nome da Meta'}
                             </label>
-                            <input type="text" value={goalName} onChange={e => setGoalName(e.target.value)} className="w-full py-3.5 px-4 bg-light-card-elevated dark:bg-dark-bg text-light-text dark:text-dark-text border border-light-border dark:border-dark-elevated rounded-xl font-bold text-sm focus:border-[#EA580C] dark:focus:border-[#EA580C] outline-none" placeholder={locale === 'en' ? 'Trip, House, etc...' : locale === 'es' ? 'Viaje, Casa, etc...' : locale === 'fr' ? 'Voyage, Maison, etc...' : locale === 'de' ? 'Reise, Haus, etc...' : 'Viagem, Casa, etc...'} autoFocus />
+                            <input type="text" value={goalName} onChange={e => setGoalName(e.target.value)} className="w-full py-3.5 px-4 bg-light-card-elevated dark:bg-dark-bg text-light-text dark:text-dark-text border border-light-border dark:border-dark-elevated rounded-xl font-bold text-sm focus:border-brand-accent dark:focus:border-brand-accent outline-none" placeholder={locale === 'en' ? 'Trip, House, etc...' : locale === 'es' ? 'Viaje, Casa, etc...' : locale === 'fr' ? 'Voyage, Maison, etc...' : locale === 'de' ? 'Reise, Haus, etc...' : 'Viagem, Casa, etc...'} autoFocus />
                         </div>
                         <div>
                             <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase mb-1 ml-1 tracking-tight">
                                 {locale === 'en' ? 'Target Value' : locale === 'es' ? 'Monto Objetivo' : locale === 'fr' ? 'Cible de Valeur' : locale === 'de' ? 'Zielwert' : 'Valor Alvo'}
                             </label>
-                            <input type="tel" value={goalAmount} onChange={e => setGoalAmount(formatCurrencyForInput(e.target.value))} className="w-full py-3.5 px-4 bg-light-card-elevated dark:bg-dark-bg text-light-text dark:text-dark-text border border-light-border dark:border-dark-elevated rounded-xl font-bold text-sm focus:border-[#EA580C] dark:focus:border-[#EA580C] outline-none tabular-nums" placeholder={formatCurrency(0, appLocale, appCurrency)} />
+                            <input type="tel" value={goalAmount} onChange={e => setGoalAmount(formatCurrencyForInput(e.target.value))} className="w-full py-3.5 px-4 bg-light-card-elevated dark:bg-dark-bg text-light-text dark:text-dark-text border border-light-border dark:border-dark-elevated rounded-xl font-bold text-sm focus:border-brand-accent dark:focus:border-brand-accent outline-none tabular-nums" placeholder={formatCurrency(0, appLocale, appCurrency)} />
                         </div>
                         <div>
                             <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase mb-1 ml-1 tracking-tight font-black">
@@ -422,14 +422,14 @@ const SavingsGoals: React.FC = () => {
                                 <span className={targetDate ? "opacity-100" : "opacity-40"}>
                                     {targetDate ? new Date(targetDate + 'T00:00:00').toLocaleDateString(appLocale) : (locale === 'en' ? 'mm/dd/yyyy' : 'dd/mm/aaaa')}
                                 </span>
-                                <CalendarIcon className="h-4 w-4 text-[#EA580C] dark:text-[#F97316]" />
+                                <CalendarIcon className="h-4 w-4 text-brand-accent dark:text-brand-accent-hover" />
                             </button>
                         </div>
                         {error && <p className="text-rose-500 text-[10px] font-bold uppercase">{error}</p>}
                     </div>
                     <div className="flex gap-3 mt-8">
                         <button onClick={closeModal} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-dark-bg text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-wider">{t('common.cancel')}</button>
-                        <button onClick={handleGoalSubmit} className="flex-1 py-3.5 rounded-xl bg-[#EA580C] hover:bg-[#F97316] text-white font-black text-xs shadow-lg shadow-[#EA580C]/20 uppercase tracking-widest active:scale-95 transition-all">{t('common.save')}</button>
+                        <button onClick={handleGoalSubmit} className="flex-1 py-3.5 rounded-xl bg-brand-accent hover:bg-brand-accent-hover text-white font-black text-xs shadow-lg shadow-brand-accent/20 uppercase tracking-widest active:scale-95 transition-all">{t('common.save')}</button>
                     </div>
                 </div>
             </Modal>
@@ -476,7 +476,7 @@ const SavingsGoals: React.FC = () => {
                             </label>
                             <button onClick={() => setModalMode('fundsCalendar')} className="w-full py-3.5 px-4 bg-light-card-elevated dark:bg-dark-bg border border-light-border dark:border-dark-elevated rounded-xl text-light-text dark:text-dark-text font-bold flex justify-between items-center text-sm">
                                 <span>{new Date(fundsDate + 'T00:00:00').toLocaleDateString(appLocale)}</span>
-                                <CalendarIcon className="h-4 w-4 text-[#EA580C] dark:text-[#F97316]" />
+                                <CalendarIcon className="h-4 w-4 text-brand-accent dark:text-brand-accent-hover" />
                             </button>
                         </div>
 
@@ -489,7 +489,7 @@ const SavingsGoals: React.FC = () => {
                                     type="tel"
                                     value={fundsAmount}
                                     onChange={e => setFundsAmount(formatCurrencyForInput(e.target.value))}
-                                    className="w-full py-2.5 px-4 bg-light-card-elevated dark:bg-dark-bg border-2 border-slate-200 dark:border-white/10 rounded-xl text-light-text dark:text-dark-text font-bold text-base text-center outline-none focus:border-[#EA580C] dark:focus:border-[#EA580C] transition-all tabular-nums"
+                                    className="w-full py-2.5 px-4 bg-light-card-elevated dark:bg-dark-bg border-2 border-slate-200 dark:border-white/10 rounded-xl text-light-text dark:text-dark-text font-bold text-base text-center outline-none focus:border-brand-accent dark:focus:border-brand-accent transition-all tabular-nums"
                                     placeholder={formatCurrency(0, appLocale, appCurrency)}
                                     autoFocus
                                 />
@@ -501,7 +501,7 @@ const SavingsGoals: React.FC = () => {
 
                     <button
                         onClick={handleFundsSubmit}
-                        className="w-full mt-8 py-3.5 rounded-2xl bg-[#EA580C] hover:bg-[#F97316] text-white font-black text-xs shadow-lg shadow-[#EA580C]/20 uppercase tracking-widest active:scale-[0.98] transition-all"
+                        className="w-full mt-8 py-3.5 rounded-2xl bg-brand-accent hover:bg-brand-accent-hover text-white font-black text-xs shadow-lg shadow-brand-accent/20 uppercase tracking-widest active:scale-[0.98] transition-all"
                     >
                         {locale === 'en' ? 'Confirm Contribution' : locale === 'es' ? 'Confirmar Aporte' : locale === 'fr' ? 'Confirmer la Contribution' : locale === 'de' ? 'Beitrag Bestätigen' : 'Confirmar Aporte'}
                     </button>

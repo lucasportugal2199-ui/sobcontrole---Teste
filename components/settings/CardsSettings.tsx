@@ -197,7 +197,7 @@ const CardsSettings: React.FC<CardsSettingsProps> = ({
                                 <div
                                     key={acc.id}
                                     onClick={() => openAccountModal(acc)}
-                                    className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-4 flex items-center justify-between shadow-xl hover:border-lime-500/40 dark:hover:border-white/[0.12] transition-all cursor-pointer group active:scale-[0.99]"
+                                    className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-4 flex items-center justify-between shadow-xl hover:border-lime-500/40 dark:hover:border-white/[0.12] transition-all cursor-pointer group active:scale-[0.99]"
                                 >
                                     <div className="flex items-center gap-3.5 min-w-0">
                                         <div
@@ -268,7 +268,7 @@ const CardsSettings: React.FC<CardsSettingsProps> = ({
                             return (
                                 <div
                                     key={card.id}
-                                    className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-4 flex flex-col gap-3 shadow-xl hover:border-lime-500/40 dark:hover:border-white/[0.12] transition-all group"
+                                    className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-4 flex flex-col gap-3 shadow-xl hover:border-lime-500/40 dark:hover:border-white/[0.12] transition-all group"
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3.5 min-w-0">
@@ -315,7 +315,7 @@ const CardsSettings: React.FC<CardsSettingsProps> = ({
                                     {/* Barra de Progresso de Limite */}
                                     <div className="pt-2.5 border-t border-slate-100 dark:border-white/5 flex flex-col gap-1.5">
                                         <div className="flex items-center justify-between text-xs">
-                                            <span className="text-slate-500 dark:text-[#64748B] font-medium">
+                                            <span className="text-slate-500 dark:text-light-text-muted font-medium">
                                                 Fatura Atual: {formatCurrency(invoiceTotal, appLocale, appCurrency)}
                                             </span>
                                             <span className="text-slate-600 dark:text-[#94A3B8] font-bold">

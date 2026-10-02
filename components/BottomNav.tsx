@@ -18,7 +18,7 @@ const NavItem: React.FC<{
         className="flex flex-col items-center justify-center w-full h-full transition-all duration-200 focus:outline-none active:scale-90 group"
     >
         <div className={`p-1.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle' : ''}`}>
-            <Icon className={`h-5 w-5 transition-colors duration-300 ${isActive ? 'text-brand-accent dark:text-brand-accent-hover' : 'text-slate-400 dark:text-[#666666]'}`} />
+            <Icon className={`h-5 w-5 transition-colors duration-300 ${isActive ? 'text-brand-accent dark:text-brand-accent-hover' : 'text-slate-400 dark:text-dark-text-muted'}`} />
         </div>
         <span className={`text-[10px] font-bold transition-colors duration-300 mt-0.5 ${isActive ? 'text-brand-accent dark:text-brand-accent-hover' : 'text-slate-500 dark:text-[#8a8a8a]'}`}>{label}</span>
     </button>
@@ -51,7 +51,7 @@ const BottomNav: React.FC = () => {
         <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-[100] pb-[var(--sab)] px-3 pb-2">
             <nav
                 aria-label={t('nav.menu')}
-                className="floating-nav bg-white/95 dark:bg-[#111111]/95 backdrop-blur-xl border border-light-border dark:border-dark-border rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+                className="floating-nav bg-white/95 dark:bg-dark-card/95 backdrop-blur-xl border border-light-border dark:border-dark-border rounded-[28px] shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
             >
                 <div className="grid grid-cols-5 items-center h-16 px-1">
                     <NavItem id="tour-inicio" label={t('nav.home')} icon={HomeIcon} isActive={currentTab === 'lancamento'} onClick={() => goTo('lancamento')} />

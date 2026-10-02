@@ -68,8 +68,8 @@ const ProfileSettings: React.FC = () => {
             <div className="flex-1 flex flex-col items-center">
                 {/* Avatar Atual em Destaque */}
                 <div className="relative mb-3 flex-shrink-0">
-                    <div className="h-20 w-20 rounded-full p-[2px] bg-gradient-to-br from-[#EA580C] to-[#F97316] shadow-sm relative flex items-center justify-center">
-                        <div className="h-full w-full rounded-full border-2 border-white dark:border-[#111111] overflow-hidden bg-slate-100 dark:bg-[#181818] flex items-center justify-center font-bold text-lg text-slate-900 dark:text-white">
+                    <div className="h-20 w-20 rounded-full p-[2px] bg-gradient-to-br from-brand-accent to-brand-accent-hover shadow-sm relative flex items-center justify-center">
+                        <div className="h-full w-full rounded-full border-2 border-white dark:border-dark-card overflow-hidden bg-slate-100 dark:bg-[#181818] flex items-center justify-center font-bold text-lg text-slate-900 dark:text-white">
                             {editAvatar ? (
                                 <img src={editAvatar} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
@@ -82,7 +82,7 @@ const ProfileSettings: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => avatarInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 p-1.5 bg-[#EA580C] hover:bg-[#F97316] text-white rounded-full shadow-md active:scale-95 transition-all border-2 border-white dark:border-[#111111]"
+                        className="absolute bottom-0 right-0 p-1.5 bg-brand-accent hover:bg-brand-accent-hover text-white rounded-full shadow-md active:scale-95 transition-all border-2 border-white dark:border-dark-card"
                         title="Enviar foto personalizada"
                     >
                         <CameraIcon className="h-3 w-3" />
@@ -91,12 +91,12 @@ const ProfileSettings: React.FC = () => {
                 </div>
 
                 {/* Grade de 8 Avatares Pré-definidos */}
-                <div className="w-full mb-3 bg-white dark:bg-[#111111] rounded-2xl p-3 shadow-sm border border-light-border dark:border-[#1F1F1F]">
+                <div className="w-full mb-3 bg-white dark:bg-dark-card rounded-2xl p-3 shadow-sm border border-light-border dark:border-dark-border">
                     <div className="flex items-center justify-between mb-2 px-0.5">
                         <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-[#94A3B8]">
                             Avatares Pré-definidos
                         </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316]">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover">
                             8 opções
                         </span>
                     </div>
@@ -112,7 +112,7 @@ const ProfileSettings: React.FC = () => {
                                     onClick={() => handleSelectPreset(preset.src)}
                                     className={`relative w-12 h-12 rounded-2xl overflow-hidden border-2 transition-all active:scale-95 flex items-center justify-center bg-slate-100 dark:bg-[#181818] ${
                                         isSelected
-                                            ? 'border-[#EA580C] ring-2 ring-[#EA580C]/40 shadow-md scale-105'
+                                            ? 'border-brand-accent ring-2 ring-brand-accent/40 shadow-md scale-105'
                                             : 'border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/20'
                                     }`}
                                     title={preset.label}
@@ -124,7 +124,7 @@ const ProfileSettings: React.FC = () => {
                                     />
 
                                     {isSelected && (
-                                        <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#EA580C] text-white flex items-center justify-center shadow-sm">
+                                        <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-brand-accent text-white flex items-center justify-center shadow-sm">
                                             <span className="text-[10px] font-black leading-none">✓</span>
                                         </div>
                                     )}
@@ -135,7 +135,7 @@ const ProfileSettings: React.FC = () => {
                 </div>
 
                 {/* Form Card compacto alinhado com o design system */}
-                <div className="w-full bg-white dark:bg-[#111111] rounded-2xl p-3.5 shadow-sm border border-light-border dark:border-[#1F1F1F] space-y-3">
+                <div className="w-full bg-white dark:bg-dark-card rounded-2xl p-3.5 shadow-sm border border-light-border dark:border-dark-border space-y-3">
                     <div>
                         <label className="text-[11px] font-bold text-slate-500 dark:text-neutral-400 mb-1 block">
                             {t('profile.displayName') || 'Nome de Exibição'}
@@ -144,7 +144,7 @@ const ProfileSettings: React.FC = () => {
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="w-full bg-slate-50 dark:bg-white/[0.04] border border-light-border dark:border-white/[0.08] rounded-xl px-3 py-2 font-medium text-sm text-light-text dark:text-dark-text outline-none focus:border-[#EA580C] dark:focus:border-[#EA580C] transition-all placeholder-slate-400"
+                            className="w-full bg-slate-50 dark:bg-white/[0.04] border border-light-border dark:border-white/[0.08] rounded-xl px-3 py-2 font-medium text-sm text-light-text dark:text-dark-text outline-none focus:border-brand-accent dark:focus:border-brand-accent transition-all placeholder-slate-400"
                             placeholder="Seu nome"
                         />
                     </div>
@@ -174,7 +174,7 @@ const ProfileSettings: React.FC = () => {
                             disabled={!hasChanges}
                             className={`w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 ${
                                 hasChanges
-                                    ? 'bg-[#EA580C] hover:bg-[#F97316] text-white shadow-md shadow-[#EA580C]/25 active:scale-[0.99] cursor-pointer'
+                                    ? 'bg-brand-accent hover:bg-brand-accent-hover text-white shadow-md shadow-brand-accent/25 active:scale-[0.99] cursor-pointer'
                                     : 'bg-slate-100 dark:bg-white/[0.04] text-slate-400 dark:text-neutral-600 cursor-not-allowed'
                             }`}
                         >

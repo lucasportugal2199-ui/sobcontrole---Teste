@@ -598,8 +598,8 @@ const MenuScreen: React.FC = () => {
 
     // Main render switch
     return (
-        <div className="bg-slate-50 dark:bg-[#050505] h-full overflow-hidden text-slate-900 dark:text-[#F1F5F9] flex flex-col font-sans transition-colors duration-300">
-            <header className="p-4 pt-[calc(1rem+var(--sat))] bg-white/95 dark:bg-[#050505]/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.06] sticky top-0 z-20 flex items-center justify-between flex-shrink-0">
+        <div className="bg-slate-50 dark:bg-dark-bg h-full overflow-hidden text-slate-900 dark:text-light-bg flex flex-col font-sans transition-colors duration-300">
+            <header className="p-4 pt-[calc(1rem+var(--sat))] bg-white/95 dark:bg-dark-bg/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/[0.06] sticky top-0 z-20 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
                     <button onClick={headerConfig.onBack} className="p-2 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/60 dark:border-white/[0.08] text-slate-700 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95 transition-all">
                         <ArrowLeftIcon className="h-4 w-4" />

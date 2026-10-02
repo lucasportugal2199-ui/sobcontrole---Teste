@@ -283,7 +283,7 @@ const Categories: React.FC = () => {
                                             )}
                                         </div>
                                         {budgetValue > 0 && activeTab === 'despesas' ? (
-                                            <p className="text-[11px] font-medium text-[#EA580C] dark:text-[#F97316] flex items-center gap-1 mt-0.5">
+                                            <p className="text-[11px] font-medium text-brand-accent dark:text-brand-accent-hover flex items-center gap-1 mt-0.5">
                                                 <TargetIcon className="h-3 w-3 shrink-0" />
                                                 <span>Meta: {formatCurrency(budgetValue, appLocale, appCurrency)}</span>
                                             </p>
@@ -357,7 +357,7 @@ const Categories: React.FC = () => {
                     onClick={() => { setActiveTab('receitas'); setOpenSwipeId(null); }} 
                     className={`py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                         activeTab === 'receitas' 
-                            ? 'bg-white dark:bg-dark-card text-[#EA580C] dark:text-[#F97316] shadow-sm' 
+                            ? 'bg-white dark:bg-dark-card text-brand-accent dark:text-brand-accent-hover shadow-sm' 
                             : 'text-slate-500 dark:text-neutral-400 hover:text-slate-700 dark:hover:text-neutral-200'
                     }`}
                 >
@@ -639,7 +639,7 @@ const Categories: React.FC = () => {
                             <div className="h-px w-full bg-slate-200/80 dark:border-white/[0.06]"></div>
                             
                             <div className="flex gap-3 items-start">
-                                <span className="font-bold text-[#EA580C] dark:text-[#F97316] text-sm w-10 shrink-0">20%</span> 
+                                <span className="font-bold text-brand-accent dark:text-brand-accent-hover text-sm w-10 shrink-0">20%</span> 
                                 <div>
                                     <span className="font-semibold text-slate-900 dark:text-white block mb-0.5">
                                         {locale === 'en' ? 'Savings & Investments' : 'Reserva Financeira (Futuro)'}

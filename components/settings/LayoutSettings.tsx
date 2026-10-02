@@ -231,7 +231,7 @@ const LayoutSettings: React.FC<LayoutSettingsProps> = ({ handleHapticToggle }) =
                                     updateUserProfile({ locale: newLang });
                                     showToast(t('settings.languageChanged') || 'Idioma alterado!');
                                 }}
-                                className="appearance-none bg-slate-100 dark:bg-[#1A1A1A] text-slate-800 dark:text-white font-semibold text-xs px-3.5 py-2 pr-8 rounded-xl border border-slate-200 dark:border-white/[0.08] focus:outline-none focus:border-blue-500 transition-all cursor-pointer shadow-sm"
+                                className="appearance-none bg-slate-100 dark:bg-dark-elevated text-slate-800 dark:text-white font-semibold text-xs px-3.5 py-2 pr-8 rounded-xl border border-slate-200 dark:border-white/[0.08] focus:outline-none focus:border-blue-500 transition-all cursor-pointer shadow-sm"
                             >
                                 <option value="pt">🇧🇷 Português</option>
                                 <option value="en">🇺🇸 English</option>

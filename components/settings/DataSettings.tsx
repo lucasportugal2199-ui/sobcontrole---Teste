@@ -79,7 +79,7 @@ const DataSettings: React.FC<DataSettingsProps> = ({
                 <div className="px-1 text-xs font-semibold text-slate-500 dark:text-neutral-400">
                     {t('data.importExportSection') || 'Importar e Exportar'}
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     <MenuItem
                         icon={InvoiceDollarIcon}
                         title={t('data.import') || 'Importar Extrato'}
@@ -128,7 +128,7 @@ const DataSettings: React.FC<DataSettingsProps> = ({
                 <div className="px-1 text-xs font-semibold text-slate-500 dark:text-neutral-400">
                     {t('data.managementSection') || 'Gerenciamento'}
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     {import.meta.env.DEV && (
                         <MenuItem
                             icon={SparklesIcon}
@@ -153,7 +153,7 @@ const DataSettings: React.FC<DataSettingsProps> = ({
                 <div className="px-1 text-xs font-semibold text-rose-500 dark:text-rose-400">
                     {t('data.dangerZone') || 'Zona de Perigo'}
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-rose-200 dark:border-rose-900/30 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-rose-200 dark:border-rose-900/30 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     <MenuItem
                         icon={TrashIcon}
                         title={t('data.deleteAccount') || 'Excluir Conta'}

@@ -465,7 +465,7 @@ export const CategoryPieWidget: React.FC<{
                             onClick={() => setViewMode('categories')}
                             className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all duration-200 ${
                                 viewMode === 'categories'
-                                    ? 'bg-white dark:bg-[#1A1A1A] text-[#EA580C] dark:text-[#F97316] shadow-md border border-slate-200/80 dark:border-[#1F1F1F]'
+                                    ? 'bg-white dark:bg-dark-elevated text-brand-accent dark:text-brand-accent-hover shadow-md border border-slate-200/80 dark:border-dark-border'
                                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                             }`}
                         >
@@ -476,7 +476,7 @@ export const CategoryPieWidget: React.FC<{
                             onClick={() => setViewMode('groups')}
                             className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all duration-200 ${
                                 viewMode === 'groups'
-                                    ? 'bg-white dark:bg-[#1A1A1A] text-[#EA580C] dark:text-[#F97316] shadow-md border border-slate-200/80 dark:border-[#1F1F1F]'
+                                    ? 'bg-white dark:bg-dark-elevated text-brand-accent dark:text-brand-accent-hover shadow-md border border-slate-200/80 dark:border-dark-border'
                                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                             }`}
                         >
@@ -547,7 +547,7 @@ export const CategoryPieWidget: React.FC<{
                 {activeData.length > 5 && (
                     <button 
                         onClick={() => setShowAll(!showAll)} 
-                        className="w-full text-center text-[10px] text-[#EA580C] dark:text-[#F97316] font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
+                        className="w-full text-center text-[10px] text-brand-accent dark:text-brand-accent-hover font-bold uppercase tracking-widest pt-2 pb-1 transition-colors hover:opacity-80 active:scale-95"
                     >
                         {showAll ? `− ${t('common.close')}` : `+ ${t('common.all')} (${activeData.length})`}
                     </button>

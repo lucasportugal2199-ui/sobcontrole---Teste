@@ -260,7 +260,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
             {/* Profile Card */}
             <div 
                 onClick={() => setMenuSubView('editProfile')}
-                className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-4 flex items-center gap-3.5 shadow-sm cursor-pointer hover:border-slate-300 dark:hover:border-white/[0.12] transition-all active:scale-[0.99] group"
+                className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-4 flex items-center gap-3.5 shadow-sm cursor-pointer hover:border-slate-300 dark:hover:border-white/[0.12] transition-all active:scale-[0.99] group"
             >
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-slate-900 text-sm shrink-0 border border-amber-500/20 bg-gradient-to-br from-amber-400 to-amber-500 shadow-sm overflow-hidden relative">
                     {userProfile.avatar ? (
@@ -289,7 +289,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
 
             {/* Plano */}
             {userProfile.isPremium ? (
-                <div className="bg-white dark:bg-[#111111] border border-amber-500/25 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-amber-500/25 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
                         <span className="shrink-0 w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                             <CrownIcon className="h-5 w-5 text-amber-500" />
@@ -338,7 +338,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
                         key={item.label}
                         type="button"
                         onClick={item.onClick}
-                        className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] shadow-sm active:scale-95 transition-transform"
+                        className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] shadow-sm active:scale-95 transition-transform"
                     >
                         <span className={`w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/[0.05] flex items-center justify-center ${item.color}`}>
                             <item.icon className="h-5 w-5" />
@@ -351,7 +351,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
             {/* Sequência e conquistas */}
             <div
                 onClick={() => setMenuSubView('achievements')}
-                className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3.5 flex items-center justify-between cursor-pointer hover:border-amber-500/40 dark:hover:border-white/[0.12] active:scale-[0.99] transition-all shadow-sm group"
+                className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl p-3.5 flex items-center justify-between cursor-pointer hover:border-amber-500/40 dark:hover:border-white/[0.12] active:scale-[0.99] transition-all shadow-sm group"
             >
                 <div className="flex items-center gap-3 min-w-0">
                     <span className="text-base w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">🔥</span>
@@ -372,7 +372,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
                 <div className="px-1 text-xs font-semibold text-slate-500 dark:text-neutral-400">
                     Gestão & Finanças
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     {renderRow({
                         icon: CardIcon,
                         iconColor: "text-sky-500 dark:text-sky-400",
@@ -405,7 +405,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
                 <div className="px-1 text-xs font-semibold text-slate-500 dark:text-neutral-400">
                     Sistema & Preferências
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     {renderRow({
                         icon: CloudIcon,
                         iconColor: "text-emerald-500 dark:text-emerald-400",
@@ -453,7 +453,7 @@ Usuário: ${userProfile.name} (${userProfile.email})
                 <div className="px-1 text-xs font-semibold text-slate-500 dark:text-neutral-400">
                     {t('feedback.supportSection') || 'Ajuda & Suporte'}
                 </div>
-                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
+                <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-white/[0.04] shadow-sm">
                     {renderRow({
                         icon: HelpCircleIcon,
                         iconColor: "text-blue-500 dark:text-blue-400",

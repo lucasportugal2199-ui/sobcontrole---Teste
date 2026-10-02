@@ -308,12 +308,12 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                     {/* Hero Card: Radar de Comprometimento Futuro */}
                     <div className="bg-white dark:bg-dark-card border border-slate-200/80 dark:border-white/[0.06] rounded-3xl p-5 shadow-lg relative overflow-hidden transition-colors">
                         {/* Ambient glow sutil */}
-                        <div className="absolute -top-16 -right-16 w-44 h-44 bg-[#EA580C]/5 dark:bg-[#EA580C]/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-16 -right-16 w-44 h-44 bg-brand-accent/5 dark:bg-brand-accent/5 rounded-full blur-3xl pointer-events-none" />
 
                         {/* Top Header do Radar */}
                         <div className="flex items-center justify-between relative z-10 mb-4">
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-xl bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover flex items-center justify-center shrink-0">
                                     <SparklesIcon className="h-4 w-4 stroke-[2.5]" />
                                 </div>
                                 <div>
@@ -365,7 +365,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                     Evolução (Próximos 8 Meses)
                                 </span>
                                 {activeFocusedMonth && (
-                                    <span className="text-xs font-black text-slate-900 dark:text-[#EA580C]">
+                                    <span className="text-xs font-black text-slate-900 dark:text-brand-accent">
                                         {activeFocusedMonth.fullMonthName}: {formatCurrency(activeFocusedMonth.total, appLocale, appCurrency)}
                                     </span>
                                 )}
@@ -385,17 +385,17 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                                 <div
                                                     className={`w-full transition-all duration-300 rounded-lg ${
                                                         isFocused
-                                                            ? 'bg-[#EA580C] shadow-md shadow-[#EA580C]/30'
+                                                            ? 'bg-brand-accent shadow-md shadow-brand-accent/30'
                                                             : m.isCurrent
                                                             ? 'bg-slate-700 dark:bg-white'
-                                                            : 'bg-slate-300 dark:bg-white/20 group-hover:bg-[#EA580C]/60'
+                                                            : 'bg-slate-300 dark:bg-white/20 group-hover:bg-brand-accent/60'
                                                     }`}
                                                     style={{ height: `${m.heightPercent}%` }}
                                                 />
                                             </div>
                                             <span className={`text-[10px] font-bold tracking-tight transition-colors ${
                                                 isFocused
-                                                    ? 'text-slate-900 dark:text-[#EA580C] font-black scale-105'
+                                                    ? 'text-slate-900 dark:text-brand-accent font-black scale-105'
                                                     : m.isCurrent
                                                     ? 'text-slate-900 dark:text-white font-extrabold'
                                                     : 'text-slate-500 dark:text-slate-400'
@@ -527,7 +527,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                             <div className="space-y-2">
                                                 <div className="w-full bg-slate-100 dark:bg-dark-elevated h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-white/[0.06]">
                                                     <div
-                                                        className="bg-gradient-to-r from-amber-500 to-[#EA580C] h-full rounded-full transition-all duration-500 shadow-sm"
+                                                        className="bg-gradient-to-r from-amber-500 to-brand-accent h-full rounded-full transition-all duration-500 shadow-sm"
                                                         style={{ width: `${progressPercent}%` }}
                                                     />
                                                 </div>
@@ -555,10 +555,10 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
             {tabMode === 'subscriptions' && (
                 <>
                     {/* Banner de Compromisso Mensal Recorrente */}
-                    <div className="bg-gradient-to-br from-slate-900 to-[#111111] dark:from-dark-elevated dark:to-dark-card rounded-3xl p-5 shadow-xl text-white relative overflow-hidden border border-slate-800 dark:border-white/[0.08]">
+                    <div className="bg-gradient-to-br from-slate-900 to-dark-card dark:from-dark-elevated dark:to-dark-card rounded-3xl p-5 shadow-xl text-white relative overflow-hidden border border-slate-800 dark:border-white/[0.08]">
                         <div className="relative z-10 flex justify-between items-start">
                             <div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-[#EA580C] dark:text-[#F97316] block mb-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-brand-accent dark:text-brand-accent-hover block mb-1">
                                     Compromisso Mensal Recorrente
                                 </span>
                                 <div className="flex items-baseline gap-1.5 my-1">
@@ -574,13 +574,13 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                             <button
                                 type="button"
                                 onClick={openAddModal}
-                                className="px-3.5 py-2 bg-[#EA580C] hover:bg-[#F97316] text-white font-black text-xs rounded-2xl active:scale-95 transition-all shadow-md flex items-center gap-1.5"
+                                className="px-3.5 py-2 bg-brand-accent hover:bg-brand-accent-hover text-white font-black text-xs rounded-2xl active:scale-95 transition-all shadow-md flex items-center gap-1.5"
                             >
                                 <PlusIcon className="h-3.5 w-3.5 stroke-[3]" />
                                 <span>Adicionar</span>
                             </button>
                         </div>
-                        <div className="absolute -right-6 -bottom-6 w-36 h-36 bg-[#EA580C]/5 rounded-full blur-2xl pointer-events-none" />
+                        <div className="absolute -right-6 -bottom-6 w-36 h-36 bg-brand-accent/5 rounded-full blur-2xl pointer-events-none" />
                     </div>
 
                     {/* Lista de Assinaturas */}
@@ -679,7 +679,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#FFEDD5] dark:bg-[#431407] text-[#EA580C] dark:text-[#F97316] flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-brand-accent-light-subtle dark:bg-brand-accent-dark-subtle text-brand-accent dark:text-brand-accent-hover flex items-center justify-center shrink-0">
                             <RepeatIcon className="h-5 w-5 stroke-[2.2]" />
                         </div>
                         <div>
@@ -703,7 +703,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                 value={form.name}
                                 onChange={e => setForm({ ...form, name: e.target.value })}
                                 placeholder="Ex: Netflix, Spotify, Internet, Gympass..."
-                                className="w-full bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3.5 font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-[#EA580C] transition-all"
+                                className="w-full bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3.5 font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-brand-accent transition-all"
                             />
                         </div>
 
@@ -717,7 +717,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                 value={form.price}
                                 onChange={e => setForm({ ...form, price: formatCurrencyForInput(e.target.value) })}
                                 placeholder="0,00"
-                                className="w-full bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3.5 font-black text-base text-slate-900 dark:text-[#EA580C] outline-none focus:border-slate-400 dark:focus:border-[#EA580C] transition-all"
+                                className="w-full bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3.5 font-black text-base text-slate-900 dark:text-brand-accent outline-none focus:border-slate-400 dark:focus:border-brand-accent transition-all"
                             />
                         </div>
 
@@ -733,7 +733,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                                     max="31"
                                     value={form.day}
                                     onChange={e => setForm({ ...form, day: e.target.value })}
-                                    className="w-24 bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3 font-bold text-center text-sm text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-[#EA580C]"
+                                    className="w-24 bg-slate-50 dark:bg-dark-elevated border border-slate-200 dark:border-white/10 rounded-2xl p-3 font-bold text-center text-sm text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-brand-accent"
                                 />
                                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                                     Todo dia {form.day || '1'} de cada mês
@@ -869,7 +869,7 @@ const SubscriptionsSettings: React.FC<SubscriptionsSettingsProps> = ({
                         <button
                             type="button"
                             onClick={handleSave}
-                            className="w-full py-3.5 bg-[#EA580C] hover:bg-[#F97316] text-white dark:bg-[#EA580C] dark:hover:bg-[#F97316] dark:text-white rounded-2xl font-black uppercase tracking-wider text-xs active:scale-95 transition-all shadow-md shadow-[#EA580C]/20"
+                            className="w-full py-3.5 bg-brand-accent hover:bg-brand-accent-hover text-white dark:bg-brand-accent dark:hover:bg-brand-accent-hover dark:text-white rounded-2xl font-black uppercase tracking-wider text-xs active:scale-95 transition-all shadow-md shadow-brand-accent/20"
                         >
                             {editingTx ? 'Salvar Alterações' : 'Cadastrar Assinatura'}
                         </button>

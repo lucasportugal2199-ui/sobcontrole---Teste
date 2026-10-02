@@ -7,7 +7,7 @@ interface SkeletonLoaderProps {
 
 const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({ message }) => {
     return (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white px-6 select-none transition-colors duration-300">
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-50 dark:bg-dark-bg text-slate-900 dark:text-white px-6 select-none transition-colors duration-300">
             {/* Glow sutil atrás do logo */}
             <div className="relative flex flex-col items-center">
                 <div className="absolute -inset-6 bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
