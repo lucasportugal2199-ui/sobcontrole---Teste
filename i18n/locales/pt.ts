@@ -1120,14 +1120,14 @@ const pt: TranslationDictionary = {
   'onboarding.skipTutorial': 'Pular Tutorial',
   'onboarding.slide1.title': 'Bem-vindo ao Sob Controle!',
   'onboarding.slide1.text': 'O seu novo painel financeiro inteligente. Vamos te mostrar rapidamente onde encontrar tudo o que você precisa.',
-  'onboarding.slide2.title': 'Suas Contas Bancárias',
-  'onboarding.slide2.text': 'Para adicionar ou gerenciar os saldos das suas contas, basta acessar as Configurações pelo menu inferior e ir em \'Contas\'.',
-  'onboarding.slide3.title': 'Cartões de Crédito',
-  'onboarding.slide3.text': 'As faturas do mês e limites dos seus cartões ficam todos agrupados. Cadastre os seus cartões na opção \'Cartões\' das configurações.',
-  'onboarding.slide4.title': 'Seu Painel, Suas Regras',
-  'onboarding.slide4.text': 'Você pode personalizar esta tela inicial! Role até o final do painel e clique em \'Editar Layout\' para esconder ou reordenar qualquer card.',
-  'onboarding.slide5.title': 'Desbloqueie Conquistas!',
-  'onboarding.slide5.text': 'Ao registrar seus gastos diários e bater metas de economia, você ganha medalhas! Acompanhe o seu progresso na aba \'Conquistas\'.',
+  'onboarding.slide2.title': "Suas Contas Bancárias",
+  'onboarding.slide2.text': "Pode começar a lançar agora: se não tiver conta cadastrada, o app cria uma Carteira para você. Para cadastrar suas contas, toque na sua foto no topo e vá em 'Contas e Cartões'.",
+  'onboarding.slide3.title': "Cartões de Crédito",
+  'onboarding.slide3.text': "As faturas e os limites dos seus cartões ficam todos agrupados. Cadastre seus cartões em 'Contas e Cartões', no Menu (toque na sua foto).",
+  'onboarding.slide4.title': "Sua Consultora Financeira",
+  'onboarding.slide4.text': "A Calopsita CFO responde perguntas sobre os seus gastos e dá dicas de economia. Ela fica no Menu (toque na sua foto) e na aba Finanças.",
+  'onboarding.slide5.title': "Desbloqueie Conquistas!",
+  'onboarding.slide5.text': "Ao registrar seus gastos e bater metas de economia, você ganha medalhas! Veja sua sequência de dias e suas conquistas no Menu.",
 
   // ============================================================
   // LAYOUT SETTINGS
@@ -1280,6 +1280,8 @@ const pt: TranslationDictionary = {
   'a11y.nextMonth': "Próximo mês",
   'a11y.goToToday': "Ir para hoje",
   'a11y.openMenu': "Abrir menu e perfil",
+  'tutorial.stepFinances.title': "Finanças",
+  'tutorial.stepFinances.description': "Aqui ficam os gráficos, o resumo do mês, a projeção e o Relatório Anual. Você também conversa com a Calopsita CFO por aqui.",
 };
 
 export default pt;

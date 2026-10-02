@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SparklesIcon, BankIcon, CreditCardIcon, ViewGridIcon, TrophyIcon, ArrowRightIcon, CloseIcon } from './icons';
+import { SparklesIcon, BankIcon, CreditCardIcon, CalopsitaIcon, TrophyIcon, ArrowRightIcon, CloseIcon } from './icons';
 import { useTranslation } from '../i18n';
 
 interface OnboardingTutorialProps {
@@ -35,9 +35,9 @@ export default function OnboardingTutorial({ isOpen, onClose }: OnboardingTutori
         {
             title: t('onboarding.slide4.title'),
             text: t('onboarding.slide4.text'),
-            icon: ViewGridIcon,
-            color: "text-teal-500 dark:text-teal-400",
-            bg: "bg-teal-100 dark:bg-teal-900/40"
+            icon: CalopsitaIcon,
+            color: "text-orange-500 dark:text-orange-400",
+            bg: "bg-orange-100 dark:bg-orange-900/40"
         },
         {
             title: t('onboarding.slide5.title'),

@@ -70,7 +70,7 @@ const BottomNav: React.FC = () => {
                         </button>
                     </div>
 
-                    <NavItem label={t('nav.finances')} icon={ChartBarIcon} isActive={currentTab === 'financas'} onClick={() => goTo('financas')} />
+                    <NavItem id="tour-financas" label={t('nav.finances')} icon={ChartBarIcon} isActive={currentTab === 'financas'} onClick={() => goTo('financas')} />
                     <NavItem id="tour-horizonte-btn" label={t('nav.future')} icon={CalendarIcon} isActive={currentTab === 'horizonte'} onClick={() => goTo('horizonte')} />
                 </div>
             </nav>

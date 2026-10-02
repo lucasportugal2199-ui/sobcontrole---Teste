@@ -608,14 +608,14 @@ const fr: TranslationDictionary = {
   'onboarding.skipTutorial': 'Passer le Tutoriel',
   'onboarding.slide1.title': 'Bienvenue sur Sob Controle !',
   'onboarding.slide1.text': 'Votre nouveau tableau de bord financier intelligent. Laissez-nous vous montrer rapidement où trouver tout ce dont vous avez besoin.',
-  'onboarding.slide2.title': 'Vos Comptes Bancaires',
-  'onboarding.slide2.text': 'Pour ajouter ou gérer les soldes de vos comptes, accédez simplement aux Paramètres depuis le menu inférieur et allez sur \'Comptes\'.',
-  'onboarding.slide3.title': 'Cartes de Crédit',
-  'onboarding.slide3.text': 'Vos factures mensuelles et vos limites de cartes sont regroupées. Enregistrez vos cartes dans l\'option \'Cartes\' des paramètres.',
-  'onboarding.slide4.title': 'Votre Tableau de Bord, Vos Règles',
-  'onboarding.slide4.text': 'Vous pouvez personnaliser cet écran d\'accueil ! Faites défiler vers le bas et cliquez sur \'Modifier la disposition\' pour masquer ou réorganiser n\'importe quelle carte.',
-  'onboarding.slide5.title': 'Débloquez des Succès !',
-  'onboarding.slide5.text': 'En enregistrant vos dépenses quotidiennes et en atteignant vos objectifs d\'épargne, vous gagnez des médailles ! Suivez vos progrès dans l\'onglet \'Succès\'.',
+  'onboarding.slide2.title': "Vos Comptes Bancaires",
+  'onboarding.slide2.text': "Vous pouvez commencer tout de suite : sans compte, l'app crée un Portefeuille pour vous. Pour ajouter vos comptes, touchez votre photo en haut et allez dans « Comptes et Cartes ».",
+  'onboarding.slide3.title': "Cartes de Crédit",
+  'onboarding.slide3.text': "Les relevés et les plafonds de vos cartes sont regroupés. Ajoutez vos cartes dans « Comptes et Cartes », dans le Menu (touchez votre photo).",
+  'onboarding.slide4.title': "Votre Conseillère Financière",
+  'onboarding.slide4.text': "La Calopsitte CFO répond à vos questions sur vos dépenses et donne des conseils d'économie. Elle se trouve dans le Menu (touchez votre photo) et dans l'onglet Finances.",
+  'onboarding.slide5.title': "Débloquez des Succès !",
+  'onboarding.slide5.text': "Enregistrez vos dépenses et atteignez vos objectifs d'épargne pour gagner des médailles ! Voyez votre série et vos succès dans le Menu.",
 
   // ============================================================
   // LAYOUT SETTINGS
@@ -758,6 +758,8 @@ const fr: TranslationDictionary = {
   'a11y.nextMonth': "Mois suivant",
   'a11y.goToToday': "Aller à aujourd'hui",
   'a11y.openMenu': "Ouvrir le menu et le profil",
+  'tutorial.stepFinances.title': "Finances",
+  'tutorial.stepFinances.description': "Vous y trouverez les graphiques, le résumé du mois, la projection et le Rapport annuel. Vous pouvez aussi parler à la Calopsitte CFO d'ici.",
 };
 
 export default fr;

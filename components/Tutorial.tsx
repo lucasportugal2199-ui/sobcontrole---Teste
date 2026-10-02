@@ -46,6 +46,13 @@ const Tutorial: React.FC = () => {
             position: 'top'
         },
         {
+            targetId: 'tour-financas',
+            title: t('tutorial.stepFinances.title'),
+            description: t('tutorial.stepFinances.description'),
+            tab: 'lancamento',
+            position: 'top'
+        },
+        {
             targetId: 'tour-metas',
             title: t('tutorial.step3.title'),
             description: t('tutorial.step3.description'),
