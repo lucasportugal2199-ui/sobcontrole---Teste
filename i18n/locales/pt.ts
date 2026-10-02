@@ -588,30 +588,7 @@ const pt: TranslationDictionary = {
   // ============================================================
   // TUTORIAL & ONBOARDING
   // ============================================================
-  'onboarding.welcome': 'Bem-vindo ao Sob Controle!',
-  'onboarding.welcomeText': 'O seu novo painel financeiro inteligente. Vamos te mostrar rapidamente onde encontrar tudo o que você precisa.',
-  'onboarding.accounts': 'Suas Contas Bancárias',
-  'onboarding.accountsText': "Para adicionar ou gerenciar os saldos das suas contas, basta acessar as Configurações pelo menu inferior e ir em 'Contas'.",
-  'onboarding.cards': 'Cartões de Crédito',
-  'onboarding.cardsText': "As faturas do mês e limites dos seus cartões ficam todos agrupados. Cadastre os seus cartões na opção 'Cartões' das configurações.",
-  'onboarding.dashboard': 'Seu Painel, Suas Regras',
-  'onboarding.dashboardText': "Você pode personalizar esta tela inicial! Role até o final do painel e clique em 'Editar Layout' para esconder ou reordenar qualquer card.",
-  'onboarding.achievements': 'Desbloqueie Conquistas!',
-  'onboarding.achievementsText': "Ao registrar seus gastos diários e bater metas de economia, você ganha medalhas! Acompanhe o seu progresso na aba 'Conquistas'.",
-  'onboarding.skip': 'Pular',
-  'onboarding.finish': 'Começar!',
 
-  'tutorial.createTransactions': 'Crie Transações',
-  'tutorial.createTransactionsDesc': "Para criar uma nova transação (receita ou despesa), basta clicar neste ícone de '+' no centro!",
-  'tutorial.futureMonthly': 'Futuro Mensal',
-  'tutorial.futureMonthlyDesc': "Clique no ícone de calendário 'Futuro' no menu inferior para ver o Futuro Mensal. Lá você projeta seu saldo dia a dia para os próximos meses!",
-  'tutorial.planDreams': 'Planeje seus Sonhos',
-  'tutorial.planDreamsDesc': 'Aqui em Metas você pode criar cofrinhos para seus objetivos e acompanhar quanto falta para realizá-los.',
-  'tutorial.allReady': 'Tudo Pronto!',
-  'tutorial.allReadyDesc': 'Agora você já conhece o básico para dominar suas finanças. Explore à vontade!',
-  'tutorial.stepOf': 'de',
-  'tutorial.next': 'Próximo',
-  'tutorial.finish': 'Finalizar',
 
   // ============================================================
   // CONTEXTUAL TIPS

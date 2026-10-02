@@ -241,20 +241,6 @@ const fr: TranslationDictionary = {
   'badge.cfo_consultant': 'Partenaire du CFO',
   'badge.cfo_consultant.desc': 'Interagir au moins 5 fois avec le chat IA.',
 
-
-  'onboarding.welcome': 'Bienvenue sur SobControle !', 'onboarding.welcomeText': 'Votre nouveau tableau de bord financier intelligent. Laissez-nous vous montrer rapidement où tout trouver.',
-  'onboarding.accounts': 'Vos Comptes Bancaires', 'onboarding.accountsText': "Pour ajouter ou gérer vos soldes, allez dans les Paramètres depuis le menu inférieur et ouvrez 'Comptes'.",
-  'onboarding.cards': 'Cartes de Crédit', 'onboarding.cardsText': "Les factures du mois et les limites de vos cartes sont regroupées. Enregistrez vos cartes dans l'option 'Cartes' des paramètres.",
-  'onboarding.dashboard': 'Votre Tableau de bord, Vos Règles', 'onboarding.dashboardText': "Vous pouvez personnaliser cet écran ! Faites défiler vers le bas et appuyez sur 'Modifier la disposition' pour masquer ou réorganiser les cartes.",
-  'onboarding.achievements': 'Débloquez des Réussites !', 'onboarding.achievementsText': "En enregistrant vos dépenses quotidiennes et en atteignant vos objectifs d'épargne, vous gagnez des médailles ! Suivez votre progression dans l'onglet 'Réussites'.",
-  'onboarding.skip': 'Passer', 'onboarding.finish': 'Commencer !',
-
-  'tutorial.createTransactions': 'Créez des Transactions', 'tutorial.createTransactionsDesc': "Pour créer une nouvelle transaction (revenu ou dépense), appuyez sur l'icône '+' au centre !",
-  'tutorial.futureMonthly': 'Prévision Mensuelle', 'tutorial.futureMonthlyDesc': "Appuyez sur l'icône du calendrier 'Avenir' dans le menu inférieur pour voir la Prévision Mensuelle. Vous y projetez votre solde jour par jour !",
-  'tutorial.planDreams': 'Planifiez vos Rêves', 'tutorial.planDreamsDesc': "Dans Objectifs vous pouvez créer des tirelires pour vos buts et suivre combien il reste pour les atteindre.",
-  'tutorial.allReady': 'Tout est Prêt !', 'tutorial.allReadyDesc': "Vous connaissez maintenant les bases pour maîtriser vos finances. Explorez librement !",
-  'tutorial.stepOf': 'de', 'tutorial.next': 'Suivant', 'tutorial.finish': 'Terminer',
-
   'tip.dismiss': 'Compris !', 'tip.dashboard-welcome': 'Bonjour ! Voici votre Tableau de bord. Ici vous voyez un résumé complet de votre mois financier.',
   'tip.management-swipe': 'Astuce : Appuyez sur une transaction pour voir les détails. Utilisez le menu ⋮ pour modifier ou supprimer.',
   'tip.metas-poupanca': "Créez des objectifs d'épargne pour mettre de l'argent de côté ! Enregistrez des versements réguliers pour suivre votre progression.",
@@ -760,6 +746,14 @@ const fr: TranslationDictionary = {
   'a11y.openMenu': "Ouvrir le menu et le profil",
   'tutorial.stepFinances.title': "Finances",
   'tutorial.stepFinances.description': "Vous y trouverez les graphiques, le résumé du mois, la projection et le Rapport annuel. Vous pouvez aussi parler à la Calopsitte CFO d'ici.",
+  'dashboard.goodMorning': "Bonjour",
+  'dashboard.goodAfternoon': "Bon après-midi",
+  'dashboard.goodEvening': "Bonsoir",
+  'dashboard.cashFlow': "Flux de trésorerie",
+  'dashboard.expenseThisMonth': "dépenses ce mois-ci",
+  'dashboard.incomeThisMonth': "revenus ce mois-ci",
+  'data.importHistorySubtitle': "Voir les relevés et reçus importés",
+  'data.noImportHistory': "Aucun historique d'importation",
 };
 
 export default fr;
