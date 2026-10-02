@@ -140,3 +140,6 @@ dist
 
 # Gerado ao rodar os testes das Edge Functions com Deno
 deno.lock
+
+# Logs exportados do Logcat (podem conter dados do aparelho)
+*.logcat

@@ -38,3 +38,16 @@
 # Login com Google: o Credential Manager carrega o provedor do Play Services por reflexão
 -if class androidx.credentials.CredentialManager
 -keep class androidx.credentials.playservices.** { *; }
+
+# --- Capacitor (causa do crash da 1.9.2 com minify ligado) ---
+# O Capacitor lê as anotações @CapacitorPlugin/@Permission dos plugins por
+# reflexão (ex.: permissões das notificações). O R8 renomeava as anotações e
+# seus métodos → NullPointerException em Plugin.getPermissionStates ao abrir.
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-keep class com.getcapacitor.** { *; }
+-keep @interface com.getcapacitor.annotation.** { *; }
+# Plugins usados pelo app (classes chamadas pela ponte JS por reflexão)
+-keep class com.capacitorjs.plugins.** { *; }
+-keep class ee.forgr.** { *; }
+-keep class cc.fovea.** { *; }
+-keep class org.apache.cordova.** { *; }
